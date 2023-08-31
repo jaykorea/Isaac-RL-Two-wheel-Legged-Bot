@@ -87,12 +87,12 @@ We use Nvidia's Isaac Gym to simulate the robot's dynamics and environment. The 
 
 ### State Observations
 The robot's state comprises its joint positions and velocities, body position, orientation, and linear and angular velocities. Specifically:
-
-Joint positions for hips and shins: 4 variables
-Wheel positions: 2 variables
-Body position (x, y, z): 3 variables
-Body orientation (roll, pitch, yaw): 3 variables
-Body linear velocity (x, y, z): 3 variables
+<br/>
+Joint positions for hips and shins: 4 variables<br/>
+Wheel positions: 2 variables<br/>
+Body position (x, y, z): 3 variables<br/>
+Body orientation (roll, pitch, yaw): 3 variables<br/>
+Body linear velocity (x, y, z): 3 variables<br/>
 Body angular velocity (roll, pitch, yaw): 3 variables
 
 ### Action Space
