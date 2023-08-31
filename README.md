@@ -1,4 +1,4 @@
-# isaac_gym_legged_bot
+# Isaac_gym_legged_bot
 two wheel legged bot for Isaac gym reinforcement learning
 
 ## Overview
