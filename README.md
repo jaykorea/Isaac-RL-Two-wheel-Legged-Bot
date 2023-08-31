@@ -29,11 +29,25 @@ https://developer.nvidia.com/isaac-gym
 nvidia-smi
 ```
 ## Download IsaacGym4
+Be sure to check whether the ubuntu & cuda version is supported!!!
 ```
 https://developer.nvidia.com/isaac-gym
 ```
 
-## How to start the learning
+## Install IsaacGym4
+```
+cd isaacgym
+./create_conda_env_rlgpu.sh       #takes a while
+conda activate rlgpu
+```
+
+## Update LD Path
+Should source the path before launch the nodes
+```
+export LD_LIBRARY_PATH=/home/stuart/miniconda3/envs/rlgpu/lib:$LD_LIBRARY_PATH
+```
+
+## 
 1. Download [IsaacGym](https://github.com/NVIDIA-Omniverse/IsaacGymEnvs)
 
 2. Copy the URDF file contained in the assets folder in IsaacGymEnvs/assets
