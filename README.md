@@ -47,28 +47,26 @@ Should source the path before launch the nodes
 export LD_LIBRARY_PATH=/home/stuart/miniconda3/envs/rlgpu/lib:$LD_LIBRARY_PATH
 ```
 
-## 
+## Install IsaacGymEnv
 1. Download [IsaacGym](https://github.com/NVIDIA-Omniverse/IsaacGymEnvs)
 
 2. Copy the URDF file contained in the assets folder in IsaacGymEnvs/assets
 
-3. Copy ```Twip.yaml``` and ```FlywheelPendulum.yaml``` in the folder in IsaacGymEnvs/isaacgymenvs/cfg/task
+3. Copy ```Postech.yaml``` in the folder in IsaacGymEnvs/isaacgymenvs/cfg/task
 
-4. Copy ```TwipPPO.yaml``` and ```FlywheelPendulumPPO.yaml``` in the folder in IsaacGymEnvs/isaacgymenvs/cfg/train
+4. Copy ```PostechPPO.yaml``` in the folder in IsaacGymEnvs/isaacgymenvs/cfg/train
 
-5. Copy ```twip.py``` and ```flywheel_pendulum.py```in the assets folder in IsaacGymEnvs/isaacgymenvs/task
+5. Copy ```postech.py```in the assets folder in IsaacGymEnvs/isaacgymenvs/task
 
-6. Paste in IsaacGymEnvs/isaacgymenvs/tasks/__init__.py 
+6. should import postech task on IsaacGymEnvs/isaacgymenvs/task/__init__.py
 ```
-from .twip import Twip
-from .flywheel_pendulum import FlywheelPendulum
+from .postech import Postech
 
-....
+...
 
-"Twip": Twip,
-"FlywheelPendulum": FlywheelPendulum,
+"Postech": Postech,
 ```
 
-7. run ```python train.py task=Twip``` or ```python train.py task=FlywheelPendulum```
+7. run ```python train.py task=Postech```
 
 
