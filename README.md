@@ -1,7 +1,7 @@
 # Isaac_gym_legged_bot
 two wheel legged bot for Isaac gym reinforcement learning
 
-## Overview
+# Overview
 This repo contains the code for learning an RL policy in [IsaacGym](https://github.com/NVIDIA-Omniverse/IsaacGymEnvs) for a two wheeled legged robot
 
 1. ```assets```: contains the URDF file of the robot
@@ -9,26 +9,26 @@ This repo contains the code for learning an RL policy in [IsaacGym](https://gith
 2. ```isaacgymenvs```: contains the IsaacGym environment and the the task specification/PPO parameters
 
 
-## Install isaac gym4
-# Install dependency
+# Install isaac gym4
+## Install dependency
 ```
 sudo apt update
 sudo apt install build-essential -y
 # verify it worked
 gcc — version
 ```
-# Install conda
+## Install conda
 download Miniconda3 Linux 64-bit for Python 3.8 here
 ```
 bash Miniconda3-<latest>-Linux-x86_64.sh
 ```
-# Check cuda - specific version is required.
+## Check cuda - specific version is required.
 plz follow this link 
 https://developer.nvidia.com/isaac-gym
 ```
 nvidia-smi
 ```
-# Download IsaacGym4
+## Download IsaacGym4
 ```
 https://developer.nvidia.com/isaac-gym
 ```
