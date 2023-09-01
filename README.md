@@ -31,17 +31,16 @@ The robot's actions are the torques applied to the joints and wheels.
 
 ### Reward Function Design
 The reward function aims to incentivize the robot to maintain an upright orientation while discouraging excessive movements or control efforts.<br/>
-![CodeCogsEqn (4)](https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/bc75fab0-6040-461d-b08b-230679adf6d4)
-
+<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/bc75fab0-6040-461d-b08b-230679adf6d4" width="60%" height="60%">
 
 * OrientationReward: Rewards the robot for maintaining an upright orientation. This is calculated as<br/>
-<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/55d6b696-ce36-4a0f-baf6-16493b810dac" width="80%" height="80%">
+<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/55d6b696-ce36-4a0f-baf6-16493b810dac" width="60%" height="60%">
 
 * SmoothnessReward<br/>
-<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/b38b9d97-b620-459b-b1ac-23e3ed2eac85" width="80%" height="80%">
+<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/b38b9d97-b620-459b-b1ac-23e3ed2eac85" width="60%" height="60%">
 
 * ControlEffort: Penalizes large torques or forces applied at the joints and wheels.<br/>
-<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/c475527f-6f4c-472b-97df-a3252294bcfa" width="80%" height="80%">
+<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/c475527f-6f4c-472b-97df-a3252294bcfa" width="60%" height="60%">
 
 ### Reset Function Design
 The reset function is triggered if:
@@ -50,15 +49,15 @@ The reset function is triggered if:
 
 * Orientation-based reset
 The orientation-based reset occurs if the absolute value of the pitch or the roll exceeds a predefined threshold.<br/>
-<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/a57596b0-aae6-40c4-9e25-fe1c08aa94e2" width="80%" height="80%">
+<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/a57596b0-aae6-40c4-9e25-fe1c08aa94e2" width="60%" height="60%">
 
 * Height-based Reset
 The height-based reset condition is triggered if the height of the robot's base link falls below a certain threshold.<br/>
-<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/c867b068-7a31-4faa-8c5e-3ce56c3fdcf4" width="80%" height="80%">
+<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/c867b068-7a31-4faa-8c5e-3ce56c3fdcf4" width="60%" height="60%">
 
 * Final reset condition
 The final reset condition is a logical OR between these two conditions, as well as a condition that checks if the episode length has been exceeded <br/>
-<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/92d75890-c4dc-45ff-80b9-eb20846c0db0" width="80%" height="80%">
+<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/92d75890-c4dc-45ff-80b9-eb20846c0db0" width="60%" height="60%">
 
 - pitch and roll are the current pitch and roll angles of the robot, respectively.
 - pitcht_hreshold and roll_threshold are the respective thresholds for pitch and roll.
