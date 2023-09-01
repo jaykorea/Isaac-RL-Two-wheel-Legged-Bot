@@ -59,6 +59,7 @@ The orientation-based reset occurs if the absolute value of the pitch or the rol
 <div align="center">
 <img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/a57596b0-aae6-40c4-9e25-fe1c08aa94e2" width="80%" height="80%">
 </div>
+
 * Height-based Reset
 The height-based reset condition is triggered if the height of the robot's base link falls below a certain threshold.
 <div align="center">
