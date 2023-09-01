@@ -70,7 +70,7 @@ The height-based reset condition is triggered if the height of the robot's base 
 * Final reset condition</br>
 The final reset condition is a logical OR between these two conditions, as well as a condition that checks if the episode length has been exceeded
 <div align="center">
-<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/92d75890-c4dc-45ff-80b9-eb20846c0db0" width="60%" height="60%">
+<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/92d75890-c4dc-45ff-80b9-eb20846c0db0" width="80%" height="80%">
 </div>
 
 - pitch and roll are the current pitch and roll angles of the robot, respectively.
