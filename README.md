@@ -12,7 +12,7 @@ Balancing robots with non-standard configurations, such as those with both wheel
 ## Methodology
 ### Robot Configuration
 The robot has two legs, each with a hip and shin joint, and two wheels. The robot's task is to maintain an upright position while also being capable of forward and backward motion.
-![image](https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/91801f7a-984f-4b02-a988-0eb07372dacb)
+![image](https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/91801f7a-984f-4b02-a988-0eb07372dacb){: width="80" height="80"}
 
 
 ### Simulation Environment
