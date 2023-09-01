@@ -47,7 +47,6 @@ The reset function is triggered if:
 
 * Orientation-based reset
 The orientation-based reset occurs if the absolute value of the pitch or the roll exceeds a predefined threshold.<br/>
-
 ![CodeCogsEqn](https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/a57596b0-aae6-40c4-9e25-fe1c08aa94e2)
 
 * Height-based Reset
