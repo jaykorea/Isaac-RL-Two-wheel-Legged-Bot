@@ -34,6 +34,7 @@ The reward function aims to incentivize the robot to maintain an upright orienta
 <div align="center">
 <img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/bc75fab0-6040-461d-b08b-230679adf6d4" width="100%" height="100%">
 </div>
+
 * OrientationReward: Rewards the robot for maintaining an upright orientation. This is calculated as
 <div align="center">
   <img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/55d6b696-ce36-4a0f-baf6-16493b810dac" width="50%" height="50%">
@@ -54,19 +55,19 @@ The reset function is triggered if:
 1. The robot's pitch or roll exceeds a set threshold, indicating that it has fallen over.
 2. The height of the robot's base_link drops below a certain value, indicating that it has kneeled or otherwise left a standard operating position.
 
-* Orientation-based reset
+* Orientation-based reset</br>
 The orientation-based reset occurs if the absolute value of the pitch or the roll exceeds a predefined threshold.
 <div align="center">
 <img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/a57596b0-aae6-40c4-9e25-fe1c08aa94e2" width="80%" height="80%">
 </div>
 
-* Height-based Reset
+* Height-based Reset</br>
 The height-based reset condition is triggered if the height of the robot's base link falls below a certain threshold.
 <div align="center">
 <img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/c867b068-7a31-4faa-8c5e-3ce56c3fdcf4" width="70%" height="70%">
 </div>
 
-* Final reset condition
+* Final reset condition</br>
 The final reset condition is a logical OR between these two conditions, as well as a condition that checks if the episode length has been exceeded <br/>
 <img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/92d75890-c4dc-45ff-80b9-eb20846c0db0" width="60%" height="60%">
 
