@@ -55,12 +55,15 @@ The reset function is triggered if:
 2. The height of the robot's base_link drops below a certain value, indicating that it has kneeled or otherwise left a standard operating position.
 
 * Orientation-based reset
-The orientation-based reset occurs if the absolute value of the pitch or the roll exceeds a predefined threshold.<br/>
-<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/a57596b0-aae6-40c4-9e25-fe1c08aa94e2" width="60%" height="60%">
-
+The orientation-based reset occurs if the absolute value of the pitch or the roll exceeds a predefined threshold.
+<div align="center">
+<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/a57596b0-aae6-40c4-9e25-fe1c08aa94e2" width="80%" height="80%">
+</div>
 * Height-based Reset
-The height-based reset condition is triggered if the height of the robot's base link falls below a certain threshold.<br/>
-<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/c867b068-7a31-4faa-8c5e-3ce56c3fdcf4" width="60%" height="60%">
+The height-based reset condition is triggered if the height of the robot's base link falls below a certain threshold.
+<div align="center">
+<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/c867b068-7a31-4faa-8c5e-3ce56c3fdcf4" width="70%" height="70%">
+</div>
 
 * Final reset condition
 The final reset condition is a logical OR between these two conditions, as well as a condition that checks if the episode length has been exceeded <br/>
