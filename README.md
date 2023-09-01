@@ -28,7 +28,7 @@ The robot's actions are the torques applied to the joints and wheels.
 
 ### Reward Function Design
 The reward function aims to incentivize the robot to maintain an upright orientation while discouraging excessive movements or control efforts.<br/>
-![CodeCogsEqn](https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/b4d9abf2-e867-4ea3-ac50-362673a0276f)
+![CodeCogsEqn (1)](https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/53a88490-0fe5-402b-bb56-5dfe21c9309d)
 
 * OrientationReward: Rewards the robot for maintaining an upright orientation. This is calculated as<br/>
  ![2](https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/985741a5-8797-465f-b65a-f9553cd1427f)
