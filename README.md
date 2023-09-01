@@ -32,7 +32,7 @@ The robot's actions are the torques applied to the joints and wheels.
 ### Reward Function Design
 The reward function aims to incentivize the robot to maintain an upright orientation while discouraging excessive movements or control efforts.
 <div align="center">
-<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/bc75fab0-6040-461d-b08b-230679adf6d4" width="90%" height="90%">
+<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/bc75fab0-6040-461d-b08b-230679adf6d4" width="100%" height="100%">
 </div>
 * OrientationReward: Rewards the robot for maintaining an upright orientation. This is calculated as
 <div align="center">
@@ -41,11 +41,13 @@ The reward function aims to incentivize the robot to maintain an upright orienta
 
 * SmoothnessReward
 <div align="center">
-<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/b38b9d97-b620-459b-b1ac-23e3ed2eac85" width="50%" height="50%">
+<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/b38b9d97-b620-459b-b1ac-23e3ed2eac85" width="60%" height="60%">
 </div>
 
 * ControlEffort: Penalizes large torques or forces applied at the joints and wheels.
+<div align="center">
 <img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/c475527f-6f4c-472b-97df-a3252294bcfa" width="30%" height="30%">
+</div>
 
 ### Reset Function Design
 The reset function is triggered if:
