@@ -46,8 +46,5 @@ The reset function is triggered if:
 1. The robot's pitch or roll exceeds a set threshold, indicating that it has fallen over.
 2. The height of the robot's base_link drops below a certain value, indicating that it has kneeled or otherwise left a standard operating position.
 
-## Experiments and Results
-TBD
-
 ## Conclusion
 I presented an RL-based approach for balancing a two-wheeled legged robot using Isaac Gym. The reward and reset functions were designed to address the unique challenges posed by this robot configuration. Experimental results demonstrate the effectiveness of our approach in various scenarios.
