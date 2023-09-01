@@ -36,7 +36,7 @@ The reward function aims to incentivize the robot to maintain an upright orienta
 * SmoothnessReward<br/>
 ![CodeCogsEqn (2)](https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/b38b9d97-b620-459b-b1ac-23e3ed2eac85)
 
-* ControlEffort: Penalizes large torques or forces applied at the joints and wheels.
+* ControlEffort: Penalizes large torques or forces applied at the joints and wheels.<br/>
 ![CodeCogsEqn (3)](https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/c475527f-6f4c-472b-97df-a3252294bcfa)
 
 ### Reset Function Design
