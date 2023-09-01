@@ -35,13 +35,13 @@ The reward function aims to incentivize the robot to maintain an upright orienta
 
 
 * OrientationReward: Rewards the robot for maintaining an upright orientation. This is calculated as<br/>
-![CodeCogsEqn](https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/55d6b696-ce36-4a0f-baf6-16493b810dac)
+<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/55d6b696-ce36-4a0f-baf6-16493b810dac" width="80%" height="80%">
 
 * SmoothnessReward<br/>
-![CodeCogsEqn (2)](https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/b38b9d97-b620-459b-b1ac-23e3ed2eac85)
+<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/b38b9d97-b620-459b-b1ac-23e3ed2eac85" width="80%" height="80%">
 
 * ControlEffort: Penalizes large torques or forces applied at the joints and wheels.<br/>
-![CodeCogsEqn (3)](https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/c475527f-6f4c-472b-97df-a3252294bcfa)
+<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/c475527f-6f4c-472b-97df-a3252294bcfa" width="80%" height="80%">
 
 ### Reset Function Design
 The reset function is triggered if:
@@ -50,15 +50,15 @@ The reset function is triggered if:
 
 * Orientation-based reset
 The orientation-based reset occurs if the absolute value of the pitch or the roll exceeds a predefined threshold.<br/>
-![CodeCogsEqn](https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/a57596b0-aae6-40c4-9e25-fe1c08aa94e2)
+<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/a57596b0-aae6-40c4-9e25-fe1c08aa94e2" width="80%" height="80%">
 
 * Height-based Reset
 The height-based reset condition is triggered if the height of the robot's base link falls below a certain threshold.<br/>
-![CodeCogsEqn (1)](https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/c867b068-7a31-4faa-8c5e-3ce56c3fdcf4)
+<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/c867b068-7a31-4faa-8c5e-3ce56c3fdcf4" width="80%" height="80%">
 
 * Final reset condition
 The final reset condition is a logical OR between these two conditions, as well as a condition that checks if the episode length has been exceeded <br/>
-![CodeCogsEqn (2)](https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/92d75890-c4dc-45ff-80b9-eb20846c0db0)
+<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/92d75890-c4dc-45ff-80b9-eb20846c0db0" width="80%" height="80%">
 
 - pitch and roll are the current pitch and roll angles of the robot, respectively.
 - pitcht_hreshold and roll_threshold are the respective thresholds for pitch and roll.
