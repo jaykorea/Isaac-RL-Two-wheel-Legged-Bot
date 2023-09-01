@@ -34,7 +34,9 @@ The reward function aims to incentivize the robot to maintain an upright orienta
 <img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/bc75fab0-6040-461d-b08b-230679adf6d4" width="90%" height="90%">
 
 * OrientationReward: Rewards the robot for maintaining an upright orientation. This is calculated as
-<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/55d6b696-ce36-4a0f-baf6-16493b810dac" width="40%" height="40%">
+<div align="center">
+  <img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/55d6b696-ce36-4a0f-baf6-16493b810dac" width="40%" height="40%">
+</div>
 
 * SmoothnessReward
 <img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/b38b9d97-b620-459b-b1ac-23e3ed2eac85" width="50%" height="50%">
