@@ -30,16 +30,16 @@ The robot's state comprises its joint positions and velocities, body position, o
 The robot's actions are the torques applied to the joints and wheels.
 
 ### Reward Function Design
-The reward function aims to incentivize the robot to maintain an upright orientation while discouraging excessive movements or control efforts.<br/>
-- <img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/bc75fab0-6040-461d-b08b-230679adf6d4" width="90%" height="90%">
+The reward function aims to incentivize the robot to maintain an upright orientation while discouraging excessive movements or control efforts.
+<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/bc75fab0-6040-461d-b08b-230679adf6d4" width="90%" height="90%">
 
-* OrientationReward: Rewards the robot for maintaining an upright orientation. This is calculated as<br/>
-- <img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/55d6b696-ce36-4a0f-baf6-16493b810dac" width="40%" height="40%">
+* OrientationReward: Rewards the robot for maintaining an upright orientation. This is calculated as
+<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/55d6b696-ce36-4a0f-baf6-16493b810dac" width="40%" height="40%">
 
-* SmoothnessReward<br/>
-- <img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/b38b9d97-b620-459b-b1ac-23e3ed2eac85" width="50%" height="50%">
+* SmoothnessReward
+<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/b38b9d97-b620-459b-b1ac-23e3ed2eac85" width="50%" height="50%">
 
-* ControlEffort: Penalizes large torques or forces applied at the joints and wheels.<br/>
+* ControlEffort: Penalizes large torques or forces applied at the joints and wheels.
 <img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/c475527f-6f4c-472b-97df-a3252294bcfa" width="30%" height="30%">
 
 ### Reset Function Design
