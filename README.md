@@ -64,12 +64,14 @@ The orientation-based reset occurs if the absolute value of the pitch or the rol
 * Height-based Reset</br>
 The height-based reset condition is triggered if the height of the robot's base link falls below a certain threshold.
 <div align="center">
-<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/c867b068-7a31-4faa-8c5e-3ce56c3fdcf4" width="70%" height="70%">
+<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/c867b068-7a31-4faa-8c5e-3ce56c3fdcf4" width="65%" height="65%">
 </div>
 
 * Final reset condition</br>
-The final reset condition is a logical OR between these two conditions, as well as a condition that checks if the episode length has been exceeded <br/>
+The final reset condition is a logical OR between these two conditions, as well as a condition that checks if the episode length has been exceeded
+<div align="center">
 <img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/92d75890-c4dc-45ff-80b9-eb20846c0db0" width="60%" height="60%">
+</div>
 
 - pitch and roll are the current pitch and roll angles of the robot, respectively.
 - pitcht_hreshold and roll_threshold are the respective thresholds for pitch and roll.
