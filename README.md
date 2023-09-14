@@ -34,8 +34,7 @@ The reward function is designed to balance multiple objectives, encouraging the 
 </br> ![total_reward](https://github.com/jaykorea/Isaac-gym-Legged-Bot/assets/95605860/ac49dce9-ef91-4093-92ae-8c3a8ed5e82f)
 
 * stability reward: Penalizes rapid changes in roll and pitch angles to improve stability. This is calculated as
-<br/>
-![kstability](https://github.com/jaykorea/Isaac-gym-Legged-Bot/assets/95605860/eb109f54-13c9-4a51-8f1e-ff8f52d68b91)
+<br/> ![kstability](https://github.com/jaykorea/Isaac-gym-Legged-Bot/assets/95605860/eb109f54-13c9-4a51-8f1e-ff8f52d68b91)
 
 * SmoothnessReward
 <div align="center">
