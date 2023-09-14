@@ -42,6 +42,19 @@ The reward function is designed to balance multiple objectives, encouraging the 
 * orientation reward: Encourages the robot to maintain an upright orientation. This is cacluated as
 <br/> ![korientation](https://github.com/jaykorea/Isaac-gym-Legged-Bot/assets/95605860/25a540d5-89bd-458d-a870-29187091f4f8)
 
+* smoothness reward: Penalizes rapid changes in angular velocity to encourage smooth movements. This is cacluated as
+<br/> ![ksmooth](https://github.com/jaykorea/Isaac-gym-Legged-Bot/assets/95605860/eda6fecb-62b6-49dd-bea6-c59435abc837)
+
+* effort reward: Penalizes high control effort. This is cacluated as
+<br/> 
+![keffort](https://github.com/jaykorea/Isaac-gym-Legged-Bot/assets/95605860/b4c549a5-a412-471c-8741-88bfc01768ed)
+
+* contact reward: Penalties for any contact with the base or knees. This is cacluated as
+<br/> ![kbase](https://github.com/jaykorea/Isaac-gym-Legged-Bot/assets/95605860/580883e0-132d-46b1-9970-201fb2e6cf32)
+<br/> ![kknee](https://github.com/jaykorea/Isaac-gym-Legged-Bot/assets/95605860/4d6eb96c-4bc9-46a9-b543-f42ce2a624ca)
+
+
+
 ### Reset Function Design
 The reset function is triggered if:
 1. The robot's pitch or roll exceeds a set threshold, indicating that it has fallen over.
