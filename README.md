@@ -52,7 +52,11 @@ The reward function is designed to balance multiple objectives, encouraging the 
 <br/> ![kbase](https://github.com/jaykorea/Isaac-gym-Legged-Bot/assets/95605860/580883e0-132d-46b1-9970-201fb2e6cf32)
 <br/> ![kknee](https://github.com/jaykorea/Isaac-gym-Legged-Bot/assets/95605860/4d6eb96c-4bc9-46a9-b543-f42ce2a624ca)
 
+* forward velocity reward: Encourages forward movement. This is cacluated as
+<br/> ![kforwardvelocity](https://github.com/jaykorea/Isaac-gym-Legged-Bot/assets/95605860/1799551e-35c8-41e9-8d6e-63f78fdb3a1d)
 
+* hip alignment reward: Penalizes misalignment of the hip joints. This is cacluated as
+<br/>![khip](https://github.com/jaykorea/Isaac-gym-Legged-Bot/assets/95605860/c4bd342c-b87d-4930-9c11-e74fc57e329c)
 
 ### Reset Function Design
 The reset function is triggered if:
