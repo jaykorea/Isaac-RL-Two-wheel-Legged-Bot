@@ -30,10 +30,9 @@ The robot's state comprises its joint positions and velocities, body position, o
 The robot's actions are the torques applied to the joints and wheels.
 
 ### Reward Function Design
-The reward function aims to incentivize the robot to maintain an upright orientation while discouraging excessive movements or control efforts.
-<div align="center">
-<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/bc75fab0-6040-461d-b08b-230679adf6d4" width="100%" height="100%">
-</div>
+The reward function is designed to balance multiple objectives, encouraging the robot to maintain an upright posture, move with smooth motions, exert efficient control efforts, and achieve forward velocity, among other criteria. The function is given by:
+![reward](https://github.com/jaykorea/Isaac-gym-Legged-Bot/assets/95605860/517712a3-9c68-4719-8987-e6b1778d6838)
+
 
 * OrientationReward: Rewards the robot for maintaining an upright orientation. This is calculated as
 <div align="center">
