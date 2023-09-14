@@ -36,15 +36,11 @@ The reward function is designed to balance multiple objectives, encouraging the 
 * stability reward: Penalizes rapid changes in roll and pitch angles to improve stability. This is calculated as
 <br/> ![kstability](https://github.com/jaykorea/Isaac-gym-Legged-Bot/assets/95605860/eb109f54-13c9-4a51-8f1e-ff8f52d68b91)
 
-* SmoothnessReward
-<div align="center">
-<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/b38b9d97-b620-459b-b1ac-23e3ed2eac85" width="55%" height="55%">
-</div>
+* gravity reward: Gravity-based orientation penalty. This is calculated as
+</br> ![kgravity](https://github.com/jaykorea/Isaac-gym-Legged-Bot/assets/95605860/67e30506-7b58-4f90-b85a-ed45541d4a52)
 
-* ControlEffort: Penalizes large torques or forces applied at the joints and wheels.
-<div align="center">
-<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/c475527f-6f4c-472b-97df-a3252294bcfa" width="35%" height="35%">
-</div>
+* orientation reward: Encourages the robot to maintain an upright orientation. This is cacluated as
+<br/> ![korientation](https://github.com/jaykorea/Isaac-gym-Legged-Bot/assets/95605860/25a540d5-89bd-458d-a870-29187091f4f8)
 
 ### Reset Function Design
 The reset function is triggered if:
