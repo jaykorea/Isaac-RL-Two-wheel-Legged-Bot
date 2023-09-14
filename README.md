@@ -46,8 +46,7 @@ The reward function is designed to balance multiple objectives, encouraging the 
 <br/> ![ksmooth](https://github.com/jaykorea/Isaac-gym-Legged-Bot/assets/95605860/eda6fecb-62b6-49dd-bea6-c59435abc837)
 
 * effort reward: Penalizes high control effort. This is cacluated as
-<br/> 
-![keffort](https://github.com/jaykorea/Isaac-gym-Legged-Bot/assets/95605860/b4c549a5-a412-471c-8741-88bfc01768ed)
+<br/> ![keffort](https://github.com/jaykorea/Isaac-gym-Legged-Bot/assets/95605860/b4c549a5-a412-471c-8741-88bfc01768ed)
 
 * contact reward: Penalties for any contact with the base or knees. This is cacluated as
 <br/> ![kbase](https://github.com/jaykorea/Isaac-gym-Legged-Bot/assets/95605860/580883e0-132d-46b1-9970-201fb2e6cf32)
