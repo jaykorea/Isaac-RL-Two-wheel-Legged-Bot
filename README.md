@@ -31,7 +31,7 @@ The robot's actions are the torques applied to the joints and wheels.
 
 ### Reward Function Design
 The reward function is designed to balance multiple objectives, encouraging the robot to maintain an upright posture, move with smooth motions, exert efficient control efforts, and achieve forward velocity, among other criteria. The function is given by:
-</br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ![total_reward](https://github.com/jaykorea/Isaac-gym-Legged-Bot/assets/95605860/ac49dce9-ef91-4093-92ae-8c3a8ed5e82f)
+</br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ![total_reward](https://github.com/jaykorea/Isaac-gym-Legged-Bot/assets/95605860/ac49dce9-ef91-4093-92ae-8c3a8ed5e82f)
 
 * stability reward: Penalizes rapid changes in roll and pitch angles to improve stability. This is calculated as
 <br/> ![kstability](https://github.com/jaykorea/Isaac-gym-Legged-Bot/assets/95605860/eb109f54-13c9-4a51-8f1e-ff8f52d68b91)
