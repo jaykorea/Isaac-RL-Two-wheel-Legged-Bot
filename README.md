@@ -4,6 +4,7 @@
 This project presents an approach to balance a two-wheeled legged robot using reinforcement learning (RL) with Nvidia's Isaac Gym. We detail the design of the reward and reset functions, which are critical for successful learning, and present experimental results to demonstrate the effectiveness of our approach.
 ## Demo video
 <img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/e26a70b3-2308-4bcc-b491-1f2229d04f47" width="95%" height="95%">
+
 ![plane_merged](https://github.com/jaykorea/Isaac-gym-Legged-Bot/assets/95605860/7a925a47-5b1b-4012-9648-f7300e4654bb)
 
 ## Introduction
