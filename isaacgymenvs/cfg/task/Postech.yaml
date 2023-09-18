@@ -7,18 +7,50 @@ physics_engine: ${..physics_engine}
 env:
   numEnvs: ${resolve_default:1024,${...num_envs}}
   envSpacing: 2.0
-  resetDist: 2.0
-  maxEffort: 20
+  resetDist: 10000
+  maxEffort: 25
+  enableDebugVis: False
 
   clipObservations: 5.0
   clipActions: 1
 
+  terrain:
+    terrainType: trimesh # none, plane, or trimesh
+    staticFriction: 1.0  # [-]
+    dynamicFriction: 1.0  # [-]
+    restitution: 0.        # [-]
+    # rough terrain only:
+    curriculum: true
+    maxInitMapLevel: 0
+    mapLength: 6. # default 6.
+    mapWidth: 6. # default 6.
+    numLevels: 15 # default : 10
+    numTerrains: 25 # default: 20
+    difficulty_height: 36 # higher the slope decrease
+    # terrain types: [smooth slope, rough slope, stairs up, stairs down, discrete]
+    terrainProportions: [0.1, 0.1, 0.35, 0.25, 0.2]
+    # tri mesh only:
+    slopeTreshold: 0.5 # default: 0.5
+
   asset:
     assetRoot: "../../assets"
     assetFileName: "urdf/postech/urdf/postech.urdf"
+    footName: wheel # SHANK if collapsing fixed joint, FOOT otherwise
+    kneeName: hip # since the hip is upper part of leg
+    baseName: base_link
+    collapseFixedJoints: False
+    fixBaseLink: False
+    defaultDofDriveMode: 4 # see GymDofDriveModeFlags (0 is none, 1 is pos tgt, 2 is vel tgt, 4 effort)
+
+  # viewer cam:
+  viewer:
+    refEnv: 0
+    pos: [0, 0, 10]  # [m]
+    lookat: [1., 1, 9]  # [m]
 
   # set to True if you use camera sensors in the environment
   enableCameraSensors: False
+  
   baseInitState:
     pos: [0.0, 0.0, 0.75] # x,y,z [m]
     rot: [0.0, 0.0, 0.0, 1.0] # x,y,z,w [quat]
@@ -26,14 +58,53 @@ env:
     vAngular: [0.0, 0.0, 0.0]  # x,y,z [rad/s]
 
   randomCommandVelocityRanges:
-    linear_x: [-2., 2.] # min max [m/s]
-    linear_y: [-1., 1.]   # min max [m/s]
-    yaw: [-1., 1.]          # min max [rad/s]
+    linear_x: [-0.05, 1.0]   # min max [m/s]
+    linear_y: [-0., 0.]   # min max [m/s]
+    yaw: [-0.5, 0.5]    # min max [rad/s]
+
+  randomJointVelocityRanges:
+    hip_l_range: [-0.0, 0.0]   # min max [m/s]
+    knee_l_range: [-0.1, 0.1]   # min max [m/s]
+    wheel_l_range: [-1.0, 1.0]   # min max [m/s]
+    hip_r_range: [-0.0, 0.0]   # min max [m/s]
+    knee_r_range: [-0.1, 0.1]  # min max [m/s]
+    wheel_r_range: [-1.0, 1.0]   # min max [m/s]
+
+  learn:
+    #randomization
+    randomizeFriction: true
+    frictionRange: [0.5, 1.25]
+    pushRobots: false
+    pushInterval_s: 45 # default : 15
+    # episode length in seconds
+    episodeLength_s: 80 # default : 20
+    episodeLength_m: 200
+    heightMeasurementScale: 5.0
+    allowKneeContacts: false
+
+  defaultJointAngles:  # = target angles when action = 0.0
+    hip_l_joint: 0.1    # [rad]
+    knee_l_joint: 0.1    # [rad]
+    wheel_l_joint: 0.1   # [rad]
+
+    hip_r_joint: 0.1     # [rad]
+    knee_r_joint: 0.1    # [rad]
+    wheel_r_joint: 0.1     # [rad]
+
+  control:
+    # PD Drive parameters:
+    stiffness: 80.0  # [N*m/rad]
+    damping: 2.0     # [N*m*s/rad]
+    # action scale: target angle = actionScale * action + defaultAngle
+    actionScale: 0.5
+    # decimation: Number of control action updates @ sim DT per policy DT
+    decimation: 4
 
 sim:
   dt: 0.0166 # 1/60 s
   substeps: 2
   up_axis: "z"
+  up_axis_idx": 2
   use_gpu_pipeline: ${eq:${...pipeline},"gpu"}
   gravity: [0.0, 0.0, -9.81]
   physx:
@@ -52,7 +123,7 @@ sim:
     contact_collection: 1 # 0: CC_NEVER (don't collect contact info), 1: CC_LAST_SUBSTEP (collect only contacts on last substep), 2: CC_ALL_SUBSTEPS (default - all contacts)
 
 task:
-  randomize: True
+  randomize: false
   randomization_params:
     frequency: 720   # Define how many simulation steps between generating new randomizations
     observations:

@@ -1,0 +1,271 @@
+task:
+  name: Postech
+  physics_engine: ${..physics_engine}
+  env:
+    numEnvs: ${resolve_default:1024,${...num_envs}}
+    envSpacing: 2.0
+    resetDist: 10000
+    maxEffort: 25
+    enableDebugVis: false
+    clipObservations: 5.0
+    clipActions: 1
+    terrain:
+      terrainType: trimesh
+      staticFriction: 1.0
+      dynamicFriction: 1.0
+      restitution: 0.0
+      curriculum: true
+      maxInitMapLevel: 0
+      mapLength: 6.0
+      mapWidth: 6.0
+      numLevels: 15
+      numTerrains: 25
+      difficulty_height: 36
+      terrainProportions:
+      - 0.1
+      - 0.1
+      - 0.35
+      - 0.25
+      - 0.2
+      slopeTreshold: 0.5
+    asset:
+      assetRoot: ../../assets
+      assetFileName: urdf/postech/urdf/postech.urdf
+      footName: wheel
+      kneeName: hip
+      baseName: base_link
+      collapseFixedJoints: false
+      fixBaseLink: false
+      defaultDofDriveMode: 4
+    viewer:
+      refEnv: 0
+      pos:
+      - 0
+      - 0
+      - 10
+      lookat:
+      - 1.0
+      - 1
+      - 9
+    enableCameraSensors: false
+    baseInitState:
+      pos:
+      - 0.0
+      - 0.0
+      - 0.75
+      rot:
+      - 0.0
+      - 0.0
+      - 0.0
+      - 1.0
+      vLinear:
+      - 0.0
+      - 0.0
+      - 0.0
+      vAngular:
+      - 0.0
+      - 0.0
+      - 0.0
+    randomCommandVelocityRanges:
+      linear_x:
+      - -0.05
+      - 1.0
+      linear_y:
+      - -0.0
+      - 0.0
+      yaw:
+      - -0.5
+      - 0.5
+    randomJointVelocityRanges:
+      hip_l_range:
+      - -0.0
+      - 0.0
+      knee_l_range:
+      - -0.1
+      - 0.1
+      wheel_l_range:
+      - -1.0
+      - 1.0
+      hip_r_range:
+      - -0.0
+      - 0.0
+      knee_r_range:
+      - -0.1
+      - 0.1
+      wheel_r_range:
+      - -1.0
+      - 1.0
+    learn:
+      randomizeFriction: true
+      frictionRange:
+      - 0.5
+      - 1.25
+      pushRobots: false
+      pushInterval_s: 45
+      episodeLength_s: 80
+      episodeLength_m: 200
+      heightMeasurementScale: 5.0
+      allowKneeContacts: false
+    defaultJointAngles:
+      hip_l_joint: 0.1
+      knee_l_joint: 0.1
+      wheel_l_joint: 0.1
+      hip_r_joint: 0.1
+      knee_r_joint: 0.1
+      wheel_r_joint: 0.1
+    control:
+      stiffness: 80.0
+      damping: 2.0
+      actionScale: 0.5
+      decimation: 4
+  sim:
+    dt: 0.0166
+    substeps: 2
+    up_axis: z
+    up_axis_idx": 2
+    use_gpu_pipeline: ${eq:${...pipeline},"gpu"}
+    gravity:
+    - 0.0
+    - 0.0
+    - -9.81
+    physx:
+      num_threads: ${....num_threads}
+      solver_type: ${....solver_type}
+      use_gpu: ${contains:"cuda",${....sim_device}}
+      num_position_iterations: 4
+      num_velocity_iterations: 1
+      contact_offset: 0.02
+      rest_offset: 0.001
+      bounce_threshold_velocity: 0.2
+      max_depenetration_velocity: 100.0
+      default_buffer_size_multiplier: 2.0
+      max_gpu_contact_pairs: 8388608
+      num_subscenes: ${....num_subscenes}
+      contact_collection: 1
+  task:
+    randomize: false
+    randomization_params:
+      frequency: 720
+      observations:
+        range:
+        - 0
+        - 0.002
+        range_correlated:
+        - 0
+        - 0.001
+        operation: additive
+        distribution: gaussian
+      actions:
+        range:
+        - -0.05
+        - 0.05
+        range_correlated:
+        - 0
+        - 0.015
+        operation: additive
+        distribution: gaussian
+      actor_params:
+        postech:
+          rigid_body_properties:
+            mass:
+              range:
+              - 1
+              - 1.5
+              operation: scaling
+              distribution: uniform
+              setup_only: true
+train:
+  params:
+    seed: ${...seed}
+    algo:
+      name: a2c_continuous
+    model:
+      name: continuous_a2c_logstd
+    network:
+      name: actor_critic
+      separate: false
+      space:
+        continuous:
+          mu_activation: None
+          sigma_activation: None
+          mu_init:
+            name: default
+          sigma_init:
+            name: const_initializer
+            val: 0
+          fixed_sigma: true
+      mlp:
+        units:
+        - 32
+        - 32
+        activation: elu
+        initializer:
+          name: default
+        regularizer:
+          name: None
+    load_checkpoint: ${if:${...checkpoint},True,False}
+    load_path: ${...checkpoint}
+    config:
+      name: ${resolve_default:Postech,${....experiment}}
+      full_experiment_name: ${.name}
+      env_name: rlgpu
+      ppo: true
+      mixed_precision: false
+      normalize_input: true
+      normalize_value: true
+      num_actors: ${....task.env.numEnvs}
+      reward_shaper:
+        scale_value: 0.1
+      normalize_advantage: true
+      gamma: 0.99
+      tau: 0.95
+      learning_rate: 0.0003
+      lr_schedule: adaptive
+      kl_threshold: 0.008
+      score_to_win: 100000
+      max_epochs: ${resolve_default:100000,${....max_iterations}}
+      save_best_after: 500
+      save_frequency: 25
+      grad_norm: 1.0
+      entropy_coef: 0.0
+      truncate_grads: true
+      e_clip: 0.2
+      horizon_length: 16
+      minibatch_size: 8192
+      mini_epochs: 8
+      critic_coef: 4
+      clip_value: true
+      seq_len: 4
+      bounds_loss_coef: 0.0001
+pbt:
+  enabled: false
+task_name: ${task.name}
+experiment: ''
+num_envs: ''
+seed: 42
+torch_deterministic: false
+max_iterations: ''
+physics_engine: physx
+pipeline: gpu
+sim_device: cuda:0
+rl_device: cuda:0
+graphics_device_id: 0
+num_threads: 4
+solver_type: 1
+num_subscenes: 4
+test: false
+checkpoint: ''
+sigma: ''
+multi_gpu: false
+wandb_activate: false
+wandb_group: ''
+wandb_name: ${train.params.config.name}
+wandb_entity: ''
+wandb_project: isaacgymenvs
+wandb_tags: []
+wandb_logcode_dir: ''
+capture_video: false
+capture_video_freq: 1464
+capture_video_len: 100
+force_render: true
+headless: false
