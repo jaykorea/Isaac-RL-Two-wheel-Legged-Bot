@@ -86,7 +86,6 @@ The final reset condition is a logical OR operation combining the Knee Contact R
 <br/> ![reset](https://github.com/jaykorea/Isaac-gym-Legged-Bot/assets/95605860/d63ca05e-20d8-4fba-a8c0-381cd625f151)
 
 
-
 - 'knee_contact' and 'base_contact' are the contact information from the sensor forces at the robot's knees and base, respectively.
 - 'projected_gravity' is the projected gravity value in the z-axis.
 - 'progress_buf' is the current episode length.
