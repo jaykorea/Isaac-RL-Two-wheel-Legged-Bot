@@ -7,12 +7,11 @@ https://github.com/jaykorea/Isaac-gym-Legged-Bot/assets/95605860/7a667e89-0f2b-4
 ### Plane forward
 https://github.com/jaykorea/Isaac-gym-Legged-Bot/assets/95605860/6a15511e-4872-4440-8ddf-89077e9e4513
 ### Terrain - stair up
-
+https://github.com/jaykorea/Isaac-gym-Legged-Bot/assets/95605860/f4b122b7-3ec5-4e63-95a3-1e1fc1f1b2d7
 ### Terrain - stair down
-
-### Terrain - rocky
-
-### Terrain - slope
+https://github.com/jaykorea/Isaac-gym-Legged-Bot/assets/95605860/3aaf25ed-b8df-44f7-b84c-325c7b0c6570
+### Terrain - rocky & slope
+https://github.com/jaykorea/Isaac-gym-Legged-Bot/assets/95605860/6db75aa1-4438-44c2-b878-d37c775f41fa
 
 ## Introduction
 Balancing robots with non-standard configurations, such as those with both wheels and legs, poses unique challenges that traditional control methods struggle to address. Reinforcement learning offers an alternative method that can adapt to complex dynamics and environments. In this work, I use Nvidia's Isaac Gym, a toolkit for RL in robotic simulation, to train a two-wheeled legged robot to maintain balance.
