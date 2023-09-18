@@ -62,7 +62,7 @@ The reward function is designed to balance multiple objectives, encouraging the 
 The reset function is triggered if:
 1. The robot's knees come into contact with the ground or an obstacle, indicating it has fallen or kneeled.
 2. The robot's base comes into contact with the ground or an obstacle, indicating it has fallen or tilted too much.
-3. The magnitude of the projected gravity in the z-axis exceeds a threshold of 7.0, indicating that the robot is likely falling or has fallen over.
+3. The magnitude of the projected gravity in the z-axis exceeds a threshold, indicating that the robot is likely falling or has fallen over.
 4. The current episode length exceeds a predefined maximum length.
 
 * Knee Contact Reset
