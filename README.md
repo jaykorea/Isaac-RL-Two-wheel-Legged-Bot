@@ -60,33 +60,38 @@ The reward function is designed to balance multiple objectives, encouraging the 
 
 ### Reset Function Design
 The reset function is triggered if:
-1. The robot's pitch or roll exceeds a set threshold, indicating that it has fallen over.
-2. The height of the robot's base_link drops below a certain value, indicating that it has kneeled or otherwise left a standard operating position.
+1. The robot's knees come into contact with the ground or an obstacle, indicating it has fallen or kneeled.
+2. The robot's base comes into contact with the ground or an obstacle, indicating it has fallen or tilted too much.
+3. The magnitude of the projected gravity in the z-axis exceeds a threshold of 7.0, indicating that the robot is likely falling or has fallen over.
+4. The current episode length exceeds a predefined maximum length.
 
-* Orientation-based reset</br>
-The orientation-based reset occurs if the absolute value of the pitch or the roll exceeds a predefined threshold.
-<div align="center">
-<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/a57596b0-aae6-40c4-9e25-fe1c08aa94e2" width="80%" height="80%">
-</div>
+* Knee Contact Reset
+This reset condition is based on the sensor forces at the robot's knees. If these forces exceed a certain threshold, it indicates that the knees have made contact with the ground or an obstacle.
+<br/> ![kknee](https://github.com/jaykorea/Isaac-gym-Legged-Bot/assets/95605860/1ba67e7f-6913-446d-bb92-cac13d2b7fd6)
 
-* Height-based Reset</br>
-The height-based reset condition is triggered if the height of the robot's base link falls below a certain threshold.
-<div align="center">
-<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/c867b068-7a31-4faa-8c5e-3ce56c3fdcf4" width="60%" height="60%">
-</div>
+* Base Contact Reset
+This reset condition is based on the sensor forces at the robot's base. If these forces exceed a certain threshold, it indicates that the base has made contact with the ground or an obstacle.
+<br/> ![base_contact](https://github.com/jaykorea/Isaac-gym-Legged-Bot/assets/95605860/74199bcb-1785-4c7b-a230-2f97dc6b61d7)
 
-* Final reset condition</br>
-The final reset condition is a logical OR between these two conditions, as well as a condition that checks if the episode length has been exceeded
-<div align="center">
-<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/92d75890-c4dc-45ff-80b9-eb20846c0db0" width="90%" height="90%">
-</div>
+* Gravity-based Reset
+This condition triggers a reset if the magnitude of the projected gravity in the z-axis exceeds a threshold.
+<br/> ![gravity_reset](https://github.com/jaykorea/Isaac-gym-Legged-Bot/assets/95605860/f78ad393-be32-4aae-8edd-4ac7c2baec46)
 
-- pitch and roll are the current pitch and roll angles of the robot, respectively.
-- pitcht_hreshold and roll_threshold are the respective thresholds for pitch and roll.
-- baselink_height is the height of the robot's base link.
-- height_threshold is the height threshold.
-- progress_buf is the current episode length.
-- maxepisodelength is the maximum allowed episode length.
+* Episode Length-based Reset
+This condition is triggered if the current episode length has reached or exceeded the maximum allowable episode length.
+<br/> ![episode_reset](https://github.com/jaykorea/Isaac-gym-Legged-Bot/assets/95605860/63987917-7ecd-445a-90e3-c7f991430c52)
+
+* Final Reset Condition
+The final reset condition is a logical OR operation combining the Knee Contact Reset, Base Contact Reset, Gravity-based Reset, and Episode Length-based Reset.
+<br/> ![reset](https://github.com/jaykorea/Isaac-gym-Legged-Bot/assets/95605860/d63ca05e-20d8-4fba-a8c0-381cd625f151)
+
+
+
+- 'knee_contact' and 'base_contact' are the contact information from the sensor forces at the robot's knees and base, respectively.
+- 'projected_gravity' is the projected gravity value in the z-axis.
+- 'progress_buf' is the current episode length.
+- 'max_episode_length' is the maximum allowed episode length.
+
 If any of theses conditions are met, the robot's environment will be reset.
 
 ## Conclusion
