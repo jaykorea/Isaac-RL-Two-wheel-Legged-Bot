@@ -5,8 +5,7 @@ This project presents an approach to balance a two-wheeled legged robot using re
 ### stationary
 <img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/e26a70b3-2308-4bcc-b491-1f2229d04f47" width="95%" height="95%">
 ### plane forward
-<img src = "https://github.com/jaykorea/Isaac-gym-Legged-Bot/assets/95605860/b19950cc-d051-4679-8fac-efc0c6d9da24" width="100" height="100%">
-
+![Uploading plane_merged.gif…]()
 
 
 ## Introduction
