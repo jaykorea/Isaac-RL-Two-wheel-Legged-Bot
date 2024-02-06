@@ -47,6 +47,11 @@ Should source the path before launch the nodes
 export LD_LIBRARY_PATH=/home/stuart/miniconda3/envs/rlgpu/lib:$LD_LIBRARY_PATH
 ```
 
+## Install Dependency
+```
+pip install -e .
+```
+
 ## Install IsaacGymEnv
 1. Download [IsaacGym](https://github.com/NVIDIA-Omniverse/IsaacGymEnvs)
 
