@@ -48,6 +48,7 @@ export LD_LIBRARY_PATH=/home/stuart/miniconda3/envs/rlgpu/lib:$LD_LIBRARY_PATH
 ```
 
 ## Install Dependency
+Install dependencies on isaac gym env folder (taht is settings.py located)
 ```
 pip install -e .
 ```
