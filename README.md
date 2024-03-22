@@ -20,7 +20,7 @@ Balancing robots with non-standard configurations, such as those with both wheel
 ## Methodology
 ### Robot Configuration
 The robot has two legs, each with a hip and shin joint, and two wheels. The robot's task is to maintain an upright position while also being capable of forward and backward motion.<br/>
-<22img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/91801f7a-984f-4b02-a988-0eb07372dacb" width="70%" height="70%">
+<img src = "https://github.com/jaykorea/isaac_gym_legged_bot/assets/95605860/91801f7a-984f-4b02-a988-0eb07372dacbdi" width="70%" height="70%">
 
 ### Simulation Environment
 I use Nvidia's Isaac Gym to simulate the robot's dynamics and environment. The Isaac Gym provides a PyTorch-compatible interface, allowing seamless integration with popular RL algorithms.
