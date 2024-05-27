@@ -10,8 +10,10 @@ def main(args):
     task_name = 'Flamingo'
 
     cfg = get_cfg(args.cfg_path, num_envs, task_name)
-    cfg.checkpoint = 'runs/Postech_24-02-07-43/nn/Postech.pth'
+    cfg.checkpoint = 'runs/Postech_26-07-05-41/nn/Postech.pth'
     cfg.test = True
+    cfg.task.task.randomize = False
+    cfg.task.env.test_mode = True
     cfg.headless = False
     isaacgym_task_map[task_name] = Flamingo
 

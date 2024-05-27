@@ -15,6 +15,7 @@ class Flamingo(VecTask):
         self.custom_origins = False
         self.debug_viz = self.cfg["env"]["enableDebugVis"]
         self.reward_vis = self.cfg["env"]["enableRewardVis"]
+        self.test_mode = self.cfg["env"]["test_mode"]
         self.scale_effort_joints = self.cfg["env"]["scaleEffortJoints"]
         self.scale_effort_wheels = self.cfg["env"]["scaleEffortWheels"]
         self.randomize = self.cfg["task"]["randomize"]
@@ -964,13 +965,14 @@ class Flamingo(VecTask):
 
     def pre_physics_step(self, actions):
         #* Convert to the device and scale by max effort -JH
-        #self.actions = actions.clone().to(self.device)
+        if self.test_mode:
+            self.actions = actions.clone().to(self.device)
+        else:
+            delay = torch.rand((self.num_envs, 1), device=self.device) # 0~1 [
+            self.actions = (1 - delay) * actions + delay * self.actions # a <- previous_a + a
+            #self.actions += 0.02 * torch.randn_like(self.actions) * self.actions # a <- a + N
+            
         #print("self actions: ", self.actions)
-        
-        delay = torch.rand((self.num_envs, 1), device=self.device) # 0~1 [
-        self.actions = (1 - delay) * actions + delay * self.actions # a <- previous_a + a
-        #self.actions += 0.02 * torch.randn_like(self.actions) * self.actions # a <- a + N
-
         # scale the wheel effort
         # self.actions[:,5] *= 0.1
         # self.actions[:,9] *= 0.1

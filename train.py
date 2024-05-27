@@ -11,6 +11,7 @@ def main(args):
 
     cfg = get_cfg(args.cfg_path, num_envs, task_name)
     cfg.test = False
+    cfg.headless = False
     isaacgym_task_map[task_name] = Flamingo
 
     launch_rlg_hydra(cfg)
