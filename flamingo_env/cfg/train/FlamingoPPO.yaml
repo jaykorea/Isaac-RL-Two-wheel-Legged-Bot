@@ -1,0 +1,80 @@
+params:
+  seed: ${...seed}
+
+  algo:
+    name: a2c_continuous
+
+  model:
+    name: continuous_a2c_logstd
+
+  network:
+    name: actor_critic
+    separate: False
+    space:
+      continuous:
+        mu_activation: None
+        sigma_activation: None
+
+        mu_init:
+          name: default
+        sigma_init:
+          name: const_initializer
+          val: 0
+        fixed_sigma: True
+
+    mlp:
+      units: [512, 256, 128] #* 512 * 256 * 128
+      activation: elu
+      d2rl: False
+      
+      initializer:
+        name: default
+      regularizer:
+        name: None
+
+  load_checkpoint: ${if:${...checkpoint},True,False} # flag which sets whether to load the checkpoint
+  load_path: ${...checkpoint} # path to the checkpoint to load
+
+  config:
+    name: ${resolve_default:Flamingo,${....experiment}}
+    full_experiment_name: ${.name}
+    env_name: rlgpu
+    ppo: True
+    mixed_precision: False
+    normalize_input: True
+    normalize_value: True
+    num_actors: ${....task.env.numEnvs}
+    reward_shaper:
+      scale_value: 0.01 #0.01 
+    normalize_advantage: True
+    gamma: 0.99
+    tau: 0.95
+    learning_rate: 3e-4
+    lr_schedule: adaptive
+    kl_threshold: 0.008
+    max_epochs: ${resolve_default:100000,${....max_iterations}}
+    save_best_after: 100 # 100
+    score_to_win: 20000
+    save_frequency: 100 # 50
+    print_stats: True
+    grad_norm: 1.0
+    entropy_coef: 0.001  # default: 0.001
+    truncate_grads: True
+    e_clip: 0.2
+    horizon_length: 24 # default: 16, anymal: 24, jw: 2560
+    minibatch_size: 8192 # default: 8192, anymal: 16384, jw: 256
+    mini_epochs: 5  # default: 8, anymal:5
+    critic_coef: 2  # default:5, anymal:2
+    clip_value: True
+    seq_len: 4
+    bounds_loss_coef: 0.
+
+    #* Minibatch_size Constraints here
+    #* self.batch_size = self.horizon_length * self.num_actors * self.num_agents
+    #* self.batch_size_envs = self.horizon_length * self.num_acto  #* 
+    #* assert(('minibatch_size_per_env' in self.config) or ('minibatch_size' in self.config))
+
+    #* self.minibatch_size_per_env = self.config.get('minibatch_size_per_env', 0)
+    #* self.minibatch_size = self.config.get('minibatch_size', self.num_actors * self.minibatch_size_per_en  #* 
+    #* self.num_minibatches = self.batch_size // self.minibatch_size
+    #* assert(self.batch_size % self.minibatch_size ==   #* 

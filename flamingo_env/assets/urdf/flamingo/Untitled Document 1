@@ -1,0 +1,66 @@
+test1
+
+        k_orientation = 0.115 # slightly increased to promote an upright posture
+        k_lin_vel_z = -0.5 # reduced to allow some vertical movement but not jumping
+        k_ang_vel_xy = -0.01 # reduced to prevent overcorrection
+        k_gravity = 0.0 # 0.0
+        k_contact = -0.1 # maintain to discourage unnecessary contacts
+        k_height = 0.0
+        k_hip_align = 0.005 # adjust as needed based on hip behavior
+        k_des_hip = -0.005 # adjust as needed based on hip behavior
+        k_shoulder_align = 1.01 # 0.005 adjust to prevent unnatural shoulder positions
+        k_position = 0.0 # unchanged, consider adding reward if position maintenance becomes a goal
+        k_torque = -0.000005 # increase if jumping is due to excessive torque
+        k_joint_acc = -0.0001 # reduced to allow quick but controlled movements
+        k_act_rate = -0.005 # reduced to allow necessary action changes
+        
+        R -> It tends to split its legs to balance its stability
+        
+        
+test2
+        k_orientation = 0.055 # slightly increased to promote an upright posture # 0.115
+        k_lin_vel_z = -0.5 # reduced to allow some vertical movement but not jumping
+        k_ang_vel_xy = -0.01 # reduced to prevent overcorrection
+        k_gravity = 0.0 # 0.0
+        k_contact = -0.1 # maintain to discourage unnecessary contacts
+        k_height = 0.0
+        k_hip_align = 0.005 # adjust as needed based on hip behavior
+        k_des_hip = -0.005 # adjust as needed based on hip behavior
+        k_shoulder_align = 0.05 # 0.005 adjust to prevent unnatural shoulder positions
+        k_position = 0.0 # unchanged, consider adding reward if position maintenance becomes a goal
+        k_torque = -0.000005 # increase if jumping is due to excessive torque
+        k_joint_acc = -0.0001 # reduced to allow quick but controlled movements
+        k_act_rate = -0.005 # reduced to allow necessary action changes
+        
+test3
+        k_orientation = 0.055 # slightly increased to promote an upright posture # 0.115
+        k_lin_vel_z = -0.5 # reduced to allow some vertical movement but not jumping
+        k_ang_vel_xy = -0.01 # reduced to prevent overcorrection
+        k_gravity = 0.0 # 0.0
+        k_contact = -0.1 # maintain to discourage unnecessary contacts
+        k_height = 0.0
+        k_hip_align = 1.005 # adjust as needed based on hip behavior
+        k_des_hip = -0.005 # adjust as needed based on hip behavior
+        k_shoulder_align = 1.05 # 0.005 adjust to prevent unnatural shoulder positions
+        k_position = 0.0 # unchanged, consider adding reward if position maintenance becomes a goal
+        k_torque = -0.000005 # increase if jumping is due to excessive torque
+        k_joint_acc = -0.0001 # reduced to allow quick but controlled movements
+        k_act_rate = -0.005 # reduced to allow necessary action changes
+        
+        
+test4
+        k_orientation = 0.155 # slightly increased to promote an upright posture # 0.115
+        k_lin_vel_z = -0.5 # reduced to allow some vertical movement but not jumping
+        k_ang_vel_xy = -0.01 # reduced to prevent overcorrection
+        k_gravity = 0.0 # 0.0
+        k_contact = -0.1 # maintain to discourage unnecessary contacts
+        k_height = 0.0
+        k_hip_align = 0.005 # adjust as needed based on hip behavior
+        k_des_hip = -0.005 # adjust as needed based on hip behavior
+        k_shoulder_align = 2.05 # 0.005 adjust to prevent unnatural shoulder positions
+        k_position = 0.0 # unchanged, consider adding reward if position maintenance becomes a goal
+        k_torque = -0.000005 # increase if jumping is due to excessive torque
+        k_joint_acc = -0.0001 # reduced to allow quick but controlled movements
+        k_act_rate = -0.005 # reduced to allow necessary action changes
+        
+        M -> increase orientation & shoulder_align       

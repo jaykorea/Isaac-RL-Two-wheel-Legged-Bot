@@ -1,0 +1,78 @@
+*base_link*
+<inertial>
+  <origin xyz="-0.08783681 0.00663818 -0.04861123"/>
+  <mass value="9.22600000"/>
+  <inertia ixx="0.05526695" ixy="-0.00000774" ixz="0.00001173" iyy="0.05861319" iyz="-0.00000169" izz="0.09428951"/>
+</inertial>
+
+*left_hip_link*
+<inertial>
+  <origin xyz="-0.00017732 0.00001322 0.00863621"/>
+  <mass value="0.76800000"/>
+  <inertia ixx="0.00107541" ixy="0.00000008" ixz="-0.00000427" iyy="0.00080743" iyz="-0.00000037" izz="0.00066233"/>
+</inertial>
+
+*left_shoulder_link*
+<inertial>
+  <origin xyz="0.06975774 -0.10786882 0.05849696"/>
+  <mass value="0.92600000"/>
+  <inertia ixx="0.00380394" ixy="0.00197133" ixz="-0.00028725" iyy="0.00233262" iyz="0.00040356" izz="0.00515076"/>
+</inertial>
+
+*left_thigh_link*
+<inertial>
+  <origin xyz="0.00429533 0.00221634 0.00480541"/>
+  <mass value="0.13700000"/>
+  <inertia ixx="0.00002355" ixy="-0.00000723" ixz="-0.00000022" iyy="0.00003330" iyz="-0.00000011" izz="0.00005514"/>
+</inertial>
+
+*left_leg_link*
+<inertial>
+  <origin xyz="-0.07947047 -0.03197022 -0.00121501"/>
+  <mass value="0.18700000"/>
+  <inertia ixx="0.00024852" ixy="-0.00039000" ixz="-0.00000408" iyy="0.00076248" iyz="-0.00000209" izz="0.00099460"/>
+</inertial>
+
+*left_wheel_link*
+<inertial>
+  <origin xyz="-0.00010593 0.00005723 -0.02524258"/>
+  <mass value="1.47300000"/>
+  <inertia ixx="0.00131805" ixy="0.00000026" ixz="0.00000002" iyy="0.00131839" iyz="-0.00000001" izz="0.00177107"/>
+</inertial>
+
+-----------------------
+
+*right_hip_link*
+<inertial>
+  <origin xyz="-0.00017679 0.00001322 0.00863600"/>
+  <mass value="0.76800000"/>
+  <inertia ixx="0.00107541" ixy="0.00000008" ixz="-0.00000427" iyy="0.00080743" iyz="-0.00000037" izz="0.00066233"/>
+</inertial>
+
+*right_shoulder_link*
+<inertial>
+  <origin xyz="0.07025939 0.10823510 0.05876463"/>
+  <mass value="0.92600000"/>
+  <inertia ixx="0.00380325" ixy="-0.00197209" ixz="-0.00028750" iyy="0.00233384" iyz="-0.00040334" izz="0.00515133"/>
+</inertial>
+
+*right_thigh_link*
+<inertial>
+  <origin xyz="0.00423777 -0.00232450 0.00480541"/>
+  <mass value="0.13700000"/>
+  <inertia ixx="0.00002355" ixy="0.00000723" ixz="-0.00000022" iyy="0.00003330" iyz="0.00000011" izz="0.00005514"/>
+</inertial>
+
+*right_leg_link*
+<inertial>
+  <origin xyz="-0.07946791 0.03197259 0.00166798"/>
+  <mass value="0.18700000"/>
+  <inertia ixx="0.00024852" ixy="0.00039000" ixz="-0.00000408" iyy="0.00076248" iyz="0.00000209" izz="0.00099460"/>
+</inertial>
+
+*right_wheel_link*
+<inertial>
+  <origin xyz="0.00011896 0.00001856 -0.02524258"/>
+  <mass value="1.47300000"/>
+  <inertia ixx="0.00131792" ixy="-0.00000009" ixz="-0.00000002" iyy="0.00131852" iyz="-0.00000000" izz="0.00177107"/>
+</inertial>

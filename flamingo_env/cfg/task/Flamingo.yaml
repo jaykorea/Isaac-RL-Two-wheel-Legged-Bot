@@ -1,0 +1,443 @@
+# used to create the object
+name: Flamingo
+
+physics_engine: "${..physics_engine}"
+
+# if given, will override the device setting in gym. 
+env:
+  numEnvs: ${resolve_default:2048,${...num_envs}}
+  numObservations: 102 #111
+  numActions: 8
+  envSpacing: 1.2
+  resetDist: 3
+  scaleEffortJoints: 24
+  scaleEffortWheels: 6
+  enableDebugVis: False
+  enableRewardVis: True
+
+  clipObservations: 5.0
+  clipActions: 1
+
+  terrain:
+    terrainType: plane # plane, trimesh, postech_terrain
+    staticFriction: 1.0  # [-]
+    dynamicFriction: 1.0  # [-]
+    restitution: 0.        # [-]
+    # rough terrain only:
+    curriculum: True
+    maxInitMapLevel: 0
+    mapLength: 8. # default 6.
+    mapWidth: 8. # default 6.
+    numLevels: 10 # default : 10
+    numTerrains: 20 # default: 20
+    difficulty_height: 1 # higher the slope decrease
+    # terrain types: [smooth slope, rough slope, stairs up, stairs down, discrete]
+    terrainProportions: [0.1, 0.1, 0.35, 0.25, 0.2]
+    # tri mesh only:
+    slopeTreshold: 0.5 # default: 0.5
+
+  asset:
+    assetRoot: "../../assets"
+    assetFileName: "urdf/flamingo/urdf/flamingo.urdf"
+    baseName: base
+    hipName: hip
+    shoulderName: shoulder
+    thighName: leg
+    footName: wheel
+    collapseFixedJoints: True
+    fixBaseLink: False
+    defaultDofDriveMode: 4 # see GymDofDriveModeFlags (0 is none, 1 is pos tgt, 2 is vel tgt, 4 effort)
+
+  # viewer cam:
+  viewer:
+    refEnv: 0
+    pos: [0, 0, 3]  # [m]
+    lookat: [1., 1, 2]  # [m]
+
+  # set to True if you use camera sensors in the environment
+  enableCameraSensors: False
+  
+  setRandomJointOffset: True
+  baseInitState:
+    pos: [0.0, 0.0, 0.2406626] # x,y,z [m] , robot height  is 0.41526
+    rot: [0.0, 0.0, 0.0, 1.0] # x,y,z,w [quat]
+    vLinear: [0.0, 0.0, 0.0]  # x,y,z [m/s]
+    vAngular: [0.0, 0.0, 0.0]  # x,y,z [rad/s]
+    
+  sendRandomVelocity: False
+  randomCommandVelocityRanges:
+    linear_x: [-1., 1.]   # min max [m/s]
+    linear_y: [-0.0, 0.0]   # min max [m/s]
+    yaw: [-1., 1.]    # min max [rad/s]
+
+  # randomJointVelocityRanges:
+  #   left_hip_range: [-0.1, 0.1]   # min max [m/s]
+  #   left_shoulder_range: [-0.5, 0.5]   # min max [m/s]
+  #   left_thigh_range: [-0.5, 0.5]   # min max [m/s]
+  #   left_wheel_range: [-0.5, 0.5]   # min max [m/s]
+    
+  #   right_hip_range: [-0.1, 0.1]   # min max [m/s]
+  #   right_shoulder_range: [-0.5, 0.5]  # min max [m/s]
+  #   right_thigh_range: [-0.5, 0.5]  # min max [m/s]
+  #   right_wheel_range: [-0.5, 0.5]   # min max [m/s]
+
+  learn:
+    #randomization
+    randomizeFriction: True
+    frictionRange: [0.5, 1.25]
+    pushRobots: True
+    pushInterval_s: 15 # default : 15
+
+    # episode length in seconds
+    episodeLength_s: 20 # default : 20
+    allowLegsContacts: false
+    alwaysPositiveReward: True
+
+    # normalization
+    linearVelocityScale: 2.0
+    angularVelocityScale: 0.25
+    dofPositionScale: 1.0
+    dofVelocityScale: 0.05
+    heightMeasurementScale: 5.0
+
+    # noise 
+    addNoise: true
+    noiseLevel: 1.0 # scales other values
+    dofPositionNoise: 0.01
+    dofVelocityNoise: 1.5
+    linearVelocityNoise: 0.1
+    angularVelocityNoise: 0.2
+    gravityNoise: 0.05
+    heightMeasurementNoise: 0.06
+ 
+    #* scale factor -> Successfull Gain - without position, heading
+    reward_gain:
+      alive_time: 0.0
+      orientation: -1.0 #* 1.5
+      lin_vel_xy: 0.5 #* 1.5
+      ang_vel_z: 0.5 #* 2.
+      
+      wheel_vel_x: 0.0
+      wheel_vel_z: 0.0
+
+      lin_vel_z: -0.04 #! -0.4
+      ang_vel_xy: -0.0025 #! -0.001
+
+      gravity: 0.0
+
+      contact: -0.001
+
+      target_height: 0.35482 # !0.35482, 0.40168 , 0.315
+      height: -5. #! -40.0
+
+      hip_align: -1.5 #! -2.0
+      des_hip: -0.0
+      shoulder_align: -0.5 #! -2.0
+      leg_align: -0.5 #! -2. 
+      
+      position: -1. #! 1. I've set to 1 to make the robot stay its env origin position
+      heading: -0.01 #! 1. To maintain its origin heading angle
+      
+      torque: -0.000305 #! -0.000105
+      joint_acc: -0.0000175 #! -0.0000055
+      act_rate: -0.035 #! -0.025
+
+      shoulder_pos: -0.0 #! -0.25
+      leg_pos: -0.0 #! -0.25
+
+    #* scale factor -> Successfull Gain - with position, heading
+    #* reward_gain:
+    #*   alive_time: 0.0
+    #*   orientation: 0.3
+    #*   lin_vel_xy: 0.2
+    #*   ang_vel_z: 0.4
+    #*   wheel_vel_x: 0.0
+    #*   wheel_vel_z: 0.0
+
+    #*   lin_vel_z: -0.4
+    #*   ang_vel_xy: -0.001
+
+    #*   gravity: 0.0
+
+    #*   contact: -5.0
+
+    #*   target_height: 0.341
+    #*   height: -40. #! -40.0
+
+    #*   hip_align: -2.5 #! -2.0
+    #*   des_hip: -0.0
+    #*   shoulder_align: -1.0 #! -2.0
+    #*   leg_align: -1.0 #! -1.5
+
+    #*   position: 1.0 #! 1. I've set to 1 to make the robot stay its env origin position
+    #*   heading: 1.0 #! 1. To maintain its origin heading angle
+ 
+    #*   torque: -0.000305 #! -0.000305
+    #*   joint_acc: -0.0000075
+    #*   act_rate: -0.055
+
+    #*   shoulder_pos: -0.35 #! -0.35
+    #*   leg_pos: -0.35 #! -0.35
+
+# Previous one 되긴됨~!
+        # alive_time: 0.0
+        # orientation: 0.15
+        # lin_vel_xy: 0.05
+        # ang_vel_z: 0.1
+        # wheel_vel_x: 0.0
+        # wheel_vel_z: 0.0
+        # lin_vel_z: -0.001
+        # ang_vel_xy: -0.005
+        # gravity: 0.0
+        # contact: -5.0
+        # target_height: 0.341
+        # height: -50.0
+        # hip_align: -2.0
+        # des_hip: -0.0
+        # shoulder_align: -1.0
+        # leg_align: -1.0
+        # position: 1.0
+        # heading: 1.0
+        # torque: -0.000305
+        # joint_acc: -7.5e-06
+        # act_rate: -0.075
+
+# reward 비율 내림 
+      # alive_time: 0.0
+      # orientation: 0.005045 #! 0.00009
+      # lin_vel_xy: 0.0228 #! 0.0003238
+      # ang_vel_z: 0.0224 #! 0.00016194
+      # wheel_vel_x: 0.0
+      # wheel_vel_z: 0.0
+      # lin_vel_z: -0.2      #! -0.2
+      # ang_vel_xy: -0.0004 #! -0.00004
+      # gravity: 0.0
+      # contact: -1.125     #! -0.125
+      # target_height: 0.39
+      # height: -100.0 #! -3.0
+      # hip_align: -0.03 #! -0.0004
+      # des_hip: -0.0
+      # shoulder_align: -0.0022 #! -0.0002
+      # leg_align: -0.0015 #! -0.0005
+      # position: 0.00023 #! 0.00009311 #! 0.00023
+      # heading: 0.00023 #! 0.00009311 #! 0.00023
+      # torque: -0.00000035
+      # joint_acc: -0.0000000375
+      # act_rate: -0.00011
+
+#      
+      # alive_time: 0.0
+      # orientation: 0.045
+      # lin_vel_xy: 0.35
+      # ang_vel_z: 0.35
+      # wheel_vel_x: 0.0
+      # wheel_vel_z: 0.0
+      # lin_vel_z: -0.2
+      # ang_vel_xy: -0.02
+      # gravity: 0.0
+      # contact: -5.0
+      # target_height: 0.42
+      # height: -30.0
+      # hip_align: -2.0
+      # des_hip: -0.0
+      # shoulder_align: -2.0
+      # leg_align: -0.5
+      # position: 0.1
+      # heading: 0.1
+      # torque: -0.00015
+      # joint_acc: -7.5e-06
+      # act_rate: -0.0055
+
+      #* alive_time: 0.0
+      #* orientation: 0.05
+      #* lin_vel_xy: 0.35
+      #* ang_vel_z: 0.35
+      #* wheel_vel_x: 0.0
+      #* wheel_vel_z: 0.0
+      #* lin_vel_z: 0.0
+      #* ang_vel_xy: -0.02
+      #* gravity: 0.0
+      #* contact: -5.0
+      #* target_height: 0.42
+      #* height: -30.0
+      #* hip_align: -2.0
+      #* des_hip: -0.0
+      #* shoulder_align: -2.0
+      #* leg_align: -0.5
+      #* position: 0.1
+      #* heading: 0.1
+      #* torque: -0.00075
+      #* joint_acc: -7.5e-06
+      #* act_rate: -0.0055
+
+      #* alive_time: 0.0
+      #* orientation: 0.065
+      #* lin_vel_xy: 0.45
+      #* ang_vel_z: 0.45
+      #* wheel_vel_x: 0.0
+      #* wheel_vel_z: 0.0
+      #* lin_vel_z: -4.5
+      #* ang_vel_xy: -0.02
+      #* gravity: 0.0
+      #* contact: -50.0
+      #* target_height: 0.41
+      #* height: -4.355
+      #* hip_align: -2.0
+      #* des_hip: -0.0
+      #* shoulder_align: -2.5
+      #* leg_align: -0.5
+      #* position: 0.1
+      #* heading: 0.1
+      #* torque: -0.00065
+      #* joint_acc: -0.000015
+      #* act_rate: -0.0075
+
+  defaultJointAngles:  # = lay down    
+    left_hip_joint: 0.0       # [rad]
+    left_shoulder_joint: 0.  # [rad]
+    left_leg_joint: 0.     # [rad]
+    left_wheel_joint: 0.0     # [rad]
+
+    right_hip_joint: 0.0       # [rad]
+    right_shoulder_joint: 0.  # [rad]
+    right_leg_joint: 0.     # [rad]
+    right_wheel_joint: 0.0     # [rad]
+
+  targetJointAngles:  # = target angles when action = 0.0    
+    left_hip_joint: 0.0       # [rad]
+    left_shoulder_joint: -0.0872665  # [rad]
+    left_leg_joint: 0.523599     # [rad]
+    left_wheel_joint: 0.0     # [rad]
+
+    right_hip_joint: 0.0       # [rad]
+    right_shoulder_joint: -0.0872665  # [rad]
+    right_leg_joint: 0.523599     # [rad]
+    right_wheel_joint: 0.0     # [rad]
+
+  control:
+    use_pd: false
+    # PD Drive parameters:
+    stiffness: 23.  # [N*m/rad]
+    damping: 1.     # [N*m*s/rad]
+    # action scale: target angle = actionScale * action + defaultAngle
+    actionScale: 1. # anymal : 0.5
+    # decimation: Number of control action updates @ sim DT per policy DT
+    decimation: 2
+
+sim:
+  dt: 0.005 # 1/100 s
+  substeps: 1
+  up_axis: "z"
+  up_axis_idx: 2
+  use_gpu_pipeline: ${eq:${...pipeline},"gpu"}
+  gravity: [0.0, 0.0, -9.81]
+  physx:
+    num_threads: ${....num_threads}
+    solver_type: ${....solver_type}
+    use_gpu: ${contains:"cuda",${....sim_device}} # set to False to run on CPU
+    num_position_iterations: 4
+    num_velocity_iterations: 1
+    contact_offset: 0.02
+    rest_offset: 0.0
+    bounce_threshold_velocity: 0.2
+    max_depenetration_velocity: 100.0
+    default_buffer_size_multiplier: 2.0
+    max_gpu_contact_pairs: 8388608 # 8*1024*1024
+    num_subscenes: ${....num_subscenes}
+    contact_collection: 1 # 0: CC_NEVER (don't collect contact info), 1: CC_LAST_SUBSTEP (collect only contacts on last substep), 2: CC_ALL_SUBSTEPS (default - all contacts)
+task:
+  randomize: True
+  randomization_params:
+    frequency: 600   # Define how many environment steps between generating new randomizations
+    observations:
+      range: [0, .002] # range for the white noise
+      operation: "additive"
+      distribution: "gaussian"
+    actions:
+      range: [0., .02]
+      operation: "additive"
+      distribution: "gaussian"
+    sim_params: 
+      gravity:
+        range: [0, 0.4]
+        operation: "additive"
+        distribution: "gaussian"
+        schedule: "linear"  # "linear" will linearly interpolate between no rand and max rand
+        schedule_steps: 3000
+    actor_params:
+      flamingo:
+        color: True
+        rigid_body_properties:
+          mass: 
+            range: [0.5, 1.5]
+            operation: "scaling"
+            distribution: "uniform"
+            setup_only: True # Property will only be randomized once before simulation is started. See Domain Randomization Documentation for more info.
+            schedule: "linear"  # "linear" will linearly interpolate between no rand and max rand
+            schedule_steps: 3000
+        rigid_shape_properties:
+          friction:
+            num_buckets: 500
+            range: [0.7, 1.3]
+            operation: "scaling"
+            distribution: "uniform"
+            schedule: "linear"  # "linear" will scale the current random sample by `min(current num steps, schedule_steps) / schedule_steps`
+            schedule_steps: 3000
+          restitution:
+            range: [0., 0.7]
+            operation: "scaling"
+            distribution: "uniform"
+            schedule: "linear"  # "linear" will scale the current random sample by `min(current num steps, schedule_steps) / schedule_steps`
+            schedule_steps: 3000
+        # dof_properties:
+        #   damping: 
+        #     range: [0.5, 1.5]
+        #     operation: "scaling"
+        #     distribution: "uniform"
+        #     schedule: "linear"  # "linear" will scale the current random sample by `min(current num steps, schedule_steps) / schedule_steps`
+        #     schedule_steps: 3000
+        #   stiffness: 
+        #     range: [0.5, 1.5]
+        #     operation: "scaling"
+        #     distribution: "uniform"
+        #     schedule: "linear"  # "linear" will scale the current random sample by `min(current num steps, schedule_steps) / schedule_steps`
+        #     schedule_steps: 3000
+        #   lower:
+        #     range: [0, 0.01]
+        #     operation: "additive"
+        #     distribution: "gaussian"
+        #     schedule: "linear"  # "linear" will scale the current random sample by `min(current num steps, schedule_steps) / schedule_steps`
+        #     schedule_steps: 3000
+        #   upper:
+        #     range: [0, 0.01]
+        #     operation: "additive"
+        #     distribution: "gaussian"
+        #     schedule: "linear"  # "linear" will scale the current random sample by `min(current num steps, schedule_steps) / schedule_steps`
+        #     schedule_steps: 3000
+# task:
+#   randomize: true
+#   randomization_params:
+#     frequency: 720   # Define how many simulation steps between generating new randomizations
+#     observations:
+#       range: [0, .002] # range for the white noise
+#       range_correlated: [0, .001 ] # range for correlated noise, refreshed with freq `frequency`
+#       operation: "additive"
+#       distribution: "gaussian"
+#       # schedule: "linear"   # "constant" is to turn on noise after `schedule_steps` num steps
+#       # schedule_steps: 40000
+#     actions:
+#       range: [-0.05, 0.05]
+#       range_correlated: [0, .015] # range for correlated noise, refreshed with freq `frequency`
+#       operation: "additive"
+#       distribution: "gaussian"
+#       # schedule: "linear"  # "linear" will linearly interpolate between no rand and max rand
+#       # schedule_steps: 40000
+#     actor_params:
+#       postech:
+#         rigid_body_properties:
+#           mass: 
+#             range: [1, 1.5]
+#             operation: "scaling"
+#             distribution: "uniform"
+#             setup_only: True # Property will only be randomized once before simulation is started. See Domain Randomization Documentation for more info.
+#             # schedule: "linear"  # "

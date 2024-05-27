@@ -1,0 +1,335 @@
+task:
+  name: Flamingo
+  physics_engine: ${..physics_engine}
+  env:
+    numEnvs: 1024
+    numObservations: 102
+    numActions: 8
+    envSpacing: 1.2
+    resetDist: 3
+    scaleEffortJoints: 24
+    scaleEffortWheels: 6
+    enableDebugVis: false
+    enableRewardVis: true
+    clipObservations: 5.0
+    clipActions: 1
+    terrain:
+      terrainType: plane
+      staticFriction: 1.0
+      dynamicFriction: 1.0
+      restitution: 0.0
+      curriculum: true
+      maxInitMapLevel: 0
+      mapLength: 8.0
+      mapWidth: 8.0
+      numLevels: 10
+      numTerrains: 20
+      difficulty_height: 1
+      terrainProportions:
+      - 0.1
+      - 0.1
+      - 0.35
+      - 0.25
+      - 0.2
+      slopeTreshold: 0.5
+    asset:
+      assetRoot: ../../assets
+      assetFileName: urdf/flamingo/urdf/flamingo.urdf
+      baseName: base
+      hipName: hip
+      shoulderName: shoulder
+      thighName: leg
+      footName: wheel
+      collapseFixedJoints: true
+      fixBaseLink: false
+      defaultDofDriveMode: 4
+    viewer:
+      refEnv: 0
+      pos:
+      - 0
+      - 0
+      - 3
+      lookat:
+      - 1.0
+      - 1
+      - 2
+    enableCameraSensors: false
+    setRandomJointOffset: true
+    baseInitState:
+      pos:
+      - 0.0
+      - 0.0
+      - 0.2406626
+      rot:
+      - 0.0
+      - 0.0
+      - 0.0
+      - 1.0
+      vLinear:
+      - 0.0
+      - 0.0
+      - 0.0
+      vAngular:
+      - 0.0
+      - 0.0
+      - 0.0
+    sendRandomVelocity: false
+    randomCommandVelocityRanges:
+      linear_x:
+      - -1.0
+      - 1.0
+      linear_y:
+      - -0.0
+      - 0.0
+      yaw:
+      - -1.0
+      - 1.0
+    learn:
+      randomizeFriction: true
+      frictionRange:
+      - 0.5
+      - 1.25
+      pushRobots: true
+      pushInterval_s: 15
+      episodeLength_s: 20
+      allowLegsContacts: false
+      alwaysPositiveReward: true
+      linearVelocityScale: 2.0
+      angularVelocityScale: 0.25
+      dofPositionScale: 1.0
+      dofVelocityScale: 0.05
+      heightMeasurementScale: 5.0
+      addNoise: true
+      noiseLevel: 1.0
+      dofPositionNoise: 0.01
+      dofVelocityNoise: 1.5
+      linearVelocityNoise: 0.1
+      angularVelocityNoise: 0.2
+      gravityNoise: 0.05
+      heightMeasurementNoise: 0.06
+      reward_gain:
+        alive_time: 0.0
+        orientation: -1.0
+        lin_vel_xy: 0.5
+        ang_vel_z: 0.5
+        wheel_vel_x: 0.0
+        wheel_vel_z: 0.0
+        lin_vel_z: -0.04
+        ang_vel_xy: -0.0025
+        gravity: 0.0
+        contact: -0.001
+        target_height: 0.35482
+        height: -5.0
+        hip_align: -1.5
+        des_hip: -0.0
+        shoulder_align: -0.5
+        leg_align: -0.5
+        position: -1.0
+        heading: -0.01
+        torque: -0.000305
+        joint_acc: -1.75e-05
+        act_rate: -0.035
+        shoulder_pos: -0.0
+        leg_pos: -0.0
+    defaultJointAngles:
+      left_hip_joint: 0.0
+      left_shoulder_joint: 0.0
+      left_leg_joint: 0.0
+      left_wheel_joint: 0.0
+      right_hip_joint: 0.0
+      right_shoulder_joint: 0.0
+      right_leg_joint: 0.0
+      right_wheel_joint: 0.0
+    targetJointAngles:
+      left_hip_joint: 0.0
+      left_shoulder_joint: -0.0872665
+      left_leg_joint: 0.523599
+      left_wheel_joint: 0.0
+      right_hip_joint: 0.0
+      right_shoulder_joint: -0.0872665
+      right_leg_joint: 0.523599
+      right_wheel_joint: 0.0
+    control:
+      use_pd: false
+      stiffness: 23.0
+      damping: 1.0
+      actionScale: 1.0
+      decimation: 2
+  sim:
+    dt: 0.005
+    substeps: 1
+    up_axis: z
+    up_axis_idx: 2
+    use_gpu_pipeline: ${eq:${...pipeline},"gpu"}
+    gravity:
+    - 0.0
+    - 0.0
+    - -9.81
+    physx:
+      num_threads: ${....num_threads}
+      solver_type: ${....solver_type}
+      use_gpu: ${contains:"cuda",${....sim_device}}
+      num_position_iterations: 4
+      num_velocity_iterations: 1
+      contact_offset: 0.02
+      rest_offset: 0.0
+      bounce_threshold_velocity: 0.2
+      max_depenetration_velocity: 100.0
+      default_buffer_size_multiplier: 2.0
+      max_gpu_contact_pairs: 8388608
+      num_subscenes: ${....num_subscenes}
+      contact_collection: 1
+  task:
+    randomize: true
+    randomization_params:
+      frequency: 600
+      observations:
+        range:
+        - 0
+        - 0.002
+        operation: additive
+        distribution: gaussian
+      actions:
+        range:
+        - 0.0
+        - 0.02
+        operation: additive
+        distribution: gaussian
+      sim_params:
+        gravity:
+          range:
+          - 0
+          - 0.4
+          operation: additive
+          distribution: gaussian
+          schedule: linear
+          schedule_steps: 3000
+      actor_params:
+        postech:
+          color: true
+          rigid_body_properties:
+            mass:
+              range:
+              - 0.5
+              - 1.5
+              operation: scaling
+              distribution: uniform
+              setup_only: true
+              schedule: linear
+              schedule_steps: 3000
+          rigid_shape_properties:
+            friction:
+              num_buckets: 500
+              range:
+              - 0.7
+              - 1.3
+              operation: scaling
+              distribution: uniform
+              schedule: linear
+              schedule_steps: 3000
+            restitution:
+              range:
+              - 0.0
+              - 0.7
+              operation: scaling
+              distribution: uniform
+              schedule: linear
+              schedule_steps: 3000
+train:
+  params:
+    seed: ${...seed}
+    algo:
+      name: a2c_continuous
+    model:
+      name: continuous_a2c_logstd
+    network:
+      name: actor_critic
+      separate: false
+      space:
+        continuous:
+          mu_activation: None
+          sigma_activation: None
+          mu_init:
+            name: default
+          sigma_init:
+            name: const_initializer
+            val: 0
+          fixed_sigma: true
+      mlp:
+        units:
+        - 512
+        - 256
+        - 128
+        activation: elu
+        d2rl: false
+        initializer:
+          name: default
+        regularizer:
+          name: None
+    load_checkpoint: ${if:${...checkpoint},True,False}
+    load_path: ${...checkpoint}
+    config:
+      name: ${resolve_default:Postech,${....experiment}}
+      full_experiment_name: ${.name}
+      env_name: rlgpu
+      ppo: true
+      mixed_precision: false
+      normalize_input: true
+      normalize_value: true
+      num_actors: ${....task.env.numEnvs}
+      reward_shaper:
+        scale_value: 0.01
+      normalize_advantage: true
+      gamma: 0.99
+      tau: 0.95
+      learning_rate: 0.0003
+      lr_schedule: adaptive
+      kl_threshold: 0.008
+      max_epochs: ${resolve_default:100000,${....max_iterations}}
+      save_best_after: 100
+      score_to_win: 20000
+      save_frequency: 100
+      print_stats: true
+      grad_norm: 1.0
+      entropy_coef: 0.001
+      truncate_grads: true
+      e_clip: 0.2
+      horizon_length: 24
+      minibatch_size: 8192
+      mini_epochs: 5
+      critic_coef: 2
+      clip_value: true
+      seq_len: 4
+      bounds_loss_coef: 0.0
+pbt:
+  enabled: false
+task_name: ${task.name}
+experiment: ''
+num_envs: ''
+seed: 42
+torch_deterministic: false
+max_iterations: ''
+physics_engine: physx
+pipeline: gpu
+sim_device: cuda:0
+rl_device: cuda:0
+graphics_device_id: 0
+num_threads: 4
+solver_type: 1
+num_subscenes: 4
+test: false
+checkpoint: ''
+sigma: ''
+multi_gpu: false
+wandb_activate: false
+wandb_group: ''
+wandb_name: ${train.params.config.name}
+wandb_entity: ''
+wandb_project: isaacgymenvs
+wandb_tags: []
+wandb_logcode_dir: ''
+capture_video: false
+capture_video_freq: 1464
+capture_video_len: 100
+force_render: true
+headless: true

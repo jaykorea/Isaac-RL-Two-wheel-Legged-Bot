@@ -1,0 +1,80 @@
+Robot Initial Height = 195mm
+
+*base_link*
+<inertial>
+  <origin xyz="-0.06731121 0.00555234 -0.07704818"/>
+  <mass value="9.91000000"/>
+  <inertia ixx="0.06015723" ixy="-0.00000812" ixz="0.00064198" iyy="0.07208645" iyz="-0.00000148" izz="0.10910209"/>
+</inertial>
+
+*left_hip_link*
+<inertial>
+  <origin xyz="-0.00017732 0.00001322 0.00863621"/>
+  <mass value="0.76800000"/>
+  <inertia ixx="0.00107541" ixy="0.00000008" ixz="-0.00000427" iyy="0.00080743" iyz="-0.00000037" izz="0.00066233"/>
+</inertial>
+
+*left_shoulder_link*
+<inertial>
+  <origin xyz="0.12821908 0.00135394 0.05846189"/>
+  <mass value="0.92600000"/>
+  <inertia ixx="0.00097192" ixy="-0.00018065" ixz="-0.00049461" iyy="0.00516463" iyz="-0.00002712" izz="0.00515076"/>
+</inertial>
+
+*left_leg_link*
+<inertial>
+  <origin xyz="-0.08243223 -0.02329330 -0.00121501"/>
+  <mass value="0.18700000"/>
+  <inertia ixx="0.00017151" ixy="-0.00032647" ixz="-0.00000428" iyy="0.00083950" iyz="-0.00000165" izz="0.00099460"/>
+</inertial>
+
+*left_wheel_link*
+<inertial>
+  <origin xyz="0.00005714 0.00008934 0.00000200"/>
+  <mass value="1.47300000"/>
+  <inertia ixx="0.00120926" ixy="-0.00000001" ixz="-0.00000000" iyy="0.00120924" iyz="-0.00000000" izz="0.00192095"/>
+</inertial>
+
+-----------------------
+
+*right_hip_link*
+<inertial>
+  <origin xyz="-0.00017679 0.00001322 0.00863600"/>
+  <mass value="0.76800000"/>
+  <inertia ixx="0.00107541" ixy="0.00000008" ixz="-0.00000427" iyy="0.00080743" iyz="-0.00000037" izz="0.00066233"/>
+</inertial>
+
+*right_shoulder_link*
+<inertial>
+  <origin xyz="0.12884217 -0.00153222 0.05873600"/>
+  <mass value="0.92600000"/>
+  <inertia ixx="0.00097191" ixy="0.00018184" ixz="-0.00049455" iyy="0.00516517" iyz="0.00002744" izz="0.00515133"/>
+</inertial>
+
+*right_leg_link*
+<inertial>
+  <origin xyz="-0.08242994 0.02329593 0.00166798"/>
+  <mass value="0.18700000"/>
+  <inertia ixx="0.00017151" ixy="0.00032647" ixz="-0.00000428" iyy="0.00083950" iyz="0.00000165" izz="0.00099460"/>
+</inertial>
+
+*right_wheel_link*
+<inertial>
+  <origin xyz="-0.00010579 -0.00000743 0.00000200"/>
+  <mass value="1.47300000"/>
+  <inertia ixx="0.00120923" ixy="-0.00000000" ixz="0.00000000" iyy="0.00120926" iyz="0.00000000" izz="0.00192095"/>
+</inertial>
+
+*center_top_link*
+<inertial>
+  <origin xyz="0.02327198 0.00052337 -0.02289824"/>
+  <mass value="0.08963000"/>
+  <inertia ixx="0.00003176" ixy="-0.00000000" ixz="0.00000654" iyy="0.00003061" iyz="-0.00000000" izz="0.00003689"/>
+</inertial>
+
+*center_bottom_link*
+<inertial>
+  <origin xyz="-0.00000000 -0.00000000 0.00000000"/>
+  <mass value="0.40000000"/>
+  <inertia ixx="0.00011246" ixy="0.00000000" ixz="0.00000000" iyy="0.00011246" iyz="0.00000000" izz="0.00011748"/>
+</inertial>
