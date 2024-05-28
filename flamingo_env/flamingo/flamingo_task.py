@@ -56,6 +56,9 @@ class Flamingo(VecTask):
         self.reward_scale["act_rate"] = self.cfg["env"]["learn"]["reward_gain"]["act_rate"]
         self.reward_scale["shoulder_pos"] = self.cfg["env"]["learn"]["reward_gain"]["shoulder_pos"]
         self.reward_scale["leg_pos"] = self.cfg["env"]["learn"]["reward_gain"]["leg_pos"]
+        self.reward_scale["dof_limit_ratio"] = self.cfg["env"]["learn"]["reward_gain"]["dof_limit_ratio"]
+        self.reward_scale["vel_limit_ratio"] = self.cfg["env"]["learn"]["reward_gain"]["vel_limit_ratio"]
+        self.reward_scale["tau_limit_ratio"] = self.cfg["env"]["learn"]["reward_gain"]["tau_limit_ratio"]
 
         # base init state
         self.setRandomJointOffset = self.cfg["env"]["setRandomJointOffset"]
@@ -115,7 +118,7 @@ class Flamingo(VecTask):
             lookat = self.cfg["env"]["viewer"]["lookat"]
             cam_pos = gymapi.Vec3(p[0], p[1], p[2])
             cam_target = gymapi.Vec3(lookat[0], lookat[1], lookat[2])
-            self.gym.viewer_camera_look_at(self.viewer, None, cam_pos, cam_target)
+            self.gym.viewer_camera_look_at(self.viewer, None, cam_pos, cam_target)  
             
         dof_state_tensor = self.gym.acquire_dof_state_tensor(self.sim)
         self.dof_state = gymtorch.wrap_tensor(dof_state_tensor)
@@ -171,7 +174,7 @@ class Flamingo(VecTask):
             angle = self.named_target_joint_angles[name]
             self.target_dof_pos[:, i] = angle
 
-        self.privileged_obs_buf = torch.zeros(self.num_envs, 3, dtype=torch.float, device=self.device, requires_grad=False)
+        self.privileged_obs_buf = torch.zeros(self.num_envs, 5, dtype=torch.float, device=self.device, requires_grad=False)
         self.last_obs_buf = torch.zeros_like(self.obs_buf, dtype=torch.float, device=self.device, requires_grad=False)
         self.last_last_obs_buf = torch.zeros_like(self.last_obs_buf, dtype=torch.float, device=self.device, requires_grad=False)
 
@@ -201,12 +204,6 @@ class Flamingo(VecTask):
             "action_rate": self.torch_zeros(),
             "shoulder_pos": self.torch_zeros(),
             "leg_pos": self.torch_zeros(),
-            # "reward_orientation_": self.torch_zeros(),
-            # "reward_hip_": self.torch_zeros(),
-            # "reward_shoulder_": self.torch_zeros(),
-            # "reward_leg_": self.torch_zeros(),
-            # "reward_action_" : self.torch_zeros(),
-            # "reward_torque_" : self.torch_zeros(),
         }
         # self.reset_episode_sums(self.torch_zeros)
         self.total_reward_sums = {key: 0 for key in self.episode_sums.keys()}
@@ -431,6 +428,8 @@ class Flamingo(VecTask):
         self.envs = []
         self.dof_limits_lower = []
         self.dof_limits_upper = []
+        self.vel_limits = []
+        self.tau_limits = []
         
         num_per_terrain_type = self.num_envs // self.cfg["env"]["terrain"]["numTerrains"]
         for i in range(self.num_envs):
@@ -500,14 +499,23 @@ class Flamingo(VecTask):
             if dof_props['lower'][j] > dof_props['upper'][j]:
                 self.dof_limits_lower.append(dof_props['upper'][j])
                 self.dof_limits_upper.append(dof_props['lower'][j])
+                self.vel_limits.append(dof_props['velocity'][j])
+                self.tau_limits.append(dof_props['effort'][j])
             else:
                 self.dof_limits_lower.append(dof_props['lower'][j])
                 self.dof_limits_upper.append(dof_props['upper'][j])
+                self.vel_limits.append(dof_props['velocity'][j])
+                self.tau_limits.append(dof_props['effort'][j])
+
         self.dof_limits_lower = to_torch(self.dof_limits_lower, device=self.device)
         self.dof_limits_upper = to_torch(self.dof_limits_upper, device=self.device)
+        self.vel_limits = to_torch(self.vel_limits, device=self.device)
+        self.tau_limits = to_torch(self.tau_limits, device=self.device)
 
         print("dof_limits_lower: ", self.dof_limits_lower)
         print("dof_limits_upper: ", self.dof_limits_upper)
+        print("vel_limits: ", self.vel_limits)
+        print("tau_limits: ", self.tau_limits)       
         print("********************limits ranges*********************************")
         print("")
 
@@ -528,43 +536,43 @@ class Flamingo(VecTask):
         self.obs_buf[env_ids, 0] = self.dof_pos[env_ids, 0]  # hip_l_joint
         self.obs_buf[env_ids, 1] = self.dof_pos[env_ids, 1]  # shoulder_l_joint
         self.obs_buf[env_ids, 2] = self.dof_pos[env_ids, 2]  # thigh_l_joint
-        self.obs_buf[env_ids, 3] = self.dof_pos[env_ids, 3]  # wheel_l_joint
-        self.obs_buf[env_ids, 4] = self.dof_pos[env_ids, 4]  # hip_r_joint
-        self.obs_buf[env_ids, 5] = self.dof_pos[env_ids, 5]  # shoulder_r_joint
-        self.obs_buf[env_ids, 6] = self.dof_pos[env_ids, 6]  # thigh_r_joint
-        self.obs_buf[env_ids, 7] = self.dof_pos[env_ids, 7]  # wheel_r_joint
+        self.privileged_obs_buf[env_ids, 3] = self.dof_pos[env_ids, 3]  # wheel_l_joint
+        self.obs_buf[env_ids, 3] = self.dof_pos[env_ids, 4]  # hip_r_joint
+        self.obs_buf[env_ids, 4] = self.dof_pos[env_ids, 5]  # shoulder_r_joint
+        self.obs_buf[env_ids, 5] = self.dof_pos[env_ids, 6]  # thigh_r_joint
+        self.privileged_obs_buf[env_ids, 4] = self.dof_pos[env_ids, 7]  # wheel_r_joint
 
         #* Joint velocities -JH
-        self.obs_buf[env_ids, 8] = self.dof_vel[env_ids, 0]  # hip_l_joint velocity
-        self.obs_buf[env_ids, 9] = self.dof_vel[env_ids, 1]  # shoulder_l_joint velocity
-        self.obs_buf[env_ids, 10] = self.dof_vel[env_ids, 2]  # thigh_l_joint velocity
-        self.obs_buf[env_ids, 11] = self.dof_vel[env_ids, 3]  # wheel_l_joint velocity
-        self.obs_buf[env_ids, 12] = self.dof_vel[env_ids, 4]  # hip_r_joint velocity
-        self.obs_buf[env_ids, 13] = self.dof_vel[env_ids, 5]  # shoulder_r_joint velocity
-        self.obs_buf[env_ids, 14] = self.dof_vel[env_ids, 6]  # thigh_r_joint velocity
-        self.obs_buf[env_ids, 15] = self.dof_vel[env_ids, 7]  # wheel_r_joint velocity
+        self.obs_buf[env_ids, 6] = self.dof_vel[env_ids, 0]  # hip_l_joint velocity
+        self.obs_buf[env_ids, 7] = self.dof_vel[env_ids, 1]  # shoulder_l_joint velocity
+        self.obs_buf[env_ids, 8] = self.dof_vel[env_ids, 2]  # thigh_l_joint velocity
+        self.obs_buf[env_ids, 9] = self.dof_vel[env_ids, 3]  # wheel_l_joint velocity
+        self.obs_buf[env_ids, 10] = self.dof_vel[env_ids, 4]  # hip_r_joint velocity
+        self.obs_buf[env_ids, 11] = self.dof_vel[env_ids, 5]  # shoulder_r_joint velocity
+        self.obs_buf[env_ids, 12] = self.dof_vel[env_ids, 6]  # thigh_r_joint velocity
+        self.obs_buf[env_ids, 13] = self.dof_vel[env_ids, 7]  # wheel_r_joint velocity
 
         #* Body states -JH
         self.privileged_obs_buf[env_ids, 0:3] = self.root_states[env_ids, 0:3]  # Body position (x, y, z)
         #* Body orientation (roll, pitch, yaw) - assuming get_euler_xyz gives (roll, pitch, yaw) -JH
-        self.obs_buf[env_ids, 16:19] = torch.stack([
+        self.obs_buf[env_ids, 14:17] = torch.stack([
             get_euler_xyz(self.root_states[env_ids, 3:7])[0],
             get_euler_xyz(self.root_states[env_ids, 3:7])[1],
             get_euler_xyz(self.root_states[env_ids, 3:7])[2]], dim=1)
         #* Body linear velocity (x, y, z) -JH
-        self.obs_buf[env_ids, 19:22] = quat_rotate_inverse(self.root_states[env_ids, 3:7], self.root_states[env_ids, 7:10])
+        self.obs_buf[env_ids, 17:20] = quat_rotate_inverse(self.root_states[env_ids, 3:7], self.root_states[env_ids, 7:10])
         #* Body angular velocity (roll, pitch, yaw) -JH
-        self.obs_buf[env_ids, 22:25] = quat_rotate_inverse(self.root_states[env_ids, 3:7], self.root_states[env_ids, 10:13])
+        self.obs_buf[env_ids, 20:23] = quat_rotate_inverse(self.root_states[env_ids, 3:7], self.root_states[env_ids, 10:13])
 
         #* Previous actions -JH
-        self.obs_buf[env_ids, 25:33] = self.actions[env_ids]
+        #self.obs_buf[env_ids, 25:33] = self.actions[env_ids]
 
         #* Previous Observations Stack -JH
-        self.obs_buf[env_ids, 33:66] = self.last_obs_buf[env_ids, 0:33]
-        self.obs_buf[env_ids, 66:99] = self.last_last_obs_buf[env_ids, 0:33]
+        self.obs_buf[env_ids, 23:46] = self.last_obs_buf[env_ids, 0:23]
+        self.obs_buf[env_ids, 46:69] = self.last_last_obs_buf[env_ids, 0:23]
 
         #* Input Commands (x, y, yaw) -JH
-        self.obs_buf[env_ids, 99:102] = self.commands[env_ids, :3]
+        self.obs_buf[env_ids, 69:72] = self.commands[env_ids, :3]
         #self.obs_buf[env_ids, 111:112] = 1 if torch.any(self.commands[env_ids, :3] != 0) else 0
 
         # #* Body states -JH
@@ -590,7 +598,7 @@ class Flamingo(VecTask):
         # self.obs_buf[env_ids, 108:111] = self.commands[env_ids, :3]
         # #self.obs_buf[env_ids, 111:112] = 1 if torch.any(self.commands[env_ids, :3] != 0) else 0
         
-        #self.obs_buf[:, :] = 0.1
+        # self.obs_buf[:, :] = 2
         return self.obs_buf
 
     def reset_idx(self, env_ids):
@@ -967,11 +975,12 @@ class Flamingo(VecTask):
         #* Convert to the device and scale by max effort -JH
         if self.test_mode:
             self.actions = actions.clone().to(self.device)
+            #print("Actions: ", self.actions[0])
         else:
             delay = torch.rand((self.num_envs, 1), device=self.device) # 0~1 [
             self.actions = (1 - delay) * actions + delay * self.actions # a <- previous_a + a
             #self.actions += 0.02 * torch.randn_like(self.actions) * self.actions # a <- a + N
-            
+
         #print("self actions: ", self.actions)
         # scale the wheel effort
         # self.actions[:,5] *= 0.1
@@ -1120,26 +1129,26 @@ class Flamingo(VecTask):
 
         return heights.view(self.num_envs, -1) * self.terrain.vertical_scale
 
-    def compute_reward(self, actions): #  새로 업데이트 했으예~
+    def compute_reward(self, actions):
         # Retrieve environment observations from buffer
         # For joint positions
-        hip_pos = self.obs_buf[:, [0, 4]]  # left_hip_link, right_hip_link
-        shoulder_pos = self.obs_buf[:, [1, 5]]  # left_shoulder_link, right_shoulder_link
-        thigh_pos = self.obs_buf[:, [2, 6]]  # left_thigh_link, right_thigh_link
-        wheel_pos = self.obs_buf[:, [3, 7]]  # left_wheel_link, right_wheel_link
+        hip_pos = self.obs_buf[:, [0, 3]]  # left_hip_link, right_hip_link
+        shoulder_pos = self.obs_buf[:, [1, 4]]  # left_shoulder_link, right_shoulder_link
+        thigh_pos = self.obs_buf[:, [2, 5]]  # left_thigh_link, right_thigh_link
+        wheel_pos = self.privileged_obs_buf[:, 3:5]  # left_wheel_link, right_wheel_link
 
         # For joint velocities
-        hip_vel = self.obs_buf[:, [8, 12]]  # left_hip_link, right_hip_link
-        shoulder_vel = self.obs_buf[:, [9, 13]]  # left_shoulder_link, right_shoulder_link
-        thigh_vel = self.obs_buf[:, [10, 14]]  # left_thigh_link, right_thigh_link
-        wheel_vel = self.obs_buf[:, [11, 15]]  # left_wheel_link, right_wheel_link
+        hip_vel = self.obs_buf[:, [6, 10]]  # left_hip_link, right_hip_link
+        shoulder_vel = self.obs_buf[:, [7, 11]]  # left_shoulder_link, right_shoulder_link
+        thigh_vel = self.obs_buf[:, [8, 12]]  # left_thigh_link, right_thigh_link
+        wheel_vel = self.obs_buf[:, [9, 13]]  # left_wheel_link, right_wheel_link
 
         # For body states
         body_pos = self.privileged_obs_buf[:, 0:3]
-        body_orientation = self.obs_buf[:, 16:19]
-        body_linear_vel = self.obs_buf[:, 19:22]
-        body_angular_vel = self.obs_buf[:, 22:25]
-        robot_command = self.obs_buf[:, 99:102]
+        body_orientation = self.obs_buf[:, 14:17]
+        body_linear_vel = self.obs_buf[:, 17:20]
+        body_angular_vel = self.obs_buf[:, 20:23]
+        robot_command = self.obs_buf[:, 69:72]
 
         base_link_height = body_pos[:, 2]
 
@@ -1154,6 +1163,7 @@ class Flamingo(VecTask):
 
         #* Compute reward and reset conditions
         self.rew_buf[:], self.reset_buf[:] = self.compute_postech_reward(
+            self.dof_pos,
             hip_pos, shoulder_pos, thigh_pos, wheel_pos,
             hip_vel, shoulder_vel, thigh_vel, wheel_vel,
             body_pos, body_orientation, body_linear_vel, body_angular_vel,
@@ -1164,7 +1174,8 @@ class Flamingo(VecTask):
         if self.always_positive_reward:
             self.rew_buf = torch.clip(self.rew_buf, min=0., max=None)
 
-    def compute_postech_reward(self, hip_pos, shoulder_pos, thigh_pos, wheel_pos,
+    def compute_postech_reward(self, dof_pos,
+                                     hip_pos, shoulder_pos, thigh_pos, wheel_pos,
                                      hip_vel, shoulder_vel, thigh_vel, wheel_vel,
                                      body_pos, body_orientation, body_linear_vel, body_angular_vel,
                                      commands, reset_buf, progress_buf, max_episode_length, base_link_height,
@@ -1178,7 +1189,7 @@ class Flamingo(VecTask):
         #reward_orientation = self.reward_scale["orientation"] * torch.exp(-torch.abs(body_orientation[:, 0]), + epsilon) * torch.exp(-torch.abs(body_orientation[:, 1]) + epsilon)
         #reward_orientation = self.reward_scale["orientation"] * (np.pi - torch.abs(body_orientation[:, 1])) * (np.pi - torch.abs(body_orientation[:, 0]))
         reward_orientation =  self.reward_scale["orientation"] * (torch.sum(torch.square(projected_gravity[:, :2]), dim=1))
-
+    
         # velocity tracking reward
         lin_vel_error = torch.sum(torch.square(commands[:, :2] - body_linear_vel[:, :2]), dim=1)
         ang_vel_error = torch.square(commands[:, 2] - body_angular_vel[:, 2])
@@ -1249,12 +1260,27 @@ class Flamingo(VecTask):
         
         # rewward for leg angle(pos)
         reward_leg_pos = self.reward_scale["leg_pos"] * torch.exp(torch.sum(torch.abs(thigh_pos[:, 0:2] - 0.698132), dim=1)) #* 0.698132
+        
+        # rewward for pos limit
+        out_of_limits_pos = -(dof_pos - self.dof_limits_lower * self.reward_scale["dof_limit_ratio"]).clip(max=0.)
+        out_of_limits_pos += (dof_pos - self.dof_limits_upper * self.reward_scale["dof_limit_ratio"]).clip(min=0.)
+        reward_dof_limits = torch.sum(out_of_limits_pos, dim=1)
 
-                # Total reward
+        # rewward for vel limit
+        reward_vel_limits = torch.sum((torch.abs(dof_vel) - self.vel_limits * self.reward_scale["vel_limit_ratio"]).clip(min=0., max=1.), dim=1)
+
+        # rewward for tau limit
+        joint_torques = torques[:, [0, 1, 2, 4, 5, 6]]
+        wheel_torques = torques[:, [3, 7]]
+        out_of_limits_joints = torch.sum((torch.abs(joint_torques) - self.tau_limits[[0, 1, 2, 4, 5, 6]] * self.reward_scale["tau_limit_ratio"]).clip(min=0.), dim=1)
+        out_of_limits_wheels = torch.sum((torch.abs(wheel_torques) - self.tau_limits[[3, 7]] * self.reward_scale["tau_limit_ratio"]).clip(min=0.), dim=1)
+        reward_torque_limits = out_of_limits_joints + out_of_limits_wheels
+ 
+        # Total reward
         reward = reward_orientation + reward_lin_vel_xy + reward_ang_vel_z + reward_ang_vel_xy + reward_lin_vel_z + reward_wheel_lin_x + reward_wheel_ang_z + rew_gravity + \
                  reward_base_contact + reward_legs_contact + reward_height + reward_hip_alignment + reward_hip_des +  \
                  reward_shoulder_alignment + reward_leg_alignment + reward_position + reward_heading + reward_torque + reward_joint_acc + reward_action_rate + reward_alive_time + \
-                 reward_shoulder_pos + reward_leg_pos
+                 reward_shoulder_pos + reward_leg_pos + reward_dof_limits + reward_vel_limits + reward_torque_limits
 
         # orientation_beta_ = 0.0001
         # height_beta_ = -5.
@@ -1317,7 +1343,7 @@ class Flamingo(VecTask):
 
         #* Define the condition for any other contacts and the height condition -JH
         #collide_condition = torch.any(legs_contact, dim=1) | torch.any(base_contact, dim=1) | torch.any(shoulders_contact, dim=1)
-        collide_condition = torch.any(base_contact, dim=1) | torch.any(legs_contact, dim=1)
+        collide_condition = torch.any(base_contact, dim=1) #| torch.any(legs_contact, dim=1) #| torch.any(shoulders_contact, dim=1)
         #flipped_condition = (torch.abs(body_orientation[:, 0]) > 3.14) | (torch.abs(body_orientation[:, 1]) > 3.14)
         edge_reset_condition = torch.full((body_pos.shape[0],), False, dtype=torch.bool, device=self.device)
         # print("tot row: ", self.terrain.tot_rows)
@@ -1464,7 +1490,7 @@ class Flamingo(VecTask):
         return False
             
     def get_base_height(self, dof_pos, env_ids):
-        epsilon = 1e-03
+        epsilon = 1e-05
         radius = 0.053
         num_envs = len(env_ids)
         base_heights = torch.zeros(num_envs, dtype=torch.float32, device=self.device)
@@ -1529,13 +1555,13 @@ class Flamingo(VecTask):
 
         left_transformations = (T_x(-0.0545) @ T_y(0.08) @ T_z(-0.0803) @ R_z_piover2 @ R_x_piover2 @
                                 R_z(dof_pos[env_ids, 0]) @ T_x(0.0265) @ T_z(0.06) @ R_y_piover2 @
-                                R_z(dof_pos[env_ids, 1]) @ T_x(0.17097) @ T_y(-0.13845) @ T_z(0.07005) @
-                                R_z(dof_pos[env_ids, 2]) @ T_x(-0.21779) @ T_y(0.0311) @ T_z(0.03988))
+                                R_z(dof_pos[env_ids, 1]) @ T_x(0.22) @ T_z(0.07005) @
+                                R_z(dof_pos[env_ids, 2]) @ T_x(-0.18883) @ T_y(-0.11289) @ T_z(0.39877))
 
         right_transformations = (T_x(-0.0545) @ T_y(-0.08) @ T_z(-0.0803) @ R_z_piover2 @ R_x_piover2 @
                                  R_z(dof_pos[env_ids, 4]) @ T_x(-0.0265) @ T_z(0.06) @ R_x_pi @ R_y_mpiover2 @
-                                 R_z(-dof_pos[env_ids, 5]) @ T_x(0.17097) @ T_y(0.13845) @ T_z(0.07005) @
-                                 R_z(-dof_pos[env_ids, 6]) @ T_x(-0.21779) @ T_y(-0.0311) @ T_z(0.03988))
+                                 R_z(-dof_pos[env_ids, 5]) @ T_x(0.22) @ T_z(0.07005) @
+                                 R_z(-dof_pos[env_ids, 6]) @ T_x(-0.18883) @ T_y(0.11289) @ T_z(0.039877))
     
         left_joint_z_pos = left_transformations[:, 2, 3]
         right_joint_z_pos = right_transformations[:, 2, 3]
@@ -1571,11 +1597,11 @@ class Flamingo(VecTask):
         std_dev_r_leg = (right_leg_joint_upper_limit - right_leg_joint_lower_limit) / r_l_dev
     
         mean_l_hip = (left_hip_joint_lower_limit + left_hip_joint_upper_limit) / 2 - 0.200714
-        mean_l_shoulder = (left_shoulder_joint_lower_limit + left_shoulder_joint_upper_limit) / 2 - 0.7854
+        mean_l_shoulder = (left_shoulder_joint_lower_limit + left_shoulder_joint_upper_limit) / 2
         mean_l_leg = (left_leg_joint_lower_limit + left_leg_joint_upper_limit) / 2 - 0.7854
     
         mean_r_hip = (right_hip_joint_lower_limit + right_hip_joint_upper_limit) / 2 + 0.200714
-        mean_r_shoulder =(right_shoulder_joint_lower_limit + right_shoulder_joint_upper_limit) / 2 - 0.7854
+        mean_r_shoulder =(right_shoulder_joint_lower_limit + right_shoulder_joint_upper_limit) / 2
         mean_r_leg = (right_leg_joint_lower_limit + right_leg_joint_upper_limit) / 2 - 0.7854
     
         num_envs = len(env_ids)

@@ -12,6 +12,7 @@ def main(args):
     cfg = get_cfg(args.cfg_path, num_envs, task_name)
     cfg.test = False
     cfg.headless = False
+    #cfg.checkpoint = 'runs/Flamingo_28-00-14-59/nn/Flamingo.pth'
     isaacgym_task_map[task_name] = Flamingo
 
     launch_rlg_hydra(cfg)

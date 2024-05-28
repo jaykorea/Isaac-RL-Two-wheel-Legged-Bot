@@ -6,12 +6,12 @@ physics_engine: "${..physics_engine}"
 # if given, will override the device setting in gym. 
 env:
   numEnvs: ${resolve_default:2048,${...num_envs}}
-  numObservations: 102 #111
+  numObservations: 72 #111
   numActions: 8
   envSpacing: 1.2
   resetDist: 3
-  scaleEffortJoints: 24
-  scaleEffortWheels: 6
+  scaleEffortJoints: 12
+  scaleEffortWheels: 3
   enableDebugVis: False
   enableRewardVis: True
   test_mode: False
@@ -60,7 +60,7 @@ env:
   
   setRandomJointOffset: True
   baseInitState:
-    pos: [0.0, 0.0, 0.2406626] # x,y,z [m] , robot height  is 0.41526
+    pos: [0.0, 0.0, 0.2461942] # x,y,z [m] , robot height  is 0.41526
     rot: [0.0, 0.0, 0.0, 1.0] # x,y,z,w [quat]
     vLinear: [0.0, 0.0, 0.0]  # x,y,z [m/s]
     vAngular: [0.0, 0.0, 0.0]  # x,y,z [rad/s]
@@ -129,7 +129,7 @@ env:
       contact: -0.001
 
       target_height: 0.35482 # !0.35482, 0.40168 , 0.315
-      height: -5. #! -40.0
+      height: -10. #! -40.0
 
       hip_align: -1.5 #! -2.0
       des_hip: -0.0
@@ -145,6 +145,10 @@ env:
 
       shoulder_pos: -0.0 #! -0.25
       leg_pos: -0.0 #! -0.25
+
+      dof_limit_ratio: 0.9
+      vel_limit_ratio: 0.9
+      tau_limit_ratio: 0.9
 
     #* scale factor -> Successfull Gain - with position, heading
     #* reward_gain:
