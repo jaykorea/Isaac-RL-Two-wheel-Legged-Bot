@@ -81,7 +81,7 @@
     <limit
       lower="-0.383972"
       upper="0.7854"
-      effort="24"
+      effort="12"
       velocity="20" />
     <dynamics
       damping="0"
@@ -133,7 +133,7 @@
     <limit
       lower="-0.785398"
       upper="0.785398"
-      effort="24"
+      effort="12"
       velocity="20" />
     <dynamics
       damping="0.0"
@@ -185,7 +185,7 @@
     <limit
       lower="-0.0872665"
       upper="1.5708"
-      effort="24"
+      effort="12"
       velocity="20" />
     <dynamics
       damping="0.0"
@@ -238,8 +238,8 @@
     <axis
       xyz="0 0 1" />
     <limit
-      effort="6"
-      velocity="50" />
+      effort="3"
+      velocity="20" />
     <dynamics
       damping="0"
       friction="0" />
@@ -290,7 +290,7 @@
     <limit
       lower="-0.7854"
       upper="0.383972"
-      effort="24"
+      effort="12"
       velocity="20" />
     <dynamics
       damping="0.0"
@@ -342,7 +342,7 @@
     <limit
       lower="-0.785398"
       upper="0.785398"
-      effort="24"
+      effort="12"
       velocity="20" />
     <dynamics
       damping="0.0"
@@ -394,7 +394,7 @@
     <limit
       lower="-0.0872665"
       upper="1.5708"
-      effort="24"
+      effort="12"
       velocity="20" />
     <dynamics
       damping="0.0"
@@ -447,8 +447,8 @@
     <axis
       xyz="0 0 -1" />
     <limit
-      effort="6"
-      velocity="50" />
+      effort="3"
+      velocity="20" />
     <dynamics
       damping="0"
       friction="0" />

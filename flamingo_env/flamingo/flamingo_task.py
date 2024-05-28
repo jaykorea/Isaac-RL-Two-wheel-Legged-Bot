@@ -204,6 +204,9 @@ class Flamingo(VecTask):
             "action_rate": self.torch_zeros(),
             "shoulder_pos": self.torch_zeros(),
             "leg_pos": self.torch_zeros(),
+            "dof_limit": self.torch_zeros(),
+            "vel_limit": self.torch_zeros(),
+            "tau_limit": self.torch_zeros(),
         }
         # self.reset_episode_sums(self.torch_zeros)
         self.total_reward_sums = {key: 0 for key in self.episode_sums.keys()}
@@ -536,43 +539,45 @@ class Flamingo(VecTask):
         self.obs_buf[env_ids, 0] = self.dof_pos[env_ids, 0]  # hip_l_joint
         self.obs_buf[env_ids, 1] = self.dof_pos[env_ids, 1]  # shoulder_l_joint
         self.obs_buf[env_ids, 2] = self.dof_pos[env_ids, 2]  # thigh_l_joint
-        self.privileged_obs_buf[env_ids, 3] = self.dof_pos[env_ids, 3]  # wheel_l_joint
-        self.obs_buf[env_ids, 3] = self.dof_pos[env_ids, 4]  # hip_r_joint
-        self.obs_buf[env_ids, 4] = self.dof_pos[env_ids, 5]  # shoulder_r_joint
-        self.obs_buf[env_ids, 5] = self.dof_pos[env_ids, 6]  # thigh_r_joint
-        self.privileged_obs_buf[env_ids, 4] = self.dof_pos[env_ids, 7]  # wheel_r_joint
+        self.obs_buf[env_ids, 3] = torch.sin(self.dof_pos[env_ids, 3])  # wheel_l_joint
+        self.obs_buf[env_ids, 4] = torch.cos(self.dof_pos[env_ids, 3])  # wheel_l_joint
+        self.obs_buf[env_ids, 5] = self.dof_pos[env_ids, 4]  # hip_r_joint
+        self.obs_buf[env_ids, 6] = self.dof_pos[env_ids, 5]  # shoulder_r_joint
+        self.obs_buf[env_ids, 7] = self.dof_pos[env_ids, 6]  # thigh_r_joint
+        self.obs_buf[env_ids, 8] = torch.sin(self.dof_pos[env_ids, 7])  # wheel_r_joint
+        self.obs_buf[env_ids, 9] = torch.cos(self.dof_pos[env_ids, 7])  # wheel_r_joint
 
         #* Joint velocities -JH
-        self.obs_buf[env_ids, 6] = self.dof_vel[env_ids, 0]  # hip_l_joint velocity
-        self.obs_buf[env_ids, 7] = self.dof_vel[env_ids, 1]  # shoulder_l_joint velocity
-        self.obs_buf[env_ids, 8] = self.dof_vel[env_ids, 2]  # thigh_l_joint velocity
-        self.obs_buf[env_ids, 9] = self.dof_vel[env_ids, 3]  # wheel_l_joint velocity
-        self.obs_buf[env_ids, 10] = self.dof_vel[env_ids, 4]  # hip_r_joint velocity
-        self.obs_buf[env_ids, 11] = self.dof_vel[env_ids, 5]  # shoulder_r_joint velocity
-        self.obs_buf[env_ids, 12] = self.dof_vel[env_ids, 6]  # thigh_r_joint velocity
-        self.obs_buf[env_ids, 13] = self.dof_vel[env_ids, 7]  # wheel_r_joint velocity
+        self.obs_buf[env_ids, 10] = self.dof_vel[env_ids, 0]  # hip_l_joint velocity
+        self.obs_buf[env_ids, 11] = self.dof_vel[env_ids, 1]  # shoulder_l_joint velocity
+        self.obs_buf[env_ids, 12] = self.dof_vel[env_ids, 2]  # thigh_l_joint velocity
+        self.obs_buf[env_ids, 13] = self.dof_vel[env_ids, 3]  # wheel_l_joint velocity
+        self.obs_buf[env_ids, 14] = self.dof_vel[env_ids, 4]  # hip_r_joint velocity
+        self.obs_buf[env_ids, 15] = self.dof_vel[env_ids, 5]  # shoulder_r_joint velocity
+        self.obs_buf[env_ids, 16] = self.dof_vel[env_ids, 6]  # thigh_r_joint velocity
+        self.obs_buf[env_ids, 17] = self.dof_vel[env_ids, 7]  # wheel_r_joint velocity
 
         #* Body states -JH
         self.privileged_obs_buf[env_ids, 0:3] = self.root_states[env_ids, 0:3]  # Body position (x, y, z)
         #* Body orientation (roll, pitch, yaw) - assuming get_euler_xyz gives (roll, pitch, yaw) -JH
-        self.obs_buf[env_ids, 14:17] = torch.stack([
+        self.obs_buf[env_ids, 18:21] = torch.stack([
             get_euler_xyz(self.root_states[env_ids, 3:7])[0],
             get_euler_xyz(self.root_states[env_ids, 3:7])[1],
             get_euler_xyz(self.root_states[env_ids, 3:7])[2]], dim=1)
         #* Body linear velocity (x, y, z) -JH
-        self.obs_buf[env_ids, 17:20] = quat_rotate_inverse(self.root_states[env_ids, 3:7], self.root_states[env_ids, 7:10])
-        #* Body angular velocity (roll, pitch, yaw) -JH
-        self.obs_buf[env_ids, 20:23] = quat_rotate_inverse(self.root_states[env_ids, 3:7], self.root_states[env_ids, 10:13])
+        self.obs_buf[env_ids, 21:24] = quat_rotate_inverse(self.root_states[env_ids, 3:7], self.root_states[env_ids, 7:10])
+        #* Body angular velocity( roll, pitch, yaw) -JH
+        self.obs_buf[env_ids, 24:27] = quat_rotate_inverse(self.root_states[env_ids, 3:7], self.root_states[env_ids, 10:13])
 
         #* Previous actions -JH
         #self.obs_buf[env_ids, 25:33] = self.actions[env_ids]
 
         #* Previous Observations Stack -JH
-        self.obs_buf[env_ids, 23:46] = self.last_obs_buf[env_ids, 0:23]
-        self.obs_buf[env_ids, 46:69] = self.last_last_obs_buf[env_ids, 0:23]
+        self.obs_buf[env_ids, 27:54] = self.last_obs_buf[env_ids, 0:27]
+        self.obs_buf[env_ids, 54:81] = self.last_last_obs_buf[env_ids, 0:27]
 
         #* Input Commands (x, y, yaw) -JH
-        self.obs_buf[env_ids, 69:72] = self.commands[env_ids, :3]
+        self.obs_buf[env_ids, 81:84] = self.commands[env_ids, :3]
         #self.obs_buf[env_ids, 111:112] = 1 if torch.any(self.commands[env_ids, :3] != 0) else 0
 
         # #* Body states -JH
@@ -1130,25 +1135,26 @@ class Flamingo(VecTask):
         return heights.view(self.num_envs, -1) * self.terrain.vertical_scale
 
     def compute_reward(self, actions):
+        
         # Retrieve environment observations from buffer
         # For joint positions
-        hip_pos = self.obs_buf[:, [0, 3]]  # left_hip_link, right_hip_link
-        shoulder_pos = self.obs_buf[:, [1, 4]]  # left_shoulder_link, right_shoulder_link
-        thigh_pos = self.obs_buf[:, [2, 5]]  # left_thigh_link, right_thigh_link
-        wheel_pos = self.privileged_obs_buf[:, 3:5]  # left_wheel_link, right_wheel_link
+        hip_pos = self.obs_buf[:, [0, 4]]  # left_hip_link, right_hip_link
+        shoulder_pos = self.obs_buf[:, [1, 5]]  # left_shoulder_link, right_shoulder_link
+        thigh_pos = self.obs_buf[:, [2, 6]]  # left_thigh_link, right_thigh_link
+        wheel_pos = self.dof_pos[:, [3, 7]]  # left_wheel_link, right_wheel_link
 
         # For joint velocities
-        hip_vel = self.obs_buf[:, [6, 10]]  # left_hip_link, right_hip_link
-        shoulder_vel = self.obs_buf[:, [7, 11]]  # left_shoulder_link, right_shoulder_link
-        thigh_vel = self.obs_buf[:, [8, 12]]  # left_thigh_link, right_thigh_link
-        wheel_vel = self.obs_buf[:, [9, 13]]  # left_wheel_link, right_wheel_link
+        hip_vel = self.obs_buf[:, [10, 14]]  # left_hip_link, right_hip_link
+        shoulder_vel = self.obs_buf[:, [11, 15]]  # left_shoulder_link, right_shoulder_link
+        thigh_vel = self.obs_buf[:, [12, 16]]  # left_thigh_link, right_thigh_link
+        wheel_vel = self.obs_buf[:, [13, 17]]  # left_wheel_link, right_wheel_link
 
         # For body states
         body_pos = self.privileged_obs_buf[:, 0:3]
-        body_orientation = self.obs_buf[:, 14:17]
-        body_linear_vel = self.obs_buf[:, 17:20]
-        body_angular_vel = self.obs_buf[:, 20:23]
-        robot_command = self.obs_buf[:, 69:72]
+        body_orientation = self.obs_buf[:, 18:21]
+        body_linear_vel = self.obs_buf[:, 21:24]
+        body_angular_vel = self.obs_buf[:, 24:27]
+        robot_command = self.obs_buf[:, 81:84]
 
         base_link_height = body_pos[:, 2]
 
@@ -1264,82 +1270,23 @@ class Flamingo(VecTask):
         # rewward for pos limit
         out_of_limits_pos = -(dof_pos - self.dof_limits_lower * self.reward_scale["dof_limit_ratio"]).clip(max=0.)
         out_of_limits_pos += (dof_pos - self.dof_limits_upper * self.reward_scale["dof_limit_ratio"]).clip(min=0.)
-        reward_dof_limits = torch.sum(out_of_limits_pos, dim=1)
+        reward_dof_limits = -torch.sum(out_of_limits_pos, dim=1)
 
         # rewward for vel limit
-        reward_vel_limits = torch.sum((torch.abs(dof_vel) - self.vel_limits * self.reward_scale["vel_limit_ratio"]).clip(min=0., max=1.), dim=1)
+        reward_vel_limits = -torch.sum((torch.abs(dof_vel) - self.vel_limits * self.reward_scale["vel_limit_ratio"]).clip(min=0., max=1.), dim=1)
 
         # rewward for tau limit
         joint_torques = torques[:, [0, 1, 2, 4, 5, 6]]
         wheel_torques = torques[:, [3, 7]]
-        out_of_limits_joints = torch.sum((torch.abs(joint_torques) - self.tau_limits[[0, 1, 2, 4, 5, 6]] * self.reward_scale["tau_limit_ratio"]).clip(min=0.), dim=1)
-        out_of_limits_wheels = torch.sum((torch.abs(wheel_torques) - self.tau_limits[[3, 7]] * self.reward_scale["tau_limit_ratio"]).clip(min=0.), dim=1)
-        reward_torque_limits = out_of_limits_joints + out_of_limits_wheels
+        out_of_limits_joints = -torch.sum((torch.abs(joint_torques) - self.tau_limits[[0, 1, 2, 4, 5, 6]] * self.reward_scale["tau_limit_ratio"]).clip(min=0.), dim=1)
+        out_of_limits_wheels = -torch.sum((torch.abs(wheel_torques) - self.tau_limits[[3, 7]] * self.reward_scale["tau_limit_ratio"]).clip(min=0.), dim=1)
+        reward_tau_limits = out_of_limits_joints + out_of_limits_wheels
  
         # Total reward
         reward = reward_orientation + reward_lin_vel_xy + reward_ang_vel_z + reward_ang_vel_xy + reward_lin_vel_z + reward_wheel_lin_x + reward_wheel_ang_z + rew_gravity + \
                  reward_base_contact + reward_legs_contact + reward_height + reward_hip_alignment + reward_hip_des +  \
                  reward_shoulder_alignment + reward_leg_alignment + reward_position + reward_heading + reward_torque + reward_joint_acc + reward_action_rate + reward_alive_time + \
-                 reward_shoulder_pos + reward_leg_pos + reward_dof_limits + reward_vel_limits + reward_torque_limits
-
-        # orientation_beta_ = 0.0001
-        # height_beta_ = -5.
-        # hip_beta_ = 0.11
-        # shoulder_beta_ = -0.35 #!0.001
-        # leg_beta_ = -0.35 #! 0.001
-        # action_beta_ = 0.01
-        # torque_beta_ = 0.003
-        # epsilon_scaler_ = 0.01
-
-        # reward_orientation_ = orientation_beta_ * torch.exp(-torch.sum(torch.square(projected_gravity[:, :2]), dim=1))
-        # reward_height_ = height_beta_ * torch.square(base_link_height - self.reward_scale["target_height"] )
-        # reward_hip_ = hip_beta_ * torch.exp(-torch.mean(torch.abs(hip_pos[:, 0:2] - 0), dim=1))
-        # reward_shoulder_ = shoulder_beta_ * torch.exp(torch.mean(torch.abs(shoulder_pos[:, 0:2] + 0.7766715), dim=1))
-        # reward_leg_ = leg_beta_ * torch.exp(torch.mean(torch.abs(thigh_pos[:, 0:2] - 0.698132), dim=1))
-        # reward_action_ = action_beta_ * torch.exp(-torch.sum(torch.square(last_actions - actions), dim=1))
-        # reward_torque_ = torque_beta_ * torch.exp(-torch.sum(torch.abs(torques) * epsilon_scaler_, dim=1))
-        
-#################### JW reward ##########################################
-        # orientation_beta_ = 0.5
-        # height_beta_ = -5.
-        # hip_beta_ = 1.
-        # shoulder_beta_ = 1.
-        # leg_beta_ = 1.
-        # action_beta_ = 1.
-        # torque_beta_ = 1.
-        # epsilon_scaler_ = 0.01
-
-        # reward_orientation_ = orientation_beta_ * torch.exp(-torch.sum(torch.square(projected_gravity[:, :2]), dim=1))
-        # reward_height_ = height_beta_ * torch.square(base_link_height - self.reward_scale["target_height"] )
-        # reward_hip_ = torch.exp(hip_beta_ * -torch.mean(torch.abs(hip_pos[:, 0:2] - 0), dim=1))
-        # reward_shoulder_ = torch.exp(shoulder_beta_ * -torch.mean(torch.abs(shoulder_pos[:, 0:2] + 0.7766715), dim=1))
-        # reward_leg_ = torch.exp(leg_beta_ * -torch.mean(torch.abs(thigh_pos[:, 0:2] - 0.698132), dim=1))
-        # reward_action_ = torch.exp(action_beta_ * -torch.sum(torch.square(last_actions - actions) * epsilon_scaler_, dim=1))
-        # reward_torque_ = torch.exp(torque_beta_ * -torch.sum(torch.abs(torques) * epsilon_scaler_, dim=1))
-
-        # reward_jw_ = reward_height_ + reward_orientation_ + ((2 - reward_hip_) * 0.5) * ((2 - reward_shoulder_) * 0.5) * ((2 - reward_leg_) * 0.5) * ((2 - reward_action_) * 0.5) * ((2 - reward_torque_) * 0.5)
-
-        # print("reward_orientation: ", reward_orientation_[0])
-        # print("reward_height: ", reward_height_[0])
-        # print("reward_hip: ", reward_hip_[0])
-        # print("reward_shoulder: ", reward_shoulder_[0])
-        # print("reward_leg: ", reward_leg_[0])
-        # print("reward_action: ", reward_action_[0])
-        # print("reward_torque: ", reward_torque_[0])
-        # print("reward_total: ", reward_jw_[0])
-        # print("--------------------------------")
-
-        # print("reward_orientation: ", reward_orientation_[0])
-        # print("reward_height: ", reward_height_[0])
-        # print("reward_hip: ", ((1- reward_hip_[0]) * 0.5))
-        # print("reward_shoulder: ", ((1 - reward_shoulder_[0]) * 0.5))
-        # print("reward_leg: ", ((1 - reward_leg_[0]) * 0.5))
-        # print("reward_action: ", ((1 - reward_action_[0]) * 0.5))
-        # print("reward_torque: ", (1 - reward_torque_[0]) * 0.5)
-        # print("reward_total: ", reward_jw_[0])
-        # print("--------------------------------")
-##############################################################################
-        #reset_condition = torch.any(legs_contact, dim=1) | torch.any(base_contact, dim=1) | torch.any(shoulders_contact, dim=1) | (base_link_height < 0.05)
+                 reward_shoulder_pos + reward_leg_pos + reward_dof_limits + reward_vel_limits + reward_tau_limits
 
         #* Define the condition for any other contacts and the height condition -JH
         #collide_condition = torch.any(legs_contact, dim=1) | torch.any(base_contact, dim=1) | torch.any(shoulders_contact, dim=1)
@@ -1386,6 +1333,9 @@ class Flamingo(VecTask):
         self.episode_sums["action_rate"] += reward_action_rate
         self.episode_sums["shoulder_pos"] += reward_shoulder_pos
         self.episode_sums["leg_pos"] += reward_leg_pos
+        self.episode_sums["dof_limit"] += reward_dof_limits
+        self.episode_sums["vel_limit"] += reward_vel_limits
+        self.episode_sums["tau_limit"] += reward_tau_limits
 
         # self.episode_sums["reward_orientation_"] += reward_orientation_
         # self.episode_sums["reward_hip_"] += reward_hip_
@@ -1422,17 +1372,14 @@ class Flamingo(VecTask):
             "action_rate": torch_zeros_(),
             "shoulder_pos": torch_zeros_(),
             "leg_pos": torch_zeros_(),
-            # "reward_orientation_": torch_zeros_(),
-            # "reward_hip_": torch_zeros_(),
-            # "reward_shoulder_": torch_zeros_(),
-            # "reward_leg_": torch_zeros_(),
-            # "reward_action_" : torch_zeros_(),
-            # "reward_torque_" : torch_zeros_(),
+            "dof_limit": torch_zeros_(),
+            "vel_limit": torch_zeros_(),
+            "tau_limit": torch_zeros_(),
         }
         
     def log_episode_sums(self):
         # Create a blank image where text will be added
-        img_height = 1350
+        img_height = 1450
         img_width = 450
         img = np.zeros((img_height, img_width, 3), dtype=np.uint8)
         font = cv2.FONT_HERSHEY_SIMPLEX
