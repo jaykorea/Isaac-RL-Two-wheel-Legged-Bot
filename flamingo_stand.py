@@ -82,8 +82,8 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
         # qpos와 qvel의 특정 인덱스에 cos, sin 변환 적용
         qpos_cos_sin = np.concatenate([
             self.data.qpos[[7, 11, 8, 12, 9, 13]],  # self.data.qpos의 특정 인덱스 값들
-            [np.sin(self.data.qpos[10]), np.cos(self.data.qpos[10])],  # sin, cos 변환
-            [np.sin(self.data.qpos[14]), np.cos(self.data.qpos[14])]  # sin, cos 변환
+            [np.sin(self.data.qpos[10]), np.sin(self.data.qpos[14])],  # sin, cos 변환
+            [np.cos(self.data.qpos[10]), np.cos(self.data.qpos[14])]  # sin, cos 변환
             # self.data.qpos[7:10],
             # [np.sin(self.data.qpos[10]), np.cos(self.data.qpos[10])],
             # self.data.qpos[11:14],
@@ -99,9 +99,9 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
         current_state = np.concatenate([
             qpos_cos_sin,  # 관절 위치 (cos, sin 변환 포함)
             qvel_zigzag, # self.data.qvel[6:],  # 관절 속도 (cos, sin 변환 포함)
-            [roll, pitch, yaw],  # base_link의 롤, 피치, 요
             lin_vel_rotated,  # base_link의 회전된 x, y, z 속도
             ang_vel_rotated,  # base_link의 회전된 각속도
+            [roll, pitch, yaw],  # base_link의 롤, 피치, 요
             self.action,
         ])
 
@@ -281,8 +281,11 @@ if __name__ == "__main__":
         obs, _ = env.reset()
         actions = []
         for _ in range(1000):
-            # action = env.action_space.sample()
-            action = model(obs).detach().numpy()
+            try:
+                action = model(obs).detach().numpy()
+            except:
+                print('Random Action!')
+                action = env.action_space.sample()
             action = np.clip(action, -1, 1)
             obs, rewards, dones, term, info = env.step(action)
             env.render()
