@@ -1,6 +1,3 @@
-from stable_baselines3 import PPO
-from stable_baselines3.common.vec_env import DummyVecEnv
-from stable_baselines3.common.evaluation import evaluate_policy
 from gymnasium import utils
 from gymnasium.envs.mujoco import MujocoEnv
 from gymnasium.spaces import Box
@@ -37,13 +34,17 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
 
         self.previous_states = []  # 이전 상태를 저장할 리스트
         self.step_counter = 0  # 스텝 카운터 초기화
+        self.state_clip = 5
 
         utils.EzPickle.__init__(self)
         MujocoEnv.__init__(
             self,
             model_path=self.model_path,
             frame_skip=self.frame_skip,
-            observation_space=Box(low=-5, high=5, shape=(self.obs_dim,), dtype=np.float32),  # 3 프레임을 쌓음
+            observation_space=Box(low=-self.state_clip,
+                                  high=self.state_clip,
+                                  shape=(self.obs_dim,),
+                                  dtype=np.float32),  # 3 프레임을 쌓음
         )
 
     def quat_rotate_inverse(self, quaternion, vectors):
@@ -80,11 +81,16 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
 
         # qpos와 qvel의 특정 인덱스에 cos, sin 변환 적용
         qpos_cos_sin = np.concatenate([
-            self.data.qpos[7:10],
-            [np.sin(self.data.qpos[10]), np.cos(self.data.qpos[10])],
-            self.data.qpos[11:13],
-            [np.sin(self.data.qpos[13]), np.cos(self.data.qpos[13])],
-            self.data.qpos[14:]
+            self.data.qpos[[7, 11, 8, 12, 9, 13]],  # self.data.qpos의 특정 인덱스 값들
+            [np.sin(self.data.qpos[10]), np.cos(self.data.qpos[10])],  # sin, cos 변환
+            [np.sin(self.data.qpos[14]), np.cos(self.data.qpos[14])]  # sin, cos 변환
+            # self.data.qpos[7:10],
+            # [np.sin(self.data.qpos[10]), np.cos(self.data.qpos[10])],
+            # self.data.qpos[11:14],
+            # [np.sin(self.data.qpos[14]), np.cos(self.data.qpos[14])],
+        ])
+        qvel_zigzag = np.concatenate([
+            self.data.qpos[[7, 11, 8, 12, 9, 13, 10, 14]],
         ])
 
         # 현재 상태 관측 값
@@ -92,10 +98,11 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
         roll, pitch, yaw = r.as_euler('xyz', degrees=False)
         current_state = np.concatenate([
             qpos_cos_sin,  # 관절 위치 (cos, sin 변환 포함)
-            self.data.qvel[6:],  # 관절 속도 (cos, sin 변환 포함)
+            qvel_zigzag, # self.data.qvel[6:],  # 관절 속도 (cos, sin 변환 포함)
             [roll, pitch, yaw],  # base_link의 롤, 피치, 요
             lin_vel_rotated,  # base_link의 회전된 x, y, z 속도
             ang_vel_rotated,  # base_link의 회전된 각속도
+            self.action,
         ])
 
         # 이전 상태를 저장하고 새로운 상태를 추가
@@ -119,23 +126,51 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
     def step(self, action):
         # action = fast_clip(action, -1.0, 1.0)
         action = action * self.max_torques  # 조인트별로 최대 토크를 설정
+        self.action = action
         self.do_simulation(action, self.frame_skip)
         self.step_counter += 1  # 스텝 카운터 증가
         obs = self._get_obs()
         reward = self._get_reward()
         done = self._is_done()
-        term = self.step_counter >= 1000  # 1000 스텝 초과 시 done
+        term = self.step_counter >= 2000  # 1000 스텝 초과 시 done
         return obs, reward, done, term, {}  # done을 두 번 반환하여 정보와 종료 조건을 분리
 
     def _get_reward(self):
+        # 상태 정보 추출
         height = self.data.qpos[2]
-        alive_reward = 1.0  # 살아있는 보상
-        height_reward = height if height > 0.1 else -1.0  # 일정 높이 유지 보상
-        return alive_reward + height_reward
+        roll, pitch, yaw = self.previous_states[0][-9:-6]  # 각도 정보 추출 (마지막 상태에서)
+        lin_vel = self.previous_states[0][-6:-3]  # 선형 속도 정보 추출 (마지막 상태에서)
+        ang_vel = self.previous_states[0][-3:]  # 각속도 정보 추출 (마지막 상태에서)
+
+        # 보상 계산
+        height_target = 0.4
+        height_reward = (height - height_target)  # 높이가 목표 높이에 가까울수록 보상
+
+        # 속도와 각도의 목표값이 0에 가까울수록 보상
+        velocity_reward = -np.linalg.norm(lin_vel)  # 선형 속도 보상
+        orientation_reward = -np.linalg.norm([yaw])  # 각도 보상
+        ang_velocity_reward = -np.linalg.norm(ang_vel)  # 각속도 보상
+
+        # 총 보상 계산
+        upright_temp = 0.1;  vel_temp = 0.1;
+        upright_reward_transformed = np.where(height_reward > 0,
+                                                 np.exp(- height_reward / upright_temp),-3)
+        command_x_reward_transformed = np.exp(velocity_reward / vel_temp)
+        command_y_reward_transformed = np.exp(orientation_reward / vel_temp)
+        command_angvel_reward_transformed = np.exp(ang_velocity_reward / vel_temp)
+        total_reward = (upright_reward_transformed
+                        + command_x_reward_transformed
+                        + command_y_reward_transformed
+                        + command_angvel_reward_transformed)
+        total_reward = np.clip(total_reward, 0, 1e6)
+        total_reward += 0.1 # 살아있는 보상
+        total_reward /= (4+0.1)
+
+        return total_reward
 
     def _is_done(self):
         height = self.data.qpos[2]
-        return height < 0.1
+        return height < 0.18
 
     def reset_model(self):
         mujoco.mj_resetData(self.model, self.data)
@@ -143,6 +178,7 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
         self.data.qvel[:] = 0
         self.previous_states = []  # 상태 초기화
         self.step_counter = 0  # 스텝 카운터 초기화
+        self.action = [0,0,0,0,0,0,0,0]
         return self._get_obs()
 
     def initial_qpos(self):
