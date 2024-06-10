@@ -26,7 +26,7 @@ from lab.flamingo.assets.flamingo import FLAMINGO_ASSETS_DATA_DIR
 
 FLAMINGO_CFG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
-        usd_path=f"{FLAMINGO_ASSETS_DATA_DIR}/Robots/Flamingo/flamingo_rev01/flamingo_box.usd",
+        usd_path=f"{FLAMINGO_ASSETS_DATA_DIR}/Robots/Flamingo/flamingo_rev01/flamingo_cylinder.usd",
         activate_contact_sensors=True,
         rigid_props=sim_utils.RigidBodyPropertiesCfg(
             disable_gravity=False,
@@ -63,25 +63,41 @@ FLAMINGO_CFG = ArticulationCfg(
             effort_limit=23.0,
             velocity_limit=20.0,
             stiffness={
-                ".*_hip_joint": 53.0,
-                ".*_shoulder_joint": 53.0,
-                ".*_leg_joint": 53.0,
+                ".*_hip_joint": 35.0,
+                ".*_shoulder_joint": 35.0,
+                ".*_leg_joint": 35.0,
             },
             damping={
-                ".*_hip_joint": 4.0,
-                ".*_shoulder_joint": 4.0,
-                ".*_leg_joint": 4.0,
+                ".*_hip_joint": 6.0,
+                ".*_shoulder_joint": 6.0,
+                ".*_leg_joint": 6.0,
+            },
+            friction={
+                ".*_hip_joint": 1.0,
+                ".*_shoulder_joint": 1.0,
+                ".*_leg_joint": 1.0,
+            },
+            armature={
+                ".*_hip_joint": 0.1,
+                ".*_shoulder_joint": 0.1,
+                ".*_leg_joint": 0.1,
             },
         ),
         "wheels": ImplicitActuatorCfg(
-            joint_names_expr=["left_wheel_joint", "right_wheel_joint"],
+            joint_names_expr=[".*_wheel_joint"],
             effort_limit=6.0,
-            velocity_limit=25.0,
+            velocity_limit=30.0,
             stiffness={
-                ".*_wheel_joint": 0.5,
+                ".*_wheel_joint": 0.0,
             },
             damping={
-                ".*_wheel_joint": 4.0,
+                ".*_wheel_joint": 3.0,
+            },
+            friction={
+                ".*_wheel_joint": 1.0,
+            },
+            armature={
+                ".*_wheel_joint": 0.01,
             },
         ),
     },
