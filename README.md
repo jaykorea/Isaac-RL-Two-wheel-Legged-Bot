@@ -16,14 +16,6 @@ https://github.com/jaykorea/Isaac-RL-Two-wheel-Legged-Bot/assets/95605860/a36183
 This repository serves as a template for building projects or extensions based on Orbit. It allows you to develop in an isolated environment, outside of the core Orbit repository.
 **Keywords:** extension, template, orbit
 
-### License
-
-The source code is released under a [BSD 3-Clause license](https://opensource.org/licenses/BSD-3-Clause).
-
-**Author: The ORBIT Project Developers<br />
-Affiliation: [The AI Institute](https://theaiinstitute.com/)<br />
-Maintainer: Nico Burger, nburger@theaiinstitute.com**
-
 ## Setup
 
 Depending on the use case defined [above](#overview), follow the instructions to set up your extension template. Start with the [Basic Setup](#basic-setup), which is required for either use case.
@@ -32,7 +24,7 @@ Depending on the use case defined [above](#overview), follow the instructions to
 
 #### Dependencies
 
-This template depends on Isaac Sim and Orbit. For detailed instructions on how to install these dependencies, please refer to the [installation guide](https://isaac-orbit.github.io/orbit/source/setup/installation.html).
+This template depends on Isaac Sim and Lab. For detailed instructions on how to install these dependencies, please refer to the [installation guide](https://isaac-orbit.github.io/orbit/source/setup/installation.html).
 
 - [Isaac Sim](https://docs.omniverse.nvidia.com/isaacsim/latest/index.html)
 - [Orbit](https://isaac-orbit.github.io/orbit/)
@@ -213,6 +205,6 @@ echo -e "\nexport PYTHONPATH=\$PYTHONPATH:/workspace/orbit.<your_extension_name>
 source ~/.bashrc
 ```
 
-## Bugs & Feature Requests
+### License
 
-Please report bugs and request features using the [Issue Tracker](https://github.com/isaac-orbit/orbit.ext_template/issues).
+The source code is released under a [BSD 3-Clause license](https://opensource.org/licenses/BSD-3-Clause).
