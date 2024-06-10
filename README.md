@@ -7,21 +7,13 @@
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://pre-commit.com/)
 [![License](https://img.shields.io/badge/license-MIT-yellow.svg)](https://opensource.org/license/mit)
 
-## Overview
+## Wake up Flamingo
+
+https://github.com/jaykorea/Isaac-RL-Two-wheel-Legged-Bot/assets/95605860/75075512-d2c6-4373-a932-c299567022e6
+
+https://github.com/jaykorea/Isaac-RL-Two-wheel-Legged-Bot/assets/95605860/a3618385-364a-4817-b817-a64cb9ebd6a9
 
 This repository serves as a template for building projects or extensions based on Orbit. It allows you to develop in an isolated environment, outside of the core Orbit repository.
-
-- **Project Template**
-    Ensures access to `Isaac Sim` and `Orbit` functionalities, which can be used as a project template.
-
-- **Omniverse Extension**
-    Can be used as an Omniverse extension, ideal for projects that leverage the Omniverse platform's graphical user interface.
-
-**Key Features:**
-
-- `Isolation` Work outside the core Orbit repository, ensuring that your development efforts remain self-contained.
-- `Flexibility` This template is set up to allow your code to be run as an extension in Omniverse.
-
 **Keywords:** extension, template, orbit
 
 ### License
