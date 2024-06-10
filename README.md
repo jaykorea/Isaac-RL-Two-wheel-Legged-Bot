@@ -16,6 +16,11 @@ https://github.com/jaykorea/Isaac-RL-Two-wheel-Legged-Bot/assets/95605860/a36183
 This repository serves as a template for building projects or extensions based on Orbit. It allows you to develop in an isolated environment, outside of the core Orbit repository.
 **Keywords:** extension, template, orbit
 
+## Sim 2 Sim framework
+![image](https://github.com/jaykorea/Isaac-RL-Two-wheel-Legged-Bot/assets/95605860/c242590d-b1d4-427e-8f52-4190cafc38e9)
+
+- Simulation to Simulation framework is available on sim2sim_onnx branch
+- You can simply inference trained policy (basically export as .onnx from isaac lab)
 ## Setup
 
 Depending on the use case defined [above](#overview), follow the instructions to set up your extension template. Start with the [Basic Setup](#basic-setup), which is required for either use case.
