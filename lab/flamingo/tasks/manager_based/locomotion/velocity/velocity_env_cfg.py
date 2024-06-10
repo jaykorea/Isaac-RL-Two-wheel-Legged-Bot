@@ -25,6 +25,7 @@ from omni.isaac.lab.sensors import ContactSensorCfg, RayCasterCfg, patterns
 from omni.isaac.lab.terrains import TerrainImporterCfg
 from omni.isaac.lab.utils import configclass
 from omni.isaac.lab.utils.noise import AdditiveUniformNoiseCfg as Unoise
+from omni.isaac.lab.utils.noise import GaussianNoiseCfg as Gnoise
 
 # import omni.isaac.orbit_tasks.locomotion.velocity.mdp as mdp
 import lab.flamingo.tasks.manager_based.locomotion.velocity.mdp as mdp
@@ -172,7 +173,7 @@ class ObservationsCfg:
         base_lin_vel = ObsTerm(func=mdp.base_lin_vel, noise=Unoise(n_min=-0.1, n_max=0.1), clip=(-25.0, 25.0))
         base_ang_vel = ObsTerm(func=mdp.base_ang_vel, noise=Unoise(n_min=-0.2, n_max=0.2), clip=(-25.0, 25.0))
         base_euler = ObsTerm(func=mdp.root_euler_angle, noise=Unoise(n_min=-0.15, n_max=0.15), clip=(-25.0, 25.0))
-        actions = ObsTerm(func=mdp.last_action, noise=Unoise(n_min=-0.01, n_max=0.01), clip=(-25.0, 25.0))
+        actions = ObsTerm(func=mdp.last_action, noise=Unoise(n_min=-0.05, n_max=0.05), clip=(-25.0, 25.0))
 
         """
         Stack 1
@@ -255,7 +256,7 @@ class EventCfg:
         func=mdp.randomize_joint_parameters,
         params={
             "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_joint", ".*_shoulder_joint", ".*_leg_joint"]),
-            "friction_distribution_params": (0.5, 1.0),
+            "friction_distribution_params": (1.0, 1.0),
             "armature_distribution_params": (0.3, 3.0),
             "operation": "scale",
             "distribution": "uniform",
@@ -265,7 +266,7 @@ class EventCfg:
         func=mdp.randomize_joint_parameters,
         params={
             "asset_cfg": SceneEntityCfg("robot", joint_names=".*_wheel_joint"),
-            "friction_distribution_params": (0.5, 1.0),
+            "friction_distribution_params": (1.0, 1.0),
             "armature_distribution_params": (0.3, 3.0),
             "operation": "scale",
             "distribution": "uniform",
@@ -275,7 +276,7 @@ class EventCfg:
         func=mdp.add_body_mass,
         params={
             "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
-            "mass_distribution_params": (-5.0, 5.0),
+            "mass_distribution_params": (-2.0, 2.0),
         },
     )
 
@@ -348,7 +349,7 @@ class RewardsCfg:
     lin_vel_z_l2 = RewTerm(func=mdp.lin_vel_z_l2, weight=-2.0)
     ang_vel_xy_l2 = RewTerm(func=mdp.ang_vel_xy_l2, weight=-0.05)
     dof_torques_l2 = RewTerm(func=mdp.joint_torques_l2, weight=-1.0e-5)
-    dof_acc_l2 = RewTerm(func=mdp.joint_acc_l2, weight=-2.5e-7)
+    dof_acc_l2 = RewTerm(func=mdp.joint_acc_l2, weight=-2.5e-6)  # default: -2.5e-6
     action_rate_l2 = RewTerm(func=mdp.action_rate_l2, weight=-0.01)
     # feet_air_time = RewTerm(
     #     func=mdp.feet_air_time,
@@ -373,7 +374,7 @@ class RewardsCfg:
     # dof_torques_limits = RewTerm(func=mdp.applied_torque_limits, weight=0.0)
     base_target_height = RewTerm(
         func=mdp.base_height_l2,
-        weight=-200.0,
+        weight=-100.0,
         params={"target_height": 0.35482, "asset_cfg": SceneEntityCfg("robot", body_names="base_link")},
     )
 
