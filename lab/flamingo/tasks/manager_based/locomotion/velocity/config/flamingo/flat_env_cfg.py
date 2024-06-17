@@ -41,12 +41,12 @@ class FlamingoRewardsCfg(RewardsCfg):
     )
     joint_deviation_leg = RewTerm(
         func=mdp.joint_target_deviation_l1,
-        weight=-0.5,  # -0.5
+        weight=-1.5,  # -0.5
         params={"target_joint_angle": 0.56810467, "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_leg_joint"])},
     )
     joint_deviation_shoulder = RewTerm(
         func=mdp.joint_target_deviation_l1,
-        weight=-0.5,  # -0.5
+        weight=-1.5,  # -0.5
         params={
             "target_joint_angle": -0.261799,
             "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_shoulder_joint"]),
@@ -86,7 +86,7 @@ class FlamingoRewardsCfg(RewardsCfg):
     # penalize torque limits
     joint_applied_torque_limits = RewTerm(
         func=mdp.applied_torque_limits,
-        weight=-0.1,
+        weight=-0.1,  # default: -0.1
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*_joint")},
     )
     undesired_contacts = RewTerm(
@@ -113,7 +113,7 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
         self.observations.policy.enable_corruption = True
 
         # reset_robot_joint_zero should be called here
-        self.events.reset_robot_joints.params["position_range"] = (-0.05, 0.05)
+        self.events.reset_robot_joints.params["position_range"] = (-0.2, 0.2)
         self.events.push_robot.interval_range_s = (10.0, 15.0)
         self.events.push_robot.params = {
             "velocity_range": {"x": (-0.5, 0.5), "y": (-0.5, 0.5)},
@@ -123,8 +123,8 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
         self.events.add_base_mass.params["mass_distribution_params"] = (-1.5, 2.5)
         # physics material should be called here
         self.events.physics_material.params["asset_cfg"].body_names = [".*_link"]
-        self.events.physics_material.params["static_friction_range"] = (0.7, 1.2)
-        self.events.physics_material.params["dynamic_friction_range"] = (1.0, 1.0)
+        self.events.physics_material.params["static_friction_range"] = (0.75, 1.5)
+        self.events.physics_material.params["dynamic_friction_range"] = (0.5, 2.0)
         self.events.base_external_force_torque.params["asset_cfg"].body_names = ["base_link"]
         self.events.reset_base.params = {
             "pose_range": {"x": (-0.5, 0.5), "y": (-0.5, 0.5), "yaw": (-3.14, 3.14)},
@@ -138,9 +138,9 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
             },
         }
         # rewards
-        self.rewards.flat_orientation_l2.weight = -5.0
+        self.rewards.flat_orientation_l2.weight = -0.5
         # self.rewards.joint_deviation_hip.params["asset_cfg"].joint_names = [".*_hip_joint"]
-        self.rewards.dof_torques_l2.weight = -5.0e-6  # default: -5.0e-6
+        self.rewards.dof_torques_l2.weight = -5.0e-5  # default: -5.0e-6
         self.rewards.track_lin_vel_xy_exp.weight = 2.0
         self.rewards.track_ang_vel_z_exp.weight = 1.0
         self.rewards.action_rate_l2.weight *= 1.5
@@ -158,9 +158,9 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
         self.scene.height_scanner.debug_vis = False
 
         # commands
-        self.commands.base_velocity.ranges.lin_vel_x = (0.0, 0.0)
+        self.commands.base_velocity.ranges.lin_vel_x = (-0.0, 0.0)
         self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
-        self.commands.base_velocity.ranges.ang_vel_z = (0.0, 0.0)
+        self.commands.base_velocity.ranges.ang_vel_z = (-0.0, 0.0)
         self.commands.base_velocity.ranges.heading = (0.0, 0.0)
 
         # terminations

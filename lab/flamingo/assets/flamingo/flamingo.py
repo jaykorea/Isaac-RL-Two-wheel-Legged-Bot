@@ -63,14 +63,14 @@ FLAMINGO_CFG = ArticulationCfg(
             effort_limit=23.0,
             velocity_limit=20.0,
             stiffness={
-                ".*_hip_joint": 35.0,
-                ".*_shoulder_joint": 35.0,
-                ".*_leg_joint": 35.0,
+                ".*_hip_joint": 120.0,
+                ".*_shoulder_joint": 120.0,
+                ".*_leg_joint": 120.0,
             },
             damping={
-                ".*_hip_joint": 6.0,
-                ".*_shoulder_joint": 6.0,
-                ".*_leg_joint": 6.0,
+                ".*_hip_joint": 4.0,
+                ".*_shoulder_joint": 4.0,
+                ".*_leg_joint": 4.0,
             },
             friction={
                 ".*_hip_joint": 0.0,
@@ -86,7 +86,7 @@ FLAMINGO_CFG = ArticulationCfg(
         "wheels": ImplicitActuatorCfg(
             joint_names_expr=[".*_wheel_joint"],
             effort_limit=6.0,
-            velocity_limit=30.0,
+            velocity_limit=25.0,
             stiffness={
                 ".*_wheel_joint": 0.0,
             },

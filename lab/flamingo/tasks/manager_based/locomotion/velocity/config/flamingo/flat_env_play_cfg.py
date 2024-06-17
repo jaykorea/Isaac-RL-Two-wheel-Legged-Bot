@@ -105,8 +105,8 @@ class FlamingoFlatEnvCfg_PLAY(LocomotionVelocityFlatEnvCfg):
         self.events.add_base_mass.params["mass_distribution_params"] = (-1.0, 1.0)
         # physics material should be called here
         self.events.physics_material.params["asset_cfg"].body_names = [".*_link"]
-        self.events.physics_material.params["static_friction_range"] = (0.8, 1.2)
-        self.events.physics_material.params["dynamic_friction_range"] = (0.8, 1.2)
+        self.events.physics_material.params["static_friction_range"] = (1.0, 1.0)
+        self.events.physics_material.params["dynamic_friction_range"] = (1.0, 1.0)
         self.events.base_external_force_torque.params["asset_cfg"].body_names = ["base_link"]
         self.events.reset_base.params = {
             "pose_range": {"x": (-0.0, 0.0), "y": (-0.0, 0.0), "yaw": (-3.14, 3.14)},
@@ -140,9 +140,9 @@ class FlamingoFlatEnvCfg_PLAY(LocomotionVelocityFlatEnvCfg):
         self.scene.height_scanner.debug_vis = False
 
         # commands
-        self.commands.base_velocity.ranges.lin_vel_x = (0.0, 0.0)
+        self.commands.base_velocity.ranges.lin_vel_x = (-0.0, 0.0)
         self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
-        self.commands.base_velocity.ranges.ang_vel_z = (0.0, 0.0)
+        self.commands.base_velocity.ranges.ang_vel_z = (-0.0, 0.0)
         self.commands.base_velocity.ranges.heading = (0.0, 0.0)
 
         # terminations
