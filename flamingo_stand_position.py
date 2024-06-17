@@ -26,7 +26,9 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
         self.model_path = os.path.join(os.path.dirname(__file__), model_path)
         self.frame_skip = frame_skip
         self.render_mode = render_mode
-        self.total_steps = 1500  # 최대 스텝 수
+        self.dt_ = 0.005  # 시뮬레이션 주기
+        self.sim_duration = 10  # 시뮬레이션 시간 unit: sec
+        self.sim_step = self.sim_duration / self.dt_
         self.id = env_id
         self.obs_dim = 31 * 3 + 3  # 모델에 따라 조정
         self.act_dim = 8  # 모델에 따라 조정
@@ -36,7 +38,7 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
         self.previous_states = []  # 이전 상태를 저장할 리스트
         self.step_counter = 0  # 스텝 카운터 초기화
         self.state_clip = 25
-        self.commands = np.zeros(3)
+        self.commands = np.array([0.0, 0.0, 0.0])
         utils.EzPickle.__init__(self)
 
         MujocoEnv.__init__(
@@ -143,7 +145,7 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
     def random_action_sample(self) -> np.ndarray:
         return self.action_space.sample()
 
-    def low_pass_filter(self, action, alpha=0.05):
+    def low_pass_filter(self, action, alpha=1.0):
         if self.filtered_action is None:
             self.filtered_action = action
         else:
@@ -196,7 +198,7 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
         height = self.data.qpos[2]
         reward = self._get_reward()
         done = self._is_done()
-        term = self.step_counter >= self.total_steps
+        term = self.step_counter >= self.sim_step
         return obs, reward, done, term, {}
 
     def _get_reward(self):
@@ -230,7 +232,7 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
 
     def _is_done(self):
         height = self.data.qpos[2]
-        return height < 0.1
+        return height < 0.15
 
     def reset_model(self):
         mujoco.mj_resetData(self.model, self.data)
@@ -301,6 +303,10 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
                      label=f'Act {joint_names[i]} Pos')
             plt.xlabel('Time (s)')
             plt.ylabel('Position (rad)')
+            ticks = np.linspace(-np.pi, np.pi, num=7)  # This generates 7 ticks from -π to π
+            plt.ylim(-np.pi, np.pi)  # Fix y-axis limits to -π to π
+            plt.yticks(ticks, [f"{tick:.2f}" for tick in ticks])  # Set y-ticks and format them to 2 decimal places
+            plt.grid(True, which='both', linestyle='--', linewidth=0.5, color='gray')  # Add a light grid
             plt.legend()
 
         # Plot wheel velocities
@@ -312,6 +318,36 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
                      label=f'Act {wheel_names[i]} Vel')
             plt.xlabel('Time (s)')
             plt.ylabel('Velocity (rad/s)')
+            plt.ylim(-30, 30)  # Fix y-axis limits
+            plt.yticks(np.arange(-30, 31, 5))  # Set y-axis ticks with a step of 1
+            plt.grid(True, which='both', linestyle='--', linewidth=0.5, color='gray')  # Add a light grid
+            plt.legend()
+
+        plt.tight_layout()
+        plt.show()
+
+        # Plot joint torques
+        plt.figure("Joint Torques", figsize=(16, 10))
+
+        # Plot joint torques
+        for i in range(6):  # Assuming 6 joints
+            plt.subplot(4, 2, i + 1)
+            plt.plot(time, np.array(log_data['joint_torques'])[:, i], label=f'{joint_names[i]} Torque')
+            plt.xlabel('Time (s)')
+            plt.ylabel('Torque (Nm)')
+            plt.ylim(-25, 25)  # Fix y-axis limits
+            plt.yticks(np.arange(-25, 26, 5))  # Set y-axis ticks with a step of 1
+            plt.grid(True, which='both', linestyle='--', linewidth=0.5, color='gray')  # Add a light grid
+            plt.legend()
+
+        for i in range(2):  # Assuming 6 joints
+            plt.subplot(4, 2, 6 + i + 1)
+            plt.plot(time, np.array(log_data['wheel_torques'])[:, i], label=f'{wheel_names[i]} Torque')
+            plt.xlabel('Time (s)')
+            plt.ylabel('Torque (Nm)')
+            plt.ylim(-25, 25)  # Fix y-axis limits
+            plt.yticks(np.arange(-25, 26, 5))  # Set y-axis ticks with a step of 1
+            plt.grid(True, which='both', linestyle='--', linewidth=0.5, color='gray')  # Add a light grid
             plt.legend()
 
         plt.tight_layout()
@@ -335,28 +371,40 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
         # Logging structure
         log_data = defaultdict(list)
         dt = 1.0 / sim_hz  # simulation timestep
+        base_velocity_set = False  # Flag to check if base velocity has been set
 
         while True:
             obs, _ = env.reset()
             actions = []
 
-            for step in tqdm(range(self.total_steps), desc="Inferencing..."):
-
+            for step in tqdm(range(int(self.sim_step)), desc="Inferencing..."):
+                current_time = step * dt
                 if step % decimation == 0:
                     obs_tensor = obs.astype(np.float32)
+                    # obs_tensor = np.full_like(obs_tensor, -0.1)
+                    # print("obs tensor:", obs_tensor)
                     action = session.run(None, {input_name: obs_tensor[np.newaxis, :]})[0][0]
                     action_clipped = np.clip(action, -1, 1)
                     actions.append(action_clipped)
+                    # print("Model action:", action)
+
+                # Set base velocity once within the specified time window
+                if 6 <= current_time and not base_velocity_set:
+                    base_velocity = np.array([1.0, 0.5, 0.0])
+                    env.data.qvel[:3] = base_velocity
+                    base_velocity_set = True
 
                 obs, rewards, dones, term, info = env.step(action_clipped)
                 env.render()
 
                 # Log the desired and actual values
-                log_data['time'].append(step * dt)
+                log_data['time'].append(current_time)
                 log_data['desired_joint_positions'].append(action_clipped[:6] * 2.0)
                 log_data['desired_wheel_velocities'].append(action_clipped[6:8] * 25.0)
                 log_data['actual_joint_positions'].append(env.data.qpos[[7, 11, 8, 12, 9, 13]].copy())
                 log_data['actual_wheel_velocities'].append(env.data.qvel[[9, 13]].copy())
+                log_data['joint_torques'].append(env.data.actuator_force[:6].copy())
+                log_data['wheel_torques'].append(env.data.actuator_force[6:8].copy())
 
                 if dones or term:
                     break
