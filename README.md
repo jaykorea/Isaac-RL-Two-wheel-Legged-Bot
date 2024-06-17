@@ -1,37 +1,24 @@
-# Extension Template for Orbit
+# Isaac LAB for Flamingo
 
-[![IsaacSim](https://img.shields.io/badge/IsaacSim-2023.1.1-silver.svg)](https://docs.omniverse.nvidia.com/isaacsim/latest/overview.html)
-[![Orbit](https://img.shields.io/badge/Orbit-0.2.0-silver)](https://isaac-orbit.github.io/orbit/)
+[![IsaacSim](https://img.shields.io/badge/IsaacSim-4.0-silver.svg)](https://docs.omniverse.nvidia.com/isaacsim/latest/overview.html)
+[![Orbit](https://img.shields.io/badge/Lab-0.3.0-silver)](https://isaac-orbit.github.io/orbit/)
 [![Python](https://img.shields.io/badge/python-3.10-blue.svg)](https://docs.python.org/3/whatsnew/3.10.html)
 [![Linux platform](https://img.shields.io/badge/platform-linux--64-orange.svg)](https://releases.ubuntu.com/20.04/)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://pre-commit.com/)
 [![License](https://img.shields.io/badge/license-MIT-yellow.svg)](https://opensource.org/license/mit)
 
-## Overview
+## Wake up Flamingo
 
-This repository serves as a template for building projects or extensions based on Orbit. It allows you to develop in an isolated environment, outside of the core Orbit repository.
+https://github.com/jaykorea/Isaac-RL-Two-wheel-Legged-Bot/assets/95605860/75075512-d2c6-4373-a932-c299567022e6
 
-- **Project Template**
-    Ensures access to `Isaac Sim` and `Orbit` functionalities, which can be used as a project template.
+https://github.com/jaykorea/Isaac-RL-Two-wheel-Legged-Bot/assets/95605860/a3618385-364a-4817-b817-a64cb9ebd6a9
 
-- **Omniverse Extension**
-    Can be used as an Omniverse extension, ideal for projects that leverage the Omniverse platform's graphical user interface.
 
-**Key Features:**
+## Sim 2 Sim framework
+![image](https://github.com/jaykorea/Isaac-RL-Two-wheel-Legged-Bot/assets/95605860/c242590d-b1d4-427e-8f52-4190cafc38e9)
 
-- `Isolation` Work outside the core Orbit repository, ensuring that your development efforts remain self-contained.
-- `Flexibility` This template is set up to allow your code to be run as an extension in Omniverse.
-
-**Keywords:** extension, template, orbit
-
-### License
-
-The source code is released under a [BSD 3-Clause license](https://opensource.org/licenses/BSD-3-Clause).
-
-**Author: The ORBIT Project Developers<br />
-Affiliation: [The AI Institute](https://theaiinstitute.com/)<br />
-Maintainer: Nico Burger, nburger@theaiinstitute.com**
-
+- Simulation to Simulation framework is available on sim2sim_onnx branch
+- You can simply inference trained policy (basically export as .onnx from isaac lab)
 ## Setup
 
 Depending on the use case defined [above](#overview), follow the instructions to set up your extension template. Start with the [Basic Setup](#basic-setup), which is required for either use case.
@@ -40,7 +27,7 @@ Depending on the use case defined [above](#overview), follow the instructions to
 
 #### Dependencies
 
-This template depends on Isaac Sim and Orbit. For detailed instructions on how to install these dependencies, please refer to the [installation guide](https://isaac-orbit.github.io/orbit/source/setup/installation.html).
+This template depends on Isaac Sim and Lab. For detailed instructions on how to install these dependencies, please refer to the [installation guide](https://isaac-orbit.github.io/orbit/source/setup/installation.html).
 
 - [Isaac Sim](https://docs.omniverse.nvidia.com/isaacsim/latest/index.html)
 - [Orbit](https://isaac-orbit.github.io/orbit/)
@@ -221,6 +208,6 @@ echo -e "\nexport PYTHONPATH=\$PYTHONPATH:/workspace/orbit.<your_extension_name>
 source ~/.bashrc
 ```
 
-## Bugs & Feature Requests
+### License
 
-Please report bugs and request features using the [Issue Tracker](https://github.com/isaac-orbit/orbit.ext_template/issues).
+The source code is released under a [BSD 3-Clause license](https://opensource.org/licenses/BSD-3-Clause).
