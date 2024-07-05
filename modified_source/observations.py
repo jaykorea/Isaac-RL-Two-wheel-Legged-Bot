@@ -115,6 +115,27 @@ def prev_prev_base_ang_vel(env: ManagerBasedEnv) -> torch.Tensor:
     return state_storage["base_ang_vel"]["previous2"]
 
 
+def base_lin_acc(
+    env: ManagerBasedEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")
+) -> torch.Tensor:
+    """Root linear velocity in the asset's root frame."""
+    # extract the used quantities (to enable type-hinting)
+    asset: RigidObject = env.scene[asset_cfg.name]
+    current_value = asset.data.body_lin_acc_w[:, asset_cfg.body_ids[0], :]
+    update_state_storage("base_lin_acc", current_value)
+    return current_value
+
+
+def prev_base_lin_acc(env: ManagerBasedEnv) -> torch.Tensor:
+    """Previous root linear acceleration in the asset's root frame."""
+    return state_storage["base_lin_acc"]["previous"]
+
+
+def prev_prev_base_lin_acc(env: ManagerBasedEnv) -> torch.Tensor:
+    """Previous-previous root linear acceleration in the asset's root frame."""
+    return state_storage["base_lin_acc"]["previous2"]
+
+
 def projected_gravity(
     env: ManagerBasedEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")
 ) -> torch.Tensor:

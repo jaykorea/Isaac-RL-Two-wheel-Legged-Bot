@@ -204,7 +204,7 @@ class RslRlVecEnvWrapper(VecEnv):
 
         # Stack observations: current, previous, and previous2 observations (excluding velocity_commands)
         stacked_obs = torch.cat(
-            (obs[:, :31], self.prev_obs[:, :31], self.prev2_obs[:, :31]), dim=1
+            (obs[:, :28], self.prev_obs[:, :28], self.prev2_obs[:, :28]), dim=1
         )
 
         # Add the last 3 velocity observations
