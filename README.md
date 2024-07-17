@@ -21,7 +21,14 @@ https://github.com/jaykorea/Isaac-RL-Two-wheel-Legged-Bot/assets/95605860/a36183
 - You can simply inference trained policy (basically export as .onnx from isaac lab)
 
 ## Setup
+### Install Isaac Sim
+```
+https://docs.omniverse.nvidia.com/isaacsim/latest/installation/index.html
+```
 ### Install Isaac Lab
+```
+https://isaac-sim.github.io/IsaacLab/source/setup/installation/index.html
+```
 
 ### Install lab.flamingo package
 1. Set the ISAACSIM_PATH environment variable to point to your isaaclab installation directory(register on your environment [.bashrc])
