@@ -37,8 +37,15 @@ https://isaac-sim.github.io/IsaacLab/source/setup/installation/index.html
    export ISAACSIM_PYTHON_EXE="${ISAACSIM_PATH}/python.sh"
    export ISAACLAB_PATH="${HOME}/IsaacLab"
    ```
-2. replace 'source' folder into your isaaclab 'source' folder
-3. install lab.flamingo pip package by running below command
+2. clone repository
+   ```
+   git clone -b flamingo_isaac_lab_envs
+   ```
+3. replace 'source' folder into your isaaclab 'source' folder
+   ```
+   cp ${HOME}/lab.flamingo/modified_source/source ${HOME}/IsaacLab/source
+   ```
+5. install lab.flamingo pip package by running below command
    ```
    ${ISAACLAB_PATH}/isaaclab.sh -p -m pip install --upgrade pip
    ${ISAACLAB_PATH}/isaaclab.sh -p -m pip install -e .
