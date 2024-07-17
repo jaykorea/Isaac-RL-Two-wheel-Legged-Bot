@@ -7,14 +7,14 @@
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://pre-commit.com/)
 [![License](https://img.shields.io/badge/license-MIT-yellow.svg)](https://opensource.org/license/mit)
 
-## Flamingo
+## Isaac Lab Flamingo
 
 https://github.com/jaykorea/Isaac-RL-Two-wheel-Legged-Bot/assets/95605860/75075512-d2c6-4373-a932-c299567022e6
 
 https://github.com/jaykorea/Isaac-RL-Two-wheel-Legged-Bot/assets/95605860/a3618385-364a-4817-b817-a64cb9ebd6a9
 
 
-## Sim 2 Sim framework
+## Sim 2 Sim framework - Lab to MuJoCo
 ![image](https://github.com/jaykorea/Isaac-RL-Two-wheel-Legged-Bot/assets/95605860/c242590d-b1d4-427e-8f52-4190cafc38e9)
 
 - Simulation to Simulation framework is available on sim2sim_onnx branch
