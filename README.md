@@ -42,3 +42,13 @@ https://isaac-sim.github.io/IsaacLab/source/setup/installation/index.html
    ${ISAACLAB_PATH}/orbit.sh -p -m pip install --upgrade pip
    ${ISAACLAB_PATH}/orbit.sh -p -m pip install -e .
    ```
+### Launch script
+#### train flamingo
+on lab.flamingo root path, type
+```
+${ISAACLAB_PATH}/isaaclab.sh -p scripts/rsl_rl/train.py --task Isaac-Velocity-Flat-Flamingo-v1 --num_envs 4096 --headless
+```
+#### play flamingo
+```
+${ISAACLAB_PATH}/isaaclab.sh -p scripts/rsl_rl/play.py --task Isaac-Velocity-Flat-Flamingo-Play-v1 --num_envs 32
+```
