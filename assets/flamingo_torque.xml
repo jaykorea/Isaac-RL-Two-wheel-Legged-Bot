@@ -39,19 +39,19 @@
         </default>
 
         <default class='joints'>
-            <joint damping="1.0" stiffness="0.0" frictionloss="0.01" armature="0.01"/>
+            <joint damping="0.0" stiffness="0.0" frictionloss="0.1" armature="0.01"/>
         </default>
         <default class='wheels'>
-            <joint damping="0.01" stiffness="0.0" frictionloss="0.01" armature="0.0001"/>
+            <joint damping="0.0" stiffness="0.0" frictionloss="0.1" armature="0.01"/>
         </default>
     </default>
     
     <worldbody>
-    <geom name="groundplane" pos="0 0 0" size="40 40 0.1" type="plane" material="MatPlane" condim="3" friction="0.8 0.8 0.01" solref="0.002 1" solimp="0.9 0.95 0.05"/>
+    <geom name="groundplane" pos="0 0 0" size="140 140 0.1" type="plane" material="MatPlane" condim="3" friction="1.0 1.0 0.01" solref="0.002 1" solimp="0.9 0.95 0.05"/>
         <body name="base_link" pos="0.0 0.0 0.2461">
-            <inertial pos="0 0 0" mass="4.00040000" diaginertia="0.02545642 0.02209148 0.02540873" />
+            <inertial pos="-0.10284789 0.00005970 -0.06484655" mass="4.00040000" diaginertia="0.02545642 0.02209148 0.02540873" />
             <geom size="0.065 0.09 0.11" pos="-0.13 0 -0.032" type="box" rgba="0.4 0.4 0.4 1" class="collision"/>
-            <geom type="mesh" mesh="base_link_mesh" rgba="0.4 0.4 0.4 1" contype="0" conaffinity="0" class="visual"/>
+            <geom type="mesh" mesh="base_link_mesh" rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0" class="visual"/>
             <site name="base_link_site" pos="0 0 0" size="0.01" rgba="0.2 0.2 0.2 1" />
             <joint name="base_free_joint" type="free" damping="0.0" />
             <site name='imu' size='0.01' pos='0.0 0 0.0'/>

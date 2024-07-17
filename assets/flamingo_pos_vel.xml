@@ -25,28 +25,29 @@
 
         <default class="hip">
             <geom solref="0.004 1"/>
-            <joint damping="0.0" stiffness="0.0" frictionloss="0.01" armature="0.1" actuatorfrclimited="true" actuatorfrcrange="-23 23"/>
-            <position kp="120" kv="25" gear="1" />
+            <joint damping="1.0" stiffness="0.0" frictionloss="0.01" armature="0.1" actuatorfrclimited="true" actuatorfrcrange="-23 23"/>
+            <position kp="75" kv="1.0" gear="1" />
         </default>
         <default class="shoulder">
             <geom solref="0.004 1"/>
             <joint damping="1.0" stiffness="0.0" frictionloss="0.01" armature="0.1" actuatorfrclimited="true" actuatorfrcrange="-23 23"/>
-            <position kp="120" kv="25" gear="1" />
+            <position kp="75" kv="1.0" gear="1" />
         </default>
         <default class="leg">
             <geom solref="0.004 1"/>
             <joint damping="1.0" stiffness="0.0" frictionloss="0.01" armature="0.1" actuatorfrclimited="true" actuatorfrcrange="-23 23"/>
-            <position kp="120" kv="25" gear="1" />
+            <position kp="75" kv="1.0" gear="1" />
         </default>
         <default class="wheels">
             <geom solref="0.004 1"/>
             <joint damping="1.0" stiffness="0.0" frictionloss="0.01" armature="0.01" actuatorfrclimited="true" actuatorfrcrange="-6 6"/>
-            <velocity kv="0.6" gear="1" />
+            <velocity kv="0.3" gear="1" />
         </default>
     </default>
     
     <worldbody>
-    <geom name="groundplane" pos="0 0 0" size="40 40 0.1" type="plane" material="MatPlane" condim="3" friction="1.0 1.0 0.01" solref="0.002 1" solimp="0.9 0.95 0.05"/>
+    <geom name="groundplane" pos="0 0 0" size="140 140 0.1" type="plane" material="MatPlane" condim="3" friction="1.0 1.0 0.01" solref="0.002 1" solimp="0.9 0.95 0.05"/>
+
         <body name="base_link" pos="0.0 0.0 0.2461">
             <inertial pos="-0.10284789 0.00005970 -0.06484655" mass="4.00040000" diaginertia="0.02545642 0.02209148 0.02540873" />
             <geom size="0.065 0.09 0.11" pos="-0.13 0 -0.032" type="box" rgba="0.4 0.4 0.4 1" class="collision"/>
