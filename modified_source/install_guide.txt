@@ -1,18 +1,8 @@
 
-# Set the ORBIT_PATH environment variable to point to your Orbit installation directory
-
-# place 'observations.py' into your orbit 'source' folder
-# i.e.) ~/IsaacLab/source/extensions/omni.isaac.orbit/omni/isaac/orbit/envs/mdp/
-
-# Place 'vecenv_wrapper.py' into your orbit 'source' folder
-# i.e.) ~/IsaacLab/source/extensions/omni.isaac.orbit_tasks/omni/isaac/orbit_tasks/utils/wrappers/rsl_rl/
-
-# Add 'rewards.py' into your IsaacLab 'source' folder
-# i.e.) ~/IsaacLab/source/extensions/omni.isaac.lab/omni/isaac/lab/envs/mdp
-
-
+# Set the ISAACSIM_PATH environment variable to point to your Orbit installation directory
 export ISAACSIM_PATH="${HOME}/.local/share/ov/pkg/isaac-sim-4.0.0"
 export ISAACSIM_PYTHON_EXE="${ISAACSIM_PATH}/python.sh"
+# replace 'source' folder into your isaaclab 'source' folder
 
 
 # ${ISAACLAB_PATH}/orbit.sh -p -m pip install --upgrade pip

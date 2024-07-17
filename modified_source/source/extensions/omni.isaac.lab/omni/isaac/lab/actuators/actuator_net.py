@@ -455,4 +455,3 @@ class ActuatorNetMLP(DCMotor):
         control_action.joint_positions = None
         control_action.joint_velocities = None
         return control_action
-

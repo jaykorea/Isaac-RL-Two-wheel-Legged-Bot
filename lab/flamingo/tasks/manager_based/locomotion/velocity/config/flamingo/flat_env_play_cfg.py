@@ -25,7 +25,7 @@ class FlamingoFlatEnvCfg_PLAY(LocomotionVelocityFlatEnvCfg):
     def __post_init__(self):
         # post init of parent
         super().__post_init__()
-        self.episode_length_s = 5.0
+        self.episode_length_s = 10.0
         self.debug_vis = True
         # scene
         self.scene.robot = FLAMINGO_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
@@ -34,7 +34,7 @@ class FlamingoFlatEnvCfg_PLAY(LocomotionVelocityFlatEnvCfg):
 
         # reset_robot_joint_zero should be called here
         self.events.reset_robot_joints.params["position_range"] = (-0.05, 0.05)
-        self.events.push_robot.interval_range_s = (2.5, 3.0)
+        self.events.push_robot.interval_range_s = (5.5, 7.5)
         self.events.push_robot.params = {
             "velocity_range": {"x": (-0.5, 0.5), "y": (-0.5, 0.5)},
         }

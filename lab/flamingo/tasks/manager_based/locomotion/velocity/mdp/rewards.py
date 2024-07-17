@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import torch
+import torch.nn.functional as F
 from typing import TYPE_CHECKING
 
 from omni.isaac.lab.managers import SceneEntityCfg
@@ -91,7 +92,7 @@ def stand_still_base(
     position_penalty = position_error / std**2
 
     # Apply the penalty only when the command is zero
-    penalty = (position_penalty + velocity_penalty) * is_zero_command.float()
+    penalty = (velocity_penalty) * is_zero_command.float()
 
     return penalty
 
@@ -175,3 +176,26 @@ def action_smoothness_hard(env: ManagerBasedRLEnv) -> torch.Tensor:
     sm3 = 0.05 * torch.sum(torch.abs(env.action_manager.action), dim=1)
 
     return sm1 + sm2 + sm3
+
+
+def base_height_range_reward(
+    env: ManagerBasedRLEnv,
+    min_height: float,
+    max_height: float,
+    in_range_reward: float,
+    asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+) -> torch.Tensor:
+    """Provide a fixed reward when the asset height is within a specified range and penalize deviations."""
+    asset: RigidObject = env.scene[asset_cfg.name]
+    root_pos_z = asset.data.root_pos_w[:, 2]
+
+    # Check if the height is within the specified range
+    in_range = (root_pos_z >= min_height) & (root_pos_z <= max_height)
+
+    # Calculate the absolute deviation from the nearest range limit when out of range
+    out_of_range_penalty = torch.abs(root_pos_z - torch.where(root_pos_z < min_height, min_height, max_height))
+
+    # Assign a fixed reward if in range, and a negative penalty if out of range
+    reward = torch.where(in_range, in_range_reward * torch.ones_like(root_pos_z), -out_of_range_penalty)
+
+    return reward

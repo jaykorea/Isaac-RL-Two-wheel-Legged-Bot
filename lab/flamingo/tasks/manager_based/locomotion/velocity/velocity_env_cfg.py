@@ -240,16 +240,16 @@ class EventCfg:
             "num_buckets": 64,
         },
     )
-    robot_joint_stiffness_and_damping = EventTerm(
-        func=mdp.randomize_actuator_gains,
-        params={
-            "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_joint", ".*_shoulder_joint", ".*_leg_joint"]),
-            "stiffness_distribution_params": (0.5, 2.0),
-            "damping_distribution_params": (0.5, 1.5),
-            "operation": "scale",
-            "distribution": "log_uniform",
-        },
-    )
+    # robot_joint_stiffness_and_damping = EventTerm(
+    #     func=mdp.randomize_actuator_gains,
+    #     params={
+    #         "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_joint", ".*_shoulder_joint", ".*_leg_joint"]),
+    #         "stiffness_distribution_params": (0.8, 1.2),
+    #         "damping_distribution_params": (0.8, 1.2),
+    #         "operation": "scale",
+    #         "distribution": "gaussian",
+    #     },
+    # )
     # robot_wheel_stiffness_and_damping = EventTerm(
     #     func=mdp.randomize_actuator_gains,
     #     params={
@@ -260,16 +260,16 @@ class EventCfg:
     #         "distribution": "log_uniform",
     #     },
     # )
-    robot_joint_friction_and_armature = EventTerm(
-        func=mdp.randomize_joint_parameters,
-        params={
-            "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_joint", ".*_shoulder_joint", ".*_leg_joint"]),
-            "friction_distribution_params": (0.1, 2.0),
-            "armature_distribution_params": (0.3, 2.0),
-            "operation": "scale",
-            "distribution": "log_uniform",
-        },
-    )
+    # robot_joint_friction_and_armature = EventTerm(
+    #     func=mdp.randomize_joint_parameters,
+    #     params={
+    #         "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_joint", ".*_shoulder_joint", ".*_leg_joint"]),
+    #         "friction_distribution_params": (0.1, 2.0),
+    #         "armature_distribution_params": (0.3, 2.0),
+    #         "operation": "scale",
+    #         "distribution": "log_uniform",
+    #     },
+    # )
     # robot_wheel_friction_and_armature = EventTerm(
     #     func=mdp.randomize_joint_parameters,
     #     params={
@@ -368,21 +368,6 @@ class RewardsCfg:
     #         "threshold": 0.5,
     #     },
     # )
-    undesired_contacts = RewTerm(
-        func=mdp.undesired_contacts,
-        weight=-1.0,
-        params={
-            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=[".*_shoulder_link", ".*_leg_link"]),
-            "threshold": 1.0,
-        },
-    )
-    # -- optional penalties
-    flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-0.1)
-    base_target_height = RewTerm(
-        func=mdp.base_height_l2,
-        weight=-10.0,
-        params={"target_height": 0.35482, "asset_cfg": SceneEntityCfg("robot", body_names="base_link")},
-    )
 
 
 @configclass
@@ -427,7 +412,7 @@ class LocomotionVelocityRoughEnvCfg(ManagerBasedRLEnvCfg):
     def __post_init__(self):
         """Post initialization."""
         # general settings
-        self.decimation = 2
+        self.decimation = 4
         self.episode_length_s = 20.0
         # simulation settings
         self.sim.dt = 0.005
@@ -469,7 +454,7 @@ class LocomotionVelocityFlatEnvCfg(ManagerBasedRLEnvCfg):
     def __post_init__(self):
         """Post initialization."""
         # general settings
-        self.decimation = 2
+        self.decimation = 4
         self.episode_length_s = 20.0
         # simulation settings
         self.sim.dt = 0.005
