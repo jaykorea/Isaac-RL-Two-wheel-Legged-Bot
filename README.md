@@ -7,7 +7,7 @@
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://pre-commit.com/)
 [![License](https://img.shields.io/badge/license-MIT-yellow.svg)](https://opensource.org/license/mit)
 
-## Wake up Flamingo
+## Flamingo
 
 https://github.com/jaykorea/Isaac-RL-Two-wheel-Legged-Bot/assets/95605860/75075512-d2c6-4373-a932-c299567022e6
 
@@ -24,7 +24,18 @@ https://github.com/jaykorea/Isaac-RL-Two-wheel-Legged-Bot/assets/95605860/a36183
 Depending on the use case defined [above](#overview), follow the instructions to set up your extension template. Start with the [Basic Setup](#basic-setup), which is required for either use case.
 
 ### Basic Setup
-
+1. Set the ISAACSIM_PATH environment variable to point to your Orbit installation directory
+#### register on your environment (.bashrc)
+   ```
+   export ISAACSIM_PATH="${HOME}/.local/share/ov/pkg/isaac-sim-4.0.0"
+   export ISAACSIM_PYTHON_EXE="${ISAACSIM_PATH}/python.sh"
+   ```
+2. replace 'source' folder into your isaaclab 'source' folder
+3. install lab.flamingo pip package by running below command
+   ```
+   ${ISAACLAB_PATH}/orbit.sh -p -m pip install --upgrade pip
+   ${ISAACLAB_PATH}/orbit.sh -p -m pip install -e .
+   ```
 #### Dependencies
 
 This template depends on Isaac Sim and Lab. For detailed instructions on how to install these dependencies, please refer to the [installation guide](https://isaac-orbit.github.io/orbit/source/setup/installation.html).
