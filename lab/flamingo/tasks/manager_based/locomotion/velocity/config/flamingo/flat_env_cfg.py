@@ -103,7 +103,7 @@ class FlamingoRewardsCfg(RewardsCfg):
         params={
             "min_height": 0.30,
             "max_height": 0.38,
-            "in_range_reward": 0.1,
+            "in_range_reward": 0.02,
             "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
         },
     )
@@ -159,8 +159,8 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
                 "x": (0.0, 0.0),
                 "y": (0.0, 0.0),
                 "z": (0.0, 0.0),
-                "roll": (-0.0, 0.0),
-                "pitch": (-0.0, 0.0),
+                "roll": (-0.35, 0.35),
+                "pitch": (-0.35, 0.35),
                 "yaw": (-0.0, 0.0),
             },
         }
@@ -169,10 +169,10 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
         self.rewards.dof_torques_l2.weight = -2.5e-6  # default: -5.0e-6
         self.rewards.track_lin_vel_xy_exp.weight = 2.0
         self.rewards.track_ang_vel_z_exp.weight = 1.0
-        self.rewards.action_rate_l2.weight *= 1.5  # default : 1.5, 1.0
-        self.rewards.dof_acc_l2.weight *= 1.5  # default : 1.5
-        self.rewards.lin_vel_z_l2.weight *= 1.0
-        self.rewards.ang_vel_xy_l2.weight *= 1.0
+        self.rewards.action_rate_l2.weight *= 1.5  # default: 1.5
+        self.rewards.dof_acc_l2.weight *= 1.5  # default: 1.5
+        self.rewards.lin_vel_z_l2.weight *= 1.0  # default: 1.0
+        self.rewards.ang_vel_xy_l2.weight *= 1.0  # default: 1.0
 
         # change terrain to flat
         self.scene.terrain.terrain_type = "plane"
