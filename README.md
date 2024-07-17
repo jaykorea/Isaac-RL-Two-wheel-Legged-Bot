@@ -35,12 +35,13 @@ https://isaac-sim.github.io/IsaacLab/source/setup/installation/index.html
    ```
    export ISAACSIM_PATH="${HOME}/.local/share/ov/pkg/isaac-sim-4.0.0"
    export ISAACSIM_PYTHON_EXE="${ISAACSIM_PATH}/python.sh"
+   export ISAACLAB_PATH="${HOME}/IsaacLab"
    ```
 2. replace 'source' folder into your isaaclab 'source' folder
 3. install lab.flamingo pip package by running below command
    ```
-   ${ISAACLAB_PATH}/orbit.sh -p -m pip install --upgrade pip
-   ${ISAACLAB_PATH}/orbit.sh -p -m pip install -e .
+   ${ISAACLAB_PATH}/isaaclab.sh -p -m pip install --upgrade pip
+   ${ISAACLAB_PATH}/isaaclab.sh -p -m pip install -e .
    ```
 ### Launch script
 #### train flamingo
