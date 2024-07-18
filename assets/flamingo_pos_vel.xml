@@ -26,21 +26,21 @@
         <default class="hip">
             <geom solref="0.004 1"/>
             <joint damping="1.0" stiffness="0.0" frictionloss="0.01" armature="0.1" actuatorfrclimited="true" actuatorfrcrange="-23 23"/>
-            <position kp="75" kv="1.0" gear="1" />
+            <position kp="80" kv="1.0" gear="1" />
         </default>
         <default class="shoulder">
             <geom solref="0.004 1"/>
             <joint damping="1.0" stiffness="0.0" frictionloss="0.01" armature="0.1" actuatorfrclimited="true" actuatorfrcrange="-23 23"/>
-            <position kp="75" kv="1.0" gear="1" />
+            <position kp="80" kv="1.0" gear="1" />
         </default>
         <default class="leg">
             <geom solref="0.004 1"/>
             <joint damping="1.0" stiffness="0.0" frictionloss="0.01" armature="0.1" actuatorfrclimited="true" actuatorfrcrange="-23 23"/>
-            <position kp="75" kv="1.0" gear="1" />
+            <position kp="80" kv="1.0" gear="1" />
         </default>
         <default class="wheels">
             <geom solref="0.004 1"/>
-            <joint damping="1.0" stiffness="0.0" frictionloss="0.01" armature="0.01" actuatorfrclimited="true" actuatorfrcrange="-6 6"/>
+            <joint damping="1.0" stiffness="0.0" frictionloss="0.01" armature="0.01" actuatorfrclimited="true" actuatorfrcrange="-5 5"/>
             <velocity kv="0.3" gear="1" />
         </default>
     </default>
