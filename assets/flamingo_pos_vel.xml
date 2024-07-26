@@ -26,17 +26,17 @@
         <default class="hip">
             <geom solref="0.004 1"/>
             <joint damping="1.0" stiffness="0.0" frictionloss="0.01" armature="0.1" actuatorfrclimited="true" actuatorfrcrange="-23 23"/>
-            <position kp="80" kv="1.0" gear="1" />
+            <position kp="100" kv="1.0" gear="1" />
         </default>
         <default class="shoulder">
             <geom solref="0.004 1"/>
             <joint damping="1.0" stiffness="0.0" frictionloss="0.01" armature="0.1" actuatorfrclimited="true" actuatorfrcrange="-23 23"/>
-            <position kp="80" kv="1.0" gear="1" />
+            <position kp="100" kv="1.0" gear="1" />
         </default>
         <default class="leg">
             <geom solref="0.004 1"/>
             <joint damping="1.0" stiffness="0.0" frictionloss="0.01" armature="0.1" actuatorfrclimited="true" actuatorfrcrange="-23 23"/>
-            <position kp="80" kv="1.0" gear="1" />
+            <position kp="100" kv="1.0" gear="1" />
         </default>
         <default class="wheels">
             <geom solref="0.004 1"/>
@@ -142,7 +142,7 @@
         <framequat name="orientation" objtype="site" noise="0.1" objname="imu"/>
         <framepos name="position" objtype="site" noise="0.1" objname="imu"/>
         <gyro name="angular-velocity" site="imu" noise="0.2" cutoff="34.9"/>
-        <velocimeter name="linear-velocity" site="imu" noise="0.1" cutoff="30"/>
+        <velocimeter name="linear-velocity" site="imu" noise="0.25" cutoff="30"/>
         <accelerometer name="linear-acceleration" site="imu" noise="0.05" cutoff="157"/>
         <magnetometer name="magnetometer" site="imu"/>
     </sensor>
