@@ -8,13 +8,33 @@ class MemoryUtils:
         self.maximum_episodes = 10000
         self.episodes = []
 
-    def load(self, states: np.ndarray, actions: np.ndarray, rewards: list, next_states: np.ndarray, terminated: list):
+        self.states = []
+        self.actions = []
+        self.next_states = []
+        self.rewards = []
+        self.terminates = []
+
+    def load(self):
         if self.total_episodes < self.maximum_episodes:
-            data = {'states': states, 'actions': actions, 'rewards': rewards, 'next_states': next_states,
-                    'terminated': terminated}
+            data = {'states': np.array(self.states), 'actions': np.array(self.actions), 'rewards': self.rewards, 'next_states': np.array(self.next_states),
+                    'terminated': self.terminates}
             self.episodes.append(data)
         else:
             print("[Error] Maximum number of episodes exceeded!")
             raise MemoryError
         self.total_episodes += 1
-        self.total_transition += states.shape[0]
+        self.total_transition += np.array(self.states).shape[0]
+
+    def store(self, states, actions, rewards, next_states, terminates):
+        self.states.append(states)
+        self.actions.append(actions)
+        self.rewards.append(rewards)
+        self.next_states.append(next_states)
+        self.terminates.append(terminates)
+
+    def reset(self):
+        self.states = []
+        self.actions = []
+        self.rewards = []
+        self.next_states = []
+        self.terminates = []

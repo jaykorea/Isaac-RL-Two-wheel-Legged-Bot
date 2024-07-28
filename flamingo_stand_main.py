@@ -1,10 +1,11 @@
 from gymnasium import utils
 from gymnasium.envs.mujoco import MujocoEnv
+from gymnasium.envs.mujoco.mujoco_rendering import MujocoRenderer
 from gymnasium.spaces import Box
 import numpy as np
-import torch
+import pickle
+import xml.etree.ElementTree as ET
 import os
-import math
 import mujoco
 import threading
 import argparse
@@ -16,6 +17,8 @@ from utils.math_utils import MathUtils
 from utils.log_utils import LogUtils
 from utils.extra_utils import ExtraUtils
 
+from manager.noise_manager import AdditiveNoiseManager
+from manager.inertia_manager import InertiaManager
 from manager.reward_manager import RewardManager
 from manager.push_manager import PushManager
 from manager.control_manager import ControlManager
@@ -30,6 +33,7 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
         self.model_path = os.path.join(os.path.dirname(__file__), model_path)
         self.frame_skip = frame_skip
         self.render_mode = render_mode
+        self.viewer = None
         self.dt_ = 0.005
         self.sim_duration = 20
         self.sim_step = (self.sim_duration / self.dt_) / self.frame_skip
@@ -43,10 +47,30 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
         self.step_counter = 0
 
         self.save_data = False
-        self.save_trajectory = True
-        self.plot_log = True
+        self.save_trajectory = False
+        self.plot_log = False
+        self.mem_save = True
 
+        self.randomize_sensor = True
+        self.randomize_inertia = True
+        self.randomize_initial_state = True
         self.push_robot = True
+
+        self.Unoise = AdditiveNoiseManager(noise_type="uniform")
+        self.Gnoise = AdditiveNoiseManager(noise_type="gaussian")
+
+        self.inertia_manager = InertiaManager(self.model_path)
+        self.specific_bodies_noise = {
+            "base_link": {"mass_mean": 0.0, "mass_std": 0.5, "inertia_mean": 0.0, "inertia_std": 0.0},
+            "left_hip_link": {"mass_mean": 0.0, "mass_std": 0.1, "inertia_mean": 0.0, "inertia_std": 0.0},
+            "right_hip_link": {"mass_mean": 0.0, "mass_std": 0.1, "inertia_mean": 0.0, "inertia_std": 0.0},
+            "left_shoulder_link": {"mass_mean": 0.0, "mass_std": 0.1, "inertia_mean": 0.0, "inertia_std": 0.0},
+            "right_shoulder_link": {"mass_mean": 0.0, "mass_std": 0.1, "inertia_mean": 0.0, "inertia_std": 0.0},
+            "left_leg_link": {"mass_mean": 0.0, "mass_std": 0.1, "inertia_mean": 0.0, "inertia_std": 0.0},
+            "right_leg_link": {"mass_mean": 0.0, "mass_std": 0.1, "inertia_mean": 0.0, "inertia_std": 0.0},
+            "left_wheel_link": {"mass_mean": 0.0, "mass_std": 0.1, "inertia_mean": 0.0, "inertia_std": 0.0},
+            "right_wheel_link": {"mass_mean": 0.0, "mass_std": 0.1, "inertia_mean": 0.0, "inertia_std": 0.0},
+        }
 
         self.reward_manager = RewardManager()
         self.control_manager = ControlManager()
@@ -59,22 +83,47 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
 
         utils.EzPickle.__init__(self)
 
-        MujocoEnv.__init__(self, model_path=self.model_path,
-                           frame_skip=self.frame_skip,
-                           observation_space=Box(low=-self.state_clip,
-                                                 high=self.state_clip,
-                                                 shape=(self.obs_dim,),
-                                                 dtype=np.float32))
+        if self.render_mode is None:
+            MujocoEnv.__init__(
+                self,
+                model_path=self.model_path,
+                frame_skip=self.frame_skip,
+                observation_space=Box(
+                    low=-self.state_clip,
+                    high=self.state_clip,
+                    shape=(self.obs_dim,),
+                    dtype=np.float32,
+                ),  # 3 프레임을 쌓음
+            )
+        else:
+            MujocoEnv.__init__(
+                self,
+                model_path=self.model_path,
+                frame_skip=self.frame_skip,
+                observation_space=Box(
+                    low=-self.state_clip,
+                    high=self.state_clip,
+                    shape=(self.obs_dim,),
+                    dtype=np.float32,
+                ),
+                render_mode=self.render_mode,
+            )
 
     def _get_obs(self, action):
+        q = self.data.qpos[[7, 11, 8, 12, 9, 13]]
+        qd = self.data.qvel[[6, 10, 7, 11, 8, 12, 9, 13]]
         quat = self.data.sensor('orientation').data[[1, 2, 3, 0]].astype(np.double)
         if np.all(quat == 0):
             quat = np.array([0, 0, 0, 1])
 
         omega = self.data.sensor('angular-velocity').data.astype(np.double)
         euler = MathUtils.quaternion_to_euler_array(quat)
-        q = self.data.qpos[[7, 11, 8, 12, 9, 13]]
-        qd = self.data.qvel[[6, 10, 7, 11, 8, 12, 9, 13]]
+
+        if self.randomize_sensor:
+            q = self.Unoise.apply(q, low=-0.04, high=0.04)
+            qd = self.Unoise.apply(qd, low=-1.5, high=1.5)
+            omega = self.Unoise.apply(omega, low=-0.2, high=0.2)
+            euler = self.Unoise.apply(euler, low=-0.1, high=0.1)
 
         current_state = np.concatenate([q, qd, omega, euler, action])
 
@@ -86,6 +135,7 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
             self.previous_states.insert(0, current_state)
 
         self.pygame_utils.update_commands(automation=self.pygame_utils.automation_command)
+
         return np.clip(np.concatenate([np.concatenate(self.previous_states), self.pygame_utils.commands]), -self.state_clip, self.state_clip)
 
     def seed(self, seed):
@@ -191,7 +241,20 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
         return contact
 
     def reset_model(self):
-        mujoco.mj_resetData(self.model, self.data)
+        if self.randomize_inertia:
+            randomized_model_path = self.inertia_manager.randomize_inertial(self.specific_bodies_noise)
+            print(f"Loading model from {randomized_model_path}")
+            self.fullpath = randomized_model_path
+            self.model = mujoco.MjModel.from_xml_path(self.fullpath)
+            self.data = mujoco.MjData(self.model)
+            mujoco.mj_resetData(self.model, self.data)
+
+            # Reinitialize the MujocoRenderer with the new model
+            self.mujoco_renderer.close()
+            self.mujoco_renderer = MujocoRenderer(self.model, self.data)
+        else:
+            mujoco.mj_resetData(self.model, self.data)
+
         self.data.qpos[:] = self.initial_qpos()
         self.data.qvel[:] = 0
         self.previous_states = []
@@ -206,6 +269,9 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
         qpos = np.zeros(self.model.nq)
         qpos[2] = 0.2561942
         qpos[3:7] = np.array([1, 0, 0, 0])
+        qpos[7:14] = np.array([0, 0, 0, 0, 0, 0, 0])
+        if self.randomize_initial_state:
+            qpos[7:14] = self.Gnoise.apply(qpos[7:14], mean=0.0, std=0.1)
         return qpos
 
     def close(self):
@@ -213,7 +279,7 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
             self.viewer.close()
             self.viewer = None
 
-    def run_mujoco(self, session, input_name, env, mem, sim_hz=200, decimation=4):
+    def run_mujoco(self, session, input_name, env, sim_hz=200, decimation=4):
         dt = (1.0 / sim_hz) * self.frame_skip
 
         while True:
@@ -228,10 +294,16 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
                 if self.push_robot:
                     self.push_manager.apply_push(env, np.array([0.5, 0.5, 0.0]), current_time, push_vel_range=(-1.0, 1.0), time_range=(5.0, 15.0), random=True)
 
+                prev_obs = obs
                 obs, rewards, term, trun, info = env.step(action_clipped)
-                env.render()
 
-                self.log_utils.log_step_data(current_time, action_clipped, env)
+                if self.mem_save:
+                    self.mem_utils.store(prev_obs, action_clipped, rewards, obs, term)
+
+                if self.plot_log or self.save_data or self.save_trajectory:
+                    self.log_utils.log_step_data(current_time, action_clipped, env)
+
+                env.render()
 
                 if term or trun:
                     break
@@ -244,6 +316,13 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
                 self.log_utils.save_data_to_csv('dataset/joints/', 'dataset/wheels/')
             if self.save_trajectory:
                 self.log_utils.save_trajectory_to_csv('dataset/trajectory/')
+
+            if self.mem_save:
+                self.mem_utils.load()
+                self.mem_utils.reset()
+
+                with open("raw_memory2.pkl", "wb") as fw:
+                    pickle.dump(self.mem_utils, fw)
 
             env.reset()
 
@@ -258,7 +337,7 @@ if __name__ == '__main__':
 
     env = FLA_STAND(env_id="FLA_STAND-v0")
     env.render_mode = "human"
-    mujoco_thread = threading.Thread(target=env.run_mujoco, args=(session, input_name, env, env.mem_utils, 200, 4))
+    mujoco_thread = threading.Thread(target=env.run_mujoco, args=(session, input_name, env, 200, 4))
     mujoco_thread.start()
 
     try:

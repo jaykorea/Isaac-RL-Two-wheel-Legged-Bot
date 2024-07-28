@@ -1,7 +1,6 @@
 <mujoco model="flamingo">
     <compiler angle="radian" />
     <option timestep="0.005" gravity="0 0 -9.81" iterations="50" solver="Newton" jacobian="dense" integrator="implicitfast"/>
-    <!-- <option timestep="0.005" gravity="0 0 -9.81" iterations="50" tolerance="1e-10" solver="Newton" jacobian="dense" cone="pyramidal"/> -->
 
     <visual>
         <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0"/>
@@ -139,11 +138,11 @@
     </actuator>
 
     <sensor>
-        <framequat name="orientation" objtype="site" noise="0.1" objname="imu"/>
-        <framepos name="position" objtype="site" noise="0.1" objname="imu"/>
-        <gyro name="angular-velocity" site="imu" noise="0.2" cutoff="34.9"/>
-        <velocimeter name="linear-velocity" site="imu" noise="0.25" cutoff="30"/>
-        <accelerometer name="linear-acceleration" site="imu" noise="0.05" cutoff="157"/>
+        <framequat name="orientation" objtype="site"  objname="imu"/>
+        <framepos name="position" objtype="site" objname="imu"/>
+        <gyro name="angular-velocity" site="imu" cutoff="34.9"/>
+        <velocimeter name="linear-velocity" site="imu" cutoff="30"/>
+        <accelerometer name="linear-acceleration" site="imu" cutoff="157"/>
         <magnetometer name="magnetometer" site="imu"/>
     </sensor>
 </mujoco>
