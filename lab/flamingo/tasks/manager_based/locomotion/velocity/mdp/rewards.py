@@ -9,7 +9,7 @@ import torch
 import torch.nn.functional as F
 from typing import TYPE_CHECKING
 
-from omni.isaac.lab.managers import SceneEntityCfg
+from omni.isaac.lab.managers import SceneEntityCfg, ManagerTermBase, RewardTermCfg
 from omni.isaac.lab.sensors import ContactSensor
 
 if TYPE_CHECKING:
@@ -58,6 +58,76 @@ def feet_air_time_positive_biped(env, command_name: str, threshold: float, senso
     # no reward for zero command
     reward *= torch.norm(env.command_manager.get_command(command_name)[:, :2], dim=1) > 0.1
     return reward
+
+
+class FlamingoAirTimeReward(ManagerTermBase):
+    """Reward for longer feet air and contact time with stuck detection and reward for locomotion."""
+
+    def __init__(self, cfg: RewardTermCfg, env: ManagerBasedRLEnv):
+        """Initialize the term.
+
+        Args:
+            cfg: The configuration of the reward.
+            env: The RL environment instance.
+        """
+        super().__init__(cfg, env)
+        self.stuck_threshold: float = cfg.params.get("stuck_threshold", 0.1)
+        self.stuck_duration: int = cfg.params.get("stuck_duration", 5)
+        self.std: float = cfg.params.get("std", 0.1)
+        self.tanh_mult: float = cfg.params.get("tanh_mult", 1.0)
+        self.target_height: float = cfg.params.get("target_height", 0.2)
+        self.asset: Articulation = env.scene[cfg.params["asset_cfg"].name]
+        self.contact_sensor: ContactSensor = env.scene.sensors[cfg.params["sensor_cfg"].name]
+        self.stuck_counter = torch.zeros(self.asset.data.root_lin_vel_b.shape[0], device=self.asset.device)
+
+        if not self.contact_sensor.cfg.track_air_time:
+            raise RuntimeError("Activate ContactSensor's track_air_time!")
+
+    def __call__(
+        self,
+        env: ManagerBasedRLEnv,
+        stuck_threshold: float,
+        stuck_duration: int,
+        std: float,
+        tanh_mult: float,
+        asset_cfg: SceneEntityCfg,
+        sensor_cfg: SceneEntityCfg,
+    ) -> torch.Tensor:
+        """Compute the reward.
+
+        This reward calculates the air-time for the feet and applies a reward when the robot is stuck.
+
+        Args:
+            env: The RL environment instance.
+        Returns:
+            The reward value.
+        """
+        contact_sensor = env.scene.sensors[sensor_cfg.name]
+
+        air_time = contact_sensor.data.current_air_time[:, sensor_cfg.body_ids]
+
+        # Stuck detection
+        progress = torch.norm(env.command_manager.get_command("base_velocity") - self.asset.data.root_lin_vel_b, dim=1)
+        is_stuck = progress > stuck_threshold  # Detect lack of progress
+
+        self.stuck_counter = torch.where(is_stuck, self.stuck_counter + 1, torch.zeros_like(self.stuck_counter))
+        stuck = self.stuck_counter >= stuck_duration
+
+        stuck_air_time_reward = torch.sum(air_time, dim=1) * stuck.float() * 10.0
+
+        # Foot clearance reward
+        foot_z_target_error = torch.square(self.asset.data.body_pos_w[:, asset_cfg.body_ids, 2] - self.target_height)
+        foot_velocity_tanh = torch.tanh(
+            tanh_mult * torch.norm(self.asset.data.body_lin_vel_w[:, asset_cfg.body_ids, :2], dim=2)
+        )
+        foot_clearance_reward = (
+            torch.exp(-torch.sum(foot_z_target_error * foot_velocity_tanh, dim=1) / std) * stuck.float()
+        )
+
+        # Final reward: Encourage lifting legs when stuck
+        reward = stuck_air_time_reward + foot_clearance_reward
+
+        return reward
 
 
 def stand_still_base(
@@ -193,9 +263,68 @@ def base_height_range_reward(
     in_range = (root_pos_z >= min_height) & (root_pos_z <= max_height)
 
     # Calculate the absolute deviation from the nearest range limit when out of range
-    out_of_range_penalty = torch.abs(root_pos_z - torch.where(root_pos_z < min_height, min_height, max_height))
+    out_of_range_penalty = torch.abs(root_pos_z - torch.where(root_pos_z < min_height, max_height, min_height))
 
     # Assign a fixed reward if in range, and a negative penalty if out of range
     reward = torch.where(in_range, in_range_reward * torch.ones_like(root_pos_z), -out_of_range_penalty)
 
     return reward
+
+
+def base_height_range_relative_reward(
+    env: ManagerBasedRLEnv,
+    min_height: float,
+    max_height: float,
+    in_range_reward: float,
+    root_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+    wheel_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+) -> torch.Tensor:
+    """Provide a fixed reward when the asset height is within a specified range and penalize deviations."""
+    root_asset: RigidObject = env.scene[root_cfg.name]
+    wheel_asset: RigidObject = env.scene[wheel_cfg.name]
+
+    root_pos_z = root_asset.data.root_pos_w[:, 2]
+    # Get the mean z position of the wheels
+    wheel_pos_z = wheel_asset.data.body_pos_w[:, wheel_cfg.body_ids, 2].mean(dim=1)
+
+    # Calculate the height difference
+    height_diff = root_pos_z - wheel_pos_z
+
+    # Check if the height difference is within the specified range
+    in_range = (height_diff >= min_height) & (height_diff <= max_height)
+
+    # Calculate the absolute deviation from the nearest range limit when out of range
+    out_of_range_penalty = torch.abs(height_diff - torch.where(height_diff < min_height, max_height, min_height))
+
+    # Assign a fixed reward if in range, and a negative penalty if out of range
+    reward = torch.where(in_range, in_range_reward * torch.ones_like(height_diff), -out_of_range_penalty)
+
+    return reward
+
+
+def joint_target_deviation_range_l1(
+    env: ManagerBasedRLEnv,
+    min_angle: float,
+    max_angle: float,
+    in_range_reward: float,
+    asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+) -> torch.Tensor:
+    """Provide a fixed reward when the joint angle is within a specified range and penalize deviations."""
+    asset: Articulation = env.scene[asset_cfg.name]
+
+    # Get the current joint positions
+    current_joint_pos = asset.data.joint_pos[:, asset_cfg.joint_ids]
+
+    # Check if the joint angles are within the specified range
+    in_range = (current_joint_pos >= min_angle) & (current_joint_pos <= max_angle)
+
+    # Calculate the absolute deviation from the nearest range limit when out of range
+    out_of_range_penalty = torch.abs(
+        current_joint_pos - torch.where(current_joint_pos < min_angle, min_angle, max_angle)
+    )
+
+    # Assign a fixed reward if in range, and a negative penalty if out of range
+    reward = torch.where(in_range, in_range_reward * torch.ones_like(current_joint_pos), -out_of_range_penalty)
+
+    # Sum the rewards over all joint ids
+    return torch.sum(reward, dim=1)

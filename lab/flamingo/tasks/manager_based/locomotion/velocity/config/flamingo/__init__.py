@@ -5,7 +5,7 @@
 
 import gymnasium as gym
 
-from . import agents, flat_env_cfg, flat_env_play_cfg, rough_env_cfg
+from . import agents, flat_env_cfg, flat_env_play_cfg, rough_env_cfg, rough_env_play_cfg
 
 ##
 # Register Gym environments.
@@ -48,7 +48,7 @@ gym.register(
     entry_point="omni.isaac.lab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
-        "env_cfg_entry_point": rough_env_cfg.FlamingoRoughEnvCfg_PLAY,
+        "env_cfg_entry_point": rough_env_play_cfg.FlamingoRoughEnvCfg_PLAY,
         "rsl_rl_cfg_entry_point": agents.rsl_rl_cfg.FlamingoRoughPPORunnerCfg,
     },
 )

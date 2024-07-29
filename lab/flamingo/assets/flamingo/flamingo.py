@@ -77,7 +77,7 @@ FLAMINGO_WHEEL_ACTUATOR_LSTM_CFG = ActuatorNetLSTMCfg(
 
 FLAMINGO_CFG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
-        usd_path=f"{FLAMINGO_ASSETS_DATA_DIR}/Robots/Flamingo/flamingo_rev01/flamingo_cylinder.usd",
+        usd_path=f"{FLAMINGO_ASSETS_DATA_DIR}/Robots/Flamingo/flamingo_rev01/flamingo_cylinder2.usd",
         activate_contact_sensors=True,
         rigid_props=sim_utils.RigidBodyPropertiesCfg(
             disable_gravity=False,
@@ -109,63 +109,63 @@ FLAMINGO_CFG = ArticulationCfg(
     soft_joint_pos_limit_factor=0.8,
     # joint_positions=[0.0, 0.0, -0.2161799, -0.2161799, 0.56810467, 0.56810467],
     actuators={
-        # "joints": ImplicitActuatorCfg(
-        #     joint_names_expr=[".*_hip_joint", ".*_shoulder_joint", ".*_leg_joint"],
-        #     effort_limit=23.0,
-        #     velocity_limit=20.0,
-        #     stiffness={
-        #         ".*_hip_joint": 45.0,
-        #         ".*_shoulder_joint": 45.0,
-        #         ".*_leg_joint": 45.0,
-        #     },
-        #     damping={
-        #         ".*_hip_joint": 2.0,
-        #         ".*_shoulder_joint": 2.0,
-        #         ".*_leg_joint": 2.0,
-        #     },
-        #     friction={
-        #         ".*_hip_joint": 0.01,
-        #         ".*_shoulder_joint": 0.01,
-        #         ".*_leg_joint": 0.01,
-        #     },
-        #     armature={
-        #         ".*_hip_joint": 0.1,
-        #         ".*_shoulder_joint": 0.1,
-        #         ".*_leg_joint": 0.1,
-        #     },
-        # ),
-        # "wheels": ImplicitActuatorCfg(
-        #     joint_names_expr=[".*_wheel_joint"],
-        #     effort_limit=6.0,
-        #     velocity_limit=25.0,
-        #     stiffness={
-        #         ".*_wheel_joint": 0.0,
-        #     },
-        #     damping={
-        #         ".*_wheel_joint": 2.0,
-        #     },
-        #     friction={
-        #         ".*_wheel_joint": 0.0,
-        #     },
-        #     armature={
-        #         ".*_wheel_joint": 0.01,
-        #     },
-        # ),
+        #     "joints": ImplicitActuatorCfg(
+        #         joint_names_expr=[".*_hip_joint", ".*_shoulder_joint", ".*_leg_joint"],
+        #         effort_limit=23.0,
+        #         velocity_limit=20.0,
+        #         stiffness={
+        #             ".*_hip_joint": 75.0,
+        #             ".*_shoulder_joint": 75.0,
+        #             ".*_leg_joint": 75.0,
+        #         },
+        #         damping={
+        #             ".*_hip_joint": 0.6,
+        #             ".*_shoulder_joint": 0.6,
+        #             ".*_leg_joint": 0.6,
+        #         },
+        #         friction={
+        #             ".*_hip_joint": 0.0,
+        #             ".*_shoulder_joint": 0.0,
+        #             ".*_leg_joint": 0.0,
+        #         },
+        #         armature={
+        #             ".*_hip_joint": 0.0,
+        #             ".*_shoulder_joint": 0.0,
+        #             ".*_leg_joint": 0.0,
+        #         },
+        #     ),
+        #     "wheels": ImplicitActuatorCfg(
+        #         joint_names_expr=[".*_wheel_joint"],
+        #         effort_limit=5.0,
+        #         velocity_limit=25.0,
+        #         stiffness={
+        #             ".*_wheel_joint": 0.0,
+        #         },
+        #         damping={
+        #             ".*_wheel_joint": 0.35,
+        #         },
+        #         friction={
+        #             ".*_wheel_joint": 0.0,
+        #         },
+        #         armature={
+        #             ".*_wheel_joint": 0.0,
+        #         },
+        #     ),
         "joints": DelayedPDActuatorCfg(
             joint_names_expr=[".*_hip_joint", ".*_shoulder_joint", ".*_leg_joint"],
             effort_limit=23.0,
             velocity_limit=20.0,
-            min_num_time_lags=0,  # physics time steps (min: 5.0 * 0 = 0.0ms)
-            max_num_time_lags=4,  # physics time steps (max: 5.0 * 4 = 20.0ms)
+            min_delay=0,  # physics time steps (min: 5.0 * 0 = 0.0ms)
+            max_delay=4,  # physics time steps (max: 5.0 * 4 = 20.0ms)
             stiffness={
-                ".*_hip_joint": 80.0,
-                ".*_shoulder_joint": 80.0,
-                ".*_leg_joint": 80.0,
+                ".*_hip_joint": 85.0,
+                ".*_shoulder_joint": 85.0,
+                ".*_leg_joint": 85.0,
             },  # default: 75.0
             damping={
-                ".*_hip_joint": 0.65,
-                ".*_shoulder_joint": 0.65,
-                ".*_leg_joint": 0.65,
+                ".*_hip_joint": 0.75,
+                ".*_shoulder_joint": 0.75,
+                ".*_leg_joint": 0.75,
             },  # default: 0.6
             friction={
                 ".*_hip_joint": 0.0,
@@ -182,8 +182,8 @@ FLAMINGO_CFG = ArticulationCfg(
             joint_names_expr=[".*_wheel_joint"],
             effort_limit=5.0,
             velocity_limit=25.0,
-            min_num_time_lags=0,  # physics time steps (min: 5.0 * 0 = 0.0ms)
-            max_num_time_lags=4,  # physics time steps (max: 5.0 * 4 = 20.0ms)
+            min_delay=0,  # physics time steps (min: 5.0 * 0 = 0.0ms)
+            max_delay=4,  # physics time steps (max: 5.0 * 4 = 20.0ms)
             stiffness={
                 ".*_wheel_joint": 0.0,
             },
@@ -195,7 +195,7 @@ FLAMINGO_CFG = ArticulationCfg(
                 ".*_wheel_joint": 0.0,
             },
         ),
-        # "joints": FLAMINGO_JOINT_ACTUATOR_MLP_CFG,
-        # "wheels": FLAMINGO_WHEEL_ACTUATOR_LSTM_CFG,
+        #     # "joints": FLAMINGO_JOINT_ACTUATOR_MLP_CFG,
+        #     # "wheels": FLAMINGO_WHEEL_ACTUATOR_LSTM_CFG,
     },
 )

@@ -17,7 +17,7 @@ class FlamingoRoughPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 24
     max_iterations = 1500
     save_interval = 50
-    experiment_name = "cassie_rough"
+    experiment_name = "FlamingoStand-v0"
     empirical_normalization = False
     policy = RslRlPpoActorCriticCfg(
         init_noise_std=1.0,
@@ -46,7 +46,18 @@ class FlamingoFlatPPORunnerCfg(FlamingoRoughPPORunnerCfg):
     def __post_init__(self):
         super().__post_init__()
 
-        self.max_iterations = 3000
-        self.experiment_name = "Flamingo_stand"
+        self.max_iterations = 30000
+        self.experiment_name = "Flamingo_stand_flat"
+        self.policy.actor_hidden_dims = [512, 256, 128]
+        self.policy.critic_hidden_dims = [512, 256, 128]
+
+
+@configclass
+class FlamingoRoughPPORunnerCfg(FlamingoRoughPPORunnerCfg):
+    def __post_init__(self):
+        super().__post_init__()
+
+        self.max_iterations = 30000
+        self.experiment_name = "Flamingo_stand_rough"
         self.policy.actor_hidden_dims = [512, 256, 128]
         self.policy.critic_hidden_dims = [512, 256, 128]

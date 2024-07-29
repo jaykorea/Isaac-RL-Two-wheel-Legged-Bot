@@ -99,7 +99,7 @@ class CommandsCfg:
     base_velocity = mdp.UniformVelocityCommandCfg(
         asset_name="robot",
         resampling_time_range=(10.0, 10.0),
-        rel_standing_envs=0.02,
+        rel_standing_envs=0.1,
         rel_heading_envs=1.0,
         heading_command=True,
         heading_control_stiffness=0.5,
@@ -151,8 +151,7 @@ class ObservationsCfg:
 
         joint_pos = ObsTerm(
             func=mdp.joint_pos_rel,
-            noise=Unoise(n_min=-0.02, n_max=0.02),
-            clip=(-25.0, 25.0),
+            noise=Unoise(n_min=-0.04, n_max=0.04),
             params={
                 "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_joint", ".*_shoulder_joint", ".*_leg_joint"])
             },
@@ -168,7 +167,7 @@ class ObservationsCfg:
         #     noise=Unoise(n_min=-0.01, n_max=0.01),
         #     params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_wheel_joint"])},
         # )
-        joint_vel = ObsTerm(func=mdp.joint_vel_rel, noise=Unoise(n_min=-1.5, n_max=1.5), clip=(-25.0, 25.0))
+        joint_vel = ObsTerm(func=mdp.joint_vel_rel, noise=Unoise(n_min=-1.5, n_max=1.5))
         # base_lin_vel = ObsTerm(func=mdp.base_lin_vel, noise=Unoise(n_min=-0.1, n_max=0.1), clip=(-25.0, 25.0))
         # base_lin_acc = ObsTerm(
         #     func=mdp.base_lin_acc,
@@ -177,9 +176,9 @@ class ObservationsCfg:
         #         "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
         #     },
         # )
-        base_ang_vel = ObsTerm(func=mdp.base_ang_vel, noise=Unoise(n_min=-0.15, n_max=0.15), clip=(-25.0, 25.0))
-        base_euler = ObsTerm(func=mdp.root_euler_angle, noise=Unoise(n_min=-0.15, n_max=0.15), clip=(-25.0, 25.0))
-        actions = ObsTerm(func=mdp.last_action, noise=Unoise(n_min=-0.01, n_max=0.01), clip=(-25.0, 25.0))
+        base_ang_vel = ObsTerm(func=mdp.base_ang_vel, noise=Unoise(n_min=-0.2, n_max=0.2))
+        base_euler = ObsTerm(func=mdp.root_euler_angle, noise=Unoise(n_min=-0.1, n_max=0.1))
+        actions = ObsTerm(func=mdp.last_action)
 
         """
         Stack 1
@@ -368,6 +367,7 @@ class RewardsCfg:
     #         "threshold": 0.5,
     #     },
     # )
+    # Terrain-specific rewards based on elevation changes
 
 
 @configclass
