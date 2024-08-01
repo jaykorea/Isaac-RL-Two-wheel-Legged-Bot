@@ -32,10 +32,10 @@ class FlamingoRewardsCfg(RewardsCfg):
     )
     joint_deviation_range_shoulder = RewTerm(
         func=mdp.joint_target_deviation_range_l1,
-        weight=2.0,
+        weight=1.0,
         params={
-            "min_angle": -0.301799,
-            "max_angle": 0.0,
+            "min_angle": -0.30,
+            "max_angle": 0.15,
             "in_range_reward": 0.001,
             "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_shoulder_joint"]),
         },  # target: -0.261799
@@ -75,7 +75,7 @@ class FlamingoRewardsCfg(RewardsCfg):
     )
     joint_applied_torque_limits = RewTerm(
         func=mdp.applied_torque_limits,
-        weight=-0.05,  # default: -0.1
+        weight=-0.1,  # default: -0.1
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*_joint")},
     )
     stand_origin_still = RewTerm(
@@ -173,10 +173,10 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
         # rewards
         self.rewards.dof_torques_l2.weight = -2.5e-5  # default: -5.0e-6
         self.rewards.track_lin_vel_xy_exp.weight = 2.0
-        self.rewards.track_pos_z_l2.weight = -1.5
+        self.rewards.track_pos_z_l2.weight = -1.0
         self.rewards.track_ang_vel_z_exp.weight = 1.0
-        self.rewards.action_rate_l2.weight *= 1.5  # default: 1.5
-        self.rewards.dof_acc_l2.weight *= 1.5  # default: 1.5
+        self.rewards.action_rate_l2.weight *= 2.5  # default: 1.5
+        self.rewards.dof_acc_l2.weight *= 2.5  # default: 1.5
 
         # change terrain to flat
         self.scene.terrain.terrain_type = "plane"
@@ -194,7 +194,7 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
         self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
         self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
         self.commands.base_velocity.ranges.heading = (-math.pi, math.pi)
-        self.commands.base_velocity.ranges.pos_z = (0.1731942, 0.3731942)
+        self.commands.base_velocity.ranges.pos_z = (0.1531942, 0.3731942)
 
         # terminations
         self.terminations.base_contact.params["sensor_cfg"].body_names = [

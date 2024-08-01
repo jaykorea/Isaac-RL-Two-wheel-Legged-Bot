@@ -7,10 +7,8 @@ import gymnasium as gym
 
 from . import (
     agents,
-    flat_env_cfg,
-    flat_env_play_cfg,
-    rough_env_cfg,
-    rough_env_play_cfg,
+    flat_env,
+    rough_env,
 )
 
 ##
@@ -18,43 +16,43 @@ from . import (
 ##
 
 gym.register(
-    id="Isaac-Velocity-Flat-Flamingo-v1",
+    id="Isaac-Velocity-Flat-Flamingo-v2",
     entry_point="omni.isaac.lab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
-        "env_cfg_entry_point": flat_env_cfg.FlamingoFlatEnvCfg,
+        "env_cfg_entry_point": flat_env.flat_env_cfg.FlamingoFlatEnvCfg,
         "rsl_rl_cfg_entry_point": agents.rsl_rl_cfg.FlamingoFlatPPORunnerCfg,
         "rl_games_cfg_entry_point": f"{agents.__name__}:rl_games_ppo_cfg.yaml",
     },
 )
 
 gym.register(
-    id="Isaac-Velocity-Flat-Flamingo-Play-v1",
+    id="Isaac-Velocity-Flat-Flamingo-Play-v2",
     entry_point="omni.isaac.lab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
-        "env_cfg_entry_point": flat_env_play_cfg.FlamingoFlatEnvCfg_PLAY,
+        "env_cfg_entry_point": flat_env.flat_env_play_cfg.FlamingoFlatEnvCfg_PLAY,
         "rsl_rl_cfg_entry_point": agents.rsl_rl_cfg.FlamingoFlatPPORunnerCfg,
         "rl_games_cfg_entry_point": f"{agents.__name__}:rl_games_ppo_cfg.yaml",
     },
 )
 
 gym.register(
-    id="Isaac-Velocity-Rough-Flamingo-v1",
+    id="Isaac-Velocity-Rough-Flamingo-v2",
     entry_point="omni.isaac.lab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
-        "env_cfg_entry_point": rough_env_cfg.FlamingoRoughEnvCfg,
+        "env_cfg_entry_point": rough_env.rough_env_cfg.FlamingoRoughEnvCfg,
         "rsl_rl_cfg_entry_point": agents.rsl_rl_cfg.FlamingoRoughPPORunnerCfg,
     },
 )
 
 gym.register(
-    id="Isaac-Velocity-Rough-Flamingo-Play-v1",
+    id="Isaac-Velocity-Rough-Flamingo-Play-v2",
     entry_point="omni.isaac.lab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
-        "env_cfg_entry_point": rough_env_play_cfg.FlamingoRoughEnvCfg_PLAY,
+        "env_cfg_entry_point": rough_env.rough_env_play_cfg.FlamingoRoughEnvCfg_PLAY,
         "rsl_rl_cfg_entry_point": agents.rsl_rl_cfg.FlamingoRoughPPORunnerCfg,
     },
 )
