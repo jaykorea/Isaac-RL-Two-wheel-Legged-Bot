@@ -2,14 +2,18 @@ from dataclasses import MISSING
 from typing import Literal, Iterable
 
 from omni.isaac.lab.utils import configclass
-from omni.isaac.lab.actuators.actuator_cfg import DCMotorCfg
+from omni.isaac.lab.actuators.actuator_cfg import (
+    ActuatorNetLSTMCfg as BaseActuatorNetLSTMCfg,
+    ActuatorNetMLPCfg as BaseActuatorNetMLPCfg,
+)
+from .actuator_net import ActuatorNetLSTM, ActuatorNetMLP
 
 
 @configclass
-class ActuatorNetLSTMCfg(DCMotorCfg):
+class ActuatorNetLSTMCfg(BaseActuatorNetLSTMCfg):
     """Configuration for LSTM-based actuator model."""
 
-    class_type: str = "ActuatorNetLSTM"
+    class_type: type = ActuatorNetLSTM
     # we don't use stiffness and damping for actuator net
     stiffness = None
     damping = None
@@ -22,10 +26,10 @@ class ActuatorNetLSTMCfg(DCMotorCfg):
 
 
 @configclass
-class ActuatorNetMLPCfg(DCMotorCfg):
+class ActuatorNetMLPCfg(BaseActuatorNetMLPCfg):
     """Configuration for MLP-based actuator model."""
 
-    class_type: str = "ActuatorNetMLP"
+    class_type: type = ActuatorNetMLP
     # we don't use stiffness and damping for actuator net
     stiffness = None
     damping = None
