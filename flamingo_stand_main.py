@@ -6,6 +6,7 @@ import numpy as np
 import pickle
 import xml.etree.ElementTree as ET
 import os
+import torch
 import mujoco
 import threading
 import argparse
@@ -35,10 +36,10 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
         self.render_mode = render_mode
         self.viewer = None
         self.dt_ = 0.005
-        self.sim_duration = 20
+        self.sim_duration = 60.0
         self.sim_step = (self.sim_duration / self.dt_) / self.frame_skip
         self.id = env_id
-        self.obs_dim = 28 * 3 + 3
+        self.obs_dim = 28 * 3 + 4
         self.act_dim = 8
         self.previous_states = []
         self.state_clip = np.inf
@@ -48,13 +49,13 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
 
         self.save_data = False
         self.save_trajectory = False
-        self.plot_log = False
-        self.mem_save = True
+        self.plot_log = True
+        self.mem_save = False
 
-        self.randomize_sensor = True
-        self.randomize_inertia = True
+        self.randomize_sensor = False
+        self.randomize_inertia = False
         self.randomize_initial_state = True
-        self.push_robot = True
+        self.push_robot = False
 
         self.Unoise = AdditiveNoiseManager(noise_type="uniform")
         self.Gnoise = AdditiveNoiseManager(noise_type="gaussian")
@@ -155,16 +156,24 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
         if self.save_data or self.save_trajectory:
             self.log_utils.collect_and_save_data(obs, action_scaled, self.data.actuator_force)
 
-        reward = self._get_reward(obs)
+        reward, info = self._get_reward(obs)
 
         term = self._is_done()
         trun = self.step_counter >= self.sim_step
 
         self.log_utils.plot_table(self.extra_utils.get_episode_sums(), self.step_counter, self.sim_step)
 
-        return obs, reward, term, trun, {}
+        return obs, reward, term, trun, info
 
     def _get_reward(self, obs):
+        """_summary_
+            obs_buf = info['obs']  # torch.Tensor
+            current_height = info['current_height']  # torch.Tensor
+            joint_acc = info['joint_acc']  # torch.Tensor
+            contact_forces = info['contact_forces']  # torch.Tensor
+            actuator_force = info['actuator_force']  # torch.Tensor
+        """
+
         self.reward_manager.get_privileged_observations(self.data, self._is_done())
         self.reward_manager.get_observations(obs, self.step_counter, self.sim_step)
 
@@ -223,9 +232,16 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
             total_reward=total_reward
         )
 
+        info = {}
+        priv_obs = self.reward_manager.req_privileged_observations()
+        info['obs'] = priv_obs['obs_buf']
+        info['current_height'] = priv_obs['current_height']
+        info['joint_acc'] = priv_obs['joint_acc']
+        info['contact_forces'] = priv_obs['contact_forces']
+        info['actuator_forces'] = priv_obs['actuator_forces']
         # reward = torch.clamp_min(total_reward, 0.0)
 
-        return total_reward.item()
+        return total_reward.item(), info
 
     def _is_done(self):
         contact_forces = self.data.cfrc_ext[1:10]  # External contact forces
@@ -250,8 +266,8 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
             mujoco.mj_resetData(self.model, self.data)
 
             # Reinitialize the MujocoRenderer with the new model
-            self.mujoco_renderer.close()
-            self.mujoco_renderer = MujocoRenderer(self.model, self.data)
+            # self.mujoco_renderer.close()
+            # self.mujoco_renderer = MujocoRenderer(self.model, self.data)
         else:
             mujoco.mj_resetData(self.model, self.data)
 
@@ -271,7 +287,7 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
         qpos[3:7] = np.array([1, 0, 0, 0])
         qpos[7:14] = np.array([0, 0, 0, 0, 0, 0, 0])
         if self.randomize_initial_state:
-            qpos[7:14] = self.Gnoise.apply(qpos[7:14], mean=0.0, std=0.1)
+            qpos[7:14] = self.Unoise.apply(qpos[7:14], low=-0.2, high=0.2)
         return qpos
 
     def close(self):
@@ -279,7 +295,7 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
             self.viewer.close()
             self.viewer = None
 
-    def run_mujoco(self, session, input_name, env, sim_hz=200, decimation=4):
+    def run_mujoco(self, session, input_name, env, sim_hz=200):
         dt = (1.0 / sim_hz) * self.frame_skip
 
         while True:
@@ -298,7 +314,7 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
                 obs, rewards, term, trun, info = env.step(action_clipped)
 
                 if self.mem_save:
-                    self.mem_utils.store(prev_obs, action_clipped, rewards, obs, term)
+                    self.mem_utils.store(prev_obs, action_clipped, rewards, obs, term, info)
 
                 if self.plot_log or self.save_data or self.save_trajectory:
                     self.log_utils.log_step_data(current_time, action_clipped, env)
@@ -321,8 +337,11 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
                 self.mem_utils.load()
                 self.mem_utils.reset()
 
-                with open("raw_memory2.pkl", "wb") as fw:
-                    pickle.dump(self.mem_utils, fw)
+                try:
+                    with open("raw_memory20.pkl", "wb") as fw:
+                        pickle.dump(self.mem_utils, fw)
+                except KeyboardInterrupt:
+                    print("Process interrupted. File not saved.")
 
             env.reset()
 
@@ -337,7 +356,7 @@ if __name__ == '__main__':
 
     env = FLA_STAND(env_id="FLA_STAND-v0")
     env.render_mode = "human"
-    mujoco_thread = threading.Thread(target=env.run_mujoco, args=(session, input_name, env, 200, 4))
+    mujoco_thread = threading.Thread(target=env.run_mujoco, args=(session, input_name, env, 200))
     mujoco_thread.start()
 
     try:

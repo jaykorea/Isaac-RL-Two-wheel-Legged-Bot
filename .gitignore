@@ -4,3 +4,5 @@ weights/
 logs/
 data/
 *.pkl
+*.npy
+/memory*

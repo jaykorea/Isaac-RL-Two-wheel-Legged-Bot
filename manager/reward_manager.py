@@ -16,6 +16,8 @@ class RewardManager:
         self.joint_pos_limits = torch.FloatTensor([-1.5708, 1.5708, -1.5708, 1.5708, -0.0872665, 1.5708])
         self.track_lin_vel_xy_std = math.sqrt(0.25)
         self.track_anv_vel_z_std = math.sqrt(0.25)
+        self.priv_obs = {}
+        self.obs = {}
 
         # Joint names and their indices
         self.joint_indices = {
@@ -29,15 +31,26 @@ class RewardManager:
             'right_wheel': 7
         }
 
+    def req_privileged_observations(self):
+        return self.priv_obs
+
     def get_privileged_observations(self, data, is_done):
         self.data = data
         self.current_height = torch.tensor(self.data.qpos[2], requires_grad=False)
         self.joint_acc = torch.tensor(self.data.qacc, requires_grad=False)
         self.contact_forces = torch.tensor(self.data.cfrc_ext[1:10], requires_grad=False)  # External contact forces
+        self.actuator_forces = torch.tensor(self.data.actuator_force[:8], requires_grad=False)
         self.is_done = is_done
 
+        self.priv_obs['obs_buf'] = self.obs
+        self.priv_obs['current_height'] = self.current_height
+        self.priv_obs['joint_acc'] = self.joint_acc
+        self.priv_obs['contact_forces'] = self.contact_forces
+        self.priv_obs['actuator_forces'] = self.data.actuator_force
+        self.priv_obs['is_done'] = self.is_done
+
     def get_observations(self, obs, step_counter, sim_step):
-        self.obs_buf = torch.tensor(obs, requires_grad=False)
+        self.obs = torch.tensor(obs, requires_grad=False)
         self.step_counter = step_counter
         self.sim_step = sim_step
 
@@ -45,13 +58,13 @@ class RewardManager:
         joint_pos_range = [(self.joint_pos_limits[2 * i + 1] - self.joint_pos_limits[2 * i]) for i in range(len(self.joint_pos_limits) // 2)]
         self.soft_joint_pos_limits = [[mean - 0.5 * range_val * self.soft_limit_factor, mean + 0.5 * range_val * self.soft_limit_factor] for mean, range_val in zip(joint_pos_mean, joint_pos_range)]
 
-        self.joint_pos = self.obs_buf[:6]
-        self.joint_vel = self.obs_buf[6:14]
-        self.base_lin_vel = self.obs_buf[14:17]
-        self.base_ang_vel = self.obs_buf[17:20]
-        self.base_euler = self.obs_buf[20:23]
-        self.actions = self.obs_buf[23:31]
-        self.prev_actions = self.obs_buf[54:62]
+        self.joint_pos = self.obs[:6]
+        self.joint_vel = self.obs[6:14]
+        self.base_lin_vel = self.obs[14:17]
+        self.base_ang_vel = self.obs[17:20]
+        self.base_euler = self.obs[20:23]
+        self.actions = self.obs[23:31]
+        self.prev_actions = self.obs[54:62]
         self.joint_torques = torch.tensor(self.data.actuator_force[:6], requires_grad=False)
         self.wheel_torques = torch.tensor(self.data.actuator_force[6:8], requires_grad=False)
 

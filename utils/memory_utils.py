@@ -13,11 +13,12 @@ class MemoryUtils:
         self.next_states = []
         self.rewards = []
         self.terminates = []
+        self.infos = []
 
     def load(self):
         if self.total_episodes < self.maximum_episodes:
             data = {'states': np.array(self.states), 'actions': np.array(self.actions), 'rewards': self.rewards, 'next_states': np.array(self.next_states),
-                    'terminated': self.terminates}
+                    'terminated': self.terminates, 'info': self.infos}
             self.episodes.append(data)
         else:
             print("[Error] Maximum number of episodes exceeded!")
@@ -25,12 +26,13 @@ class MemoryUtils:
         self.total_episodes += 1
         self.total_transition += np.array(self.states).shape[0]
 
-    def store(self, states, actions, rewards, next_states, terminates):
+    def store(self, states, actions, rewards, next_states, terminates, info):
         self.states.append(states)
         self.actions.append(actions)
         self.rewards.append(rewards)
         self.next_states.append(next_states)
         self.terminates.append(terminates)
+        self.infos.append(info)
 
     def reset(self):
         self.states = []
@@ -38,3 +40,4 @@ class MemoryUtils:
         self.rewards = []
         self.next_states = []
         self.terminates = []
+        self.infos = []

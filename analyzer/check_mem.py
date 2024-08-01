@@ -30,9 +30,10 @@ def check_episode_numbers(pkl_file_path):
         print(f"  Rewards: {len(episode['rewards'])}")
         print(f"  Next States: {episode['next_states'].shape}")
         print(f"  Terminated: {len(episode['terminated'])}")
+        print(f"  Info: {len(episode['info'])}")
 
 
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-pkl_file_path = os.path.join(root_dir, 'raw_memory.pkl')
+pkl_file_path = os.path.join(root_dir, 'raw_memory8.pkl')
 
 check_episode_numbers(pkl_file_path)

@@ -9,9 +9,10 @@ class PygameUtils:
         self.screen = pygame.display.set_mode((480, 240))
         pygame.display.set_caption('Command Controller')
 
-        self.commands = np.zeros(3)
-        self.max_linear_speed = 0.65
+        self.commands = [0.0, 0.0, 0.0, 0.1931942]
+        self.max_linear_speed = 1.0
         self.max_angular_speed = 1.0
+        self.range_pos_z = (0.1531942, 0.3531942)
         self.acceleration = 0.1
         self.deceleration = 0.05
         self.automation_command = False
@@ -29,7 +30,9 @@ class PygameUtils:
             pygame.K_UP: (75, 50, 50, 50),
             pygame.K_DOWN: (75, 150, 50, 50),
             pygame.K_LEFT: (25, 100, 50, 50),
-            pygame.K_RIGHT: (125, 100, 50, 50)
+            pygame.K_RIGHT: (125, 100, 50, 50),
+            pygame.K_w: (275, 50, 50, 50),
+            pygame.K_s: (275, 150, 50, 50),
         }
 
         for key, pos in key_positions.items():
@@ -78,6 +81,13 @@ class PygameUtils:
             self.commands[2] = max(self.commands[2], -self.max_angular_speed)
         else:
             self.commands[2] = self._adjust_speed(self.commands[2], self.deceleration)
+
+        if keys[pygame.K_w]:
+            self.commands[3] += self.acceleration * 0.01
+            self.commands[3] = min(self.commands[3], self.range_pos_z[1])
+        elif keys[pygame.K_s]:
+            self.commands[3] -= self.acceleration * 0.01
+            self.commands[3] = max(self.commands[3], self.range_pos_z[0])
 
         self.draw_keyboard(keys)
 
