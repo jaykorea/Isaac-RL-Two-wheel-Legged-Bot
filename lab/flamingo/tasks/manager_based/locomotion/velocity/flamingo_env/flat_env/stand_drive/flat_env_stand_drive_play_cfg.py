@@ -3,18 +3,9 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 import math
-from omni.isaac.lab.managers import RewardTermCfg as RewTerm
-from omni.isaac.lab.managers import SceneEntityCfg
 from omni.isaac.lab.utils import configclass
 
-import lab.flamingo.tasks.manager_based.stand_drive.velocity.mdp as mdp
-from lab.flamingo.tasks.manager_based.stand_drive.velocity.velocity_env_cfg import LocomotionVelocityFlatEnvCfg
-
-
-##
-# Pre-defined configs
-##
-
+from lab.flamingo.tasks.manager_based.locomotion.velocity.velocity_env_cfg import LocomotionVelocityFlatEnvCfg
 
 from lab.flamingo.assets.flamingo import FLAMINGO_CFG  # isort: skip
 
@@ -77,7 +68,7 @@ class FlamingoFlatEnvCfg_PLAY(LocomotionVelocityFlatEnvCfg):
         self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
         self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
         self.commands.base_velocity.ranges.heading = (-math.pi, math.pi)
-        self.commands.base_velocity.ranges.pos_z = (0.19, 0.19)  # (0.1931942, 0.3531942)
+        self.commands.base_velocity.ranges.pos_z = (0.0, 0.0)
 
         # terminations
         self.terminations.base_contact.params["sensor_cfg"].body_names = [

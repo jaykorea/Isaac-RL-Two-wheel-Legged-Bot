@@ -42,22 +42,44 @@ class FlamingoPPORunnerCfg(RslRlOnPolicyRunnerCfg):
 
 
 @configclass
-class FlamingoFlatPPORunnerCfg(FlamingoPPORunnerCfg):
+class FlamingoFlatPPORunnerCfg_Stand_Drive(FlamingoPPORunnerCfg):
     def __post_init__(self):
         super().__post_init__()
 
-        self.max_iterations = 10000
-        self.experiment_name = "Flamingo_stand_flat"
+        self.max_iterations = 5000
+        self.experiment_name = "Flamingo_Flat_Stand_Drive"
         self.policy.actor_hidden_dims = [512, 256, 128]
         self.policy.critic_hidden_dims = [512, 256, 128]
 
 
 @configclass
-class FlamingoRoughPPORunnerCfg(FlamingoPPORunnerCfg):
+class FlamingoFlatPPORunnerCfg_Track_Z(FlamingoPPORunnerCfg):
+    def __post_init__(self):
+        super().__post_init__()
+
+        self.max_iterations = 5000
+        self.experiment_name = "Flamingo_Flat_Track_Z"
+        self.policy.actor_hidden_dims = [512, 256, 128]
+        self.policy.critic_hidden_dims = [512, 256, 128]
+
+
+@configclass
+class FlamingoRoughPPORunnerCfg_Stand_Drive(FlamingoPPORunnerCfg):
     def __post_init__(self):
         super().__post_init__()
 
         self.max_iterations = 30000
-        self.experiment_name = "Flamingo_stand_rough"
+        self.experiment_name = "Flamingo_Rough_Stand_Drive"
+        self.policy.actor_hidden_dims = [512, 256, 128]
+        self.policy.critic_hidden_dims = [512, 256, 128]
+
+
+@configclass
+class FlamingoRoughPPORunnerCfg_Track_Z(FlamingoPPORunnerCfg):
+    def __post_init__(self):
+        super().__post_init__()
+
+        self.max_iterations = 30000
+        self.experiment_name = "Flamingo_Rough_Track_Z"
         self.policy.actor_hidden_dims = [512, 256, 128]
         self.policy.critic_hidden_dims = [512, 256, 128]

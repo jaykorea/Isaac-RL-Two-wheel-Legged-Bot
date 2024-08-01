@@ -376,18 +376,6 @@ class RewardsCfg:
     track_ang_vel_z_exp = RewTerm(
         func=mdp.track_ang_vel_z_exp, weight=0.5, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
     )
-    track_pos_z_l2 = RewTerm(
-        func=mdp.track_pos_z_exp,
-        weight=1.0,
-        params={
-            "std": math.sqrt(0.025),
-            "command_name": "base_velocity",
-            "relative": True,
-            "root_cfg": SceneEntityCfg("robot", body_names="base_link"),
-            "wheel_cfg": SceneEntityCfg("robot", body_names=".*_wheel_link"),
-            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_wheel_link"),
-        },
-    )
     # -- penalties
     lin_vel_z_l2 = RewTerm(func=mdp.lin_vel_z_l2, weight=-1.0)
     ang_vel_xy_l2 = RewTerm(func=mdp.ang_vel_xy_l2, weight=-0.05)

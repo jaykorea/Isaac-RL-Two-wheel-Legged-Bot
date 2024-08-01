@@ -9,16 +9,14 @@ from omni.isaac.lab.managers import RewardTermCfg as RewTerm
 from omni.isaac.lab.managers import SceneEntityCfg
 from omni.isaac.lab.utils import configclass
 
+# import omni.isaac.orbit_tasks.locomotion.velocity.mdp as mdp
 from omni.isaac.lab.managers import CurriculumTermCfg as CurrTerm
-import lab.flamingo.tasks.manager_based.stand_drive.velocity.mdp as mdp
-from lab.flamingo.tasks.manager_based.stand_drive.velocity.velocity_env_cfg import (
+import lab.flamingo.tasks.manager_based.locomotion.velocity.mdp as mdp
+from lab.flamingo.tasks.manager_based.locomotion.velocity.velocity_env_cfg import (
     LocomotionVelocityRoughEnvCfg,
     RewardsCfg,
 )
 
-##
-# Pre-defined configs
-##
 from lab.flamingo.assets.flamingo import FLAMINGO_CFG  # isort: skip
 
 
@@ -35,6 +33,18 @@ class FlamingoCurriculumCfg:
 
 @configclass
 class FlamingoRewardsCfg(RewardsCfg):
+    track_pos_z_l2 = RewTerm(
+        func=mdp.track_pos_z_exp,
+        weight=1.0,
+        params={
+            "std": math.sqrt(0.025),
+            "command_name": "base_velocity",
+            "relative": True,
+            "root_cfg": SceneEntityCfg("robot", body_names="base_link"),
+            "wheel_cfg": SceneEntityCfg("robot", body_names=".*_wheel_link"),
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_wheel_link"),
+        },
+    )
     stuck_air_time = RewTerm(
         func=mdp.FlamingoAirTimeReward,
         weight=0.0,
@@ -53,16 +63,16 @@ class FlamingoRewardsCfg(RewardsCfg):
         weight=-5.0,
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_joint"])},
     )
-    # joint_deviation_range_shoulder = RewTerm(
-    #     func=mdp.joint_target_deviation_range_l1,
-    #     weight=5.0,
-    #     params={
-    #         "min_angle": -0.301799,
-    #         "max_angle": 0.0,
-    #         "in_range_reward": 0.001,
-    #         "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_shoulder_joint"]),
-    #     },  # target: -0.261799
-    # )
+    joint_deviation_range_shoulder = RewTerm(
+        func=mdp.joint_target_deviation_range_l1,
+        weight=5.0,
+        params={
+            "min_angle": -0.301799,
+            "max_angle": 0.154,
+            "in_range_reward": 0.001,
+            "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_shoulder_joint"]),
+        },  # target: -0.261799
+    )
     # joint_deviation_range_leg = RewTerm(
     #     func=mdp.joint_target_deviation_range_l1,
     #     weight=5.0,
@@ -235,13 +245,6 @@ class FlamingoRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
             ),
         },
         """
-
-        # commands
-        self.commands.base_velocity.ranges.lin_vel_x = (-1.0, 1.0)
-        self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
-        self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
-        self.commands.base_velocity.ranges.heading = (-0.0, 0.0)
-
         # events
         self.events.push_robot = None
         # self.events.push_robot.params = {
@@ -276,8 +279,9 @@ class FlamingoRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         # terminations
         self.terminations.base_contact.params["sensor_cfg"].body_names = [
             "base_link",
-            ".*_shoulder_link",
-            # ".*_leg_link",
+            ".*_hip_link",
+            # ".*_shoulder_link",
+            ".*_leg_link",
         ]
 
         # rewards
@@ -287,3 +291,10 @@ class FlamingoRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         self.rewards.track_ang_vel_z_exp.weight = 1.0
         self.rewards.action_rate_l2.weight *= 1.5  # default: 1.5
         self.rewards.dof_acc_l2.weight *= 1.0  # default: 1.5
+
+        # commands
+        self.commands.base_velocity.ranges.lin_vel_x = (-1.0, 1.0)
+        self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
+        self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
+        self.commands.base_velocity.ranges.heading = (-0.0, 0.0)
+        self.commands.base_velocity.ranges.pos_z = (0.1531942, 0.3731942)

@@ -236,13 +236,6 @@ class FlamingoRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
             ),
         },
         """
-
-        # commands
-        self.commands.base_velocity.ranges.lin_vel_x = (-1.0, 1.0)
-        self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
-        self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
-        self.commands.base_velocity.ranges.heading = (-0.0, 0.0)
-
         # events
         self.events.push_robot = None
         # self.events.push_robot.params = {
@@ -277,14 +270,21 @@ class FlamingoRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         # terminations
         self.terminations.base_contact.params["sensor_cfg"].body_names = [
             "base_link",
-            ".*_shoulder_link",
-            # ".*_leg_link",
+            ".*_hip_link",
+            # ".*_shoulder_link",
+            ".*_leg_link",
         ]
 
         # rewards
-        # self.rewards.joint_deviation_hip.params["asset_cfg"].joint_names = [".*_hip_joint"]
         self.rewards.dof_torques_l2.weight = -2.5e-7  # default: -5.0e-6
         self.rewards.track_lin_vel_xy_exp.weight = 2.0
         self.rewards.track_ang_vel_z_exp.weight = 1.0
         self.rewards.action_rate_l2.weight *= 1.5  # default: 1.5
         self.rewards.dof_acc_l2.weight *= 1.0  # default: 1.5
+
+        # commands
+        self.commands.base_velocity.ranges.lin_vel_x = (-1.0, 1.0)
+        self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
+        self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
+        self.commands.base_velocity.ranges.heading = (-math.pi, math.pi)
+        self.commands.base_velocity.ranges.pos_z = (0.0, 0.0)

@@ -15,9 +15,6 @@ from lab.flamingo.tasks.manager_based.locomotion.velocity.velocity_env_cfg impor
 )
 
 
-##
-# Pre-defined configs
-##
 # from omni.isaac.orbit_assets.flamingo import FLAMINGO_CFG
 from lab.flamingo.assets.flamingo import FLAMINGO_CFG  # isort: skip
 
@@ -25,6 +22,18 @@ from lab.flamingo.assets.flamingo import FLAMINGO_CFG  # isort: skip
 @configclass
 class FlamingoRewardsCfg(RewardsCfg):
     termination_penalty = RewTerm(func=mdp.is_terminated, weight=-200.0)
+    track_pos_z_l2 = RewTerm(
+        func=mdp.track_pos_z_exp,
+        weight=1.0,
+        params={
+            "std": math.sqrt(0.025),
+            "command_name": "base_velocity",
+            "relative": True,
+            "root_cfg": SceneEntityCfg("robot", body_names="base_link"),
+            "wheel_cfg": SceneEntityCfg("robot", body_names=".*_wheel_link"),
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_wheel_link"),
+        },
+    )
     joint_deviation_hip = RewTerm(
         func=mdp.joint_deviation_l1,
         weight=-2.0,

@@ -3,17 +3,11 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 import math
-from omni.isaac.lab.managers import RewardTermCfg as RewTerm
-from omni.isaac.lab.managers import SceneEntityCfg
+
 from omni.isaac.lab.utils import configclass
 
-import lab.flamingo.tasks.manager_based.locomotion.velocity.mdp as mdp
 from lab.flamingo.tasks.manager_based.locomotion.velocity.velocity_env_cfg import LocomotionVelocityRoughEnvCfg
 
-
-##
-# Pre-defined configs
-##
 from lab.flamingo.assets.flamingo import FLAMINGO_CFG  # isort: skip
 
 
@@ -87,7 +81,8 @@ class FlamingoRoughEnvCfg_PLAY(LocomotionVelocityRoughEnvCfg):
         # terminations
         self.terminations.base_contact.params["sensor_cfg"].body_names = [
             "base_link",
-            ".*_shoulder_link",
+            ".*_hip_link",
+            # ".*_shoulder_link",
             ".*_leg_link",
         ]
 
@@ -95,5 +90,6 @@ class FlamingoRoughEnvCfg_PLAY(LocomotionVelocityRoughEnvCfg):
         self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
         self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
         self.commands.base_velocity.ranges.heading = (-math.pi, math.pi)
+        self.commands.base_velocity.ranges.pos_z = (0.0, 0.0)
         # disable randomization for play
         self.observations.policy.enable_corruption = False

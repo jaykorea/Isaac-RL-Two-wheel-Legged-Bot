@@ -7,16 +7,14 @@ from omni.isaac.lab.managers import RewardTermCfg as RewTerm
 from omni.isaac.lab.managers import SceneEntityCfg
 from omni.isaac.lab.utils import configclass
 
-import lab.flamingo.tasks.manager_based.stand_drive.velocity.mdp as mdp
-from lab.flamingo.tasks.manager_based.stand_drive.velocity.velocity_env_cfg import (
+# import omni.isaac.orbit_tasks.locomotion.velocity.mdp as mdp
+import lab.flamingo.tasks.manager_based.locomotion.velocity.mdp as mdp
+from lab.flamingo.tasks.manager_based.locomotion.velocity.velocity_env_cfg import (
     LocomotionVelocityFlatEnvCfg,
     RewardsCfg,
 )
 
 
-##
-# Pre-defined configs
-##
 # from omni.isaac.orbit_assets.flamingo import FLAMINGO_CFG
 from lab.flamingo.assets.flamingo import FLAMINGO_CFG  # isort: skip
 
@@ -103,10 +101,10 @@ class FlamingoRewardsCfg(RewardsCfg):
     # )  # default: 0.35482, 28482 works better
     base_range_height = RewTerm(
         func=mdp.base_height_range_reward,
-        weight=10.0,
+        weight=15.0,
         params={
             "min_height": 0.30,
-            "max_height": 0.38,
+            "max_height": 0.35,
             "in_range_reward": 0.005,
             "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
         },
@@ -152,7 +150,7 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
         # }
         # add base mass should be called here
         self.events.add_base_mass.params["asset_cfg"].body_names = ["base_link"]
-        self.events.add_base_mass.params["mass_distribution_params"] = (-1.0, 2.0)
+        self.events.add_base_mass.params["mass_distribution_params"] = (-1.0, 2.5)
         # physics material should be called here
         self.events.physics_material.params["asset_cfg"].body_names = [".*_link"]
         self.events.physics_material.params["static_friction_range"] = (0.4, 1.0)
@@ -170,10 +168,11 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
             },
         }
         # rewards
-        self.rewards.dof_torques_l2.weight = -2.5e-5  # default: -5.0e-6
+        self.rewards.dof_torques_l2.weight = -2.5e-4  # default: -5.0e-6
         self.rewards.track_lin_vel_xy_exp.weight = 2.0
         self.rewards.track_ang_vel_z_exp.weight = 1.0
-        self.rewards.action_rate_l2.weight *= 2.5  # default: 1.5
+        self.rewards.lin_vel_z_l2.weight *= 0.5
+        self.rewards.action_rate_l2.weight *= 5.5  # default: 1.5
         self.rewards.dof_acc_l2.weight *= 2.5  # default: 1.5
 
         # change terrain to flat
@@ -188,7 +187,7 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
         self.scene.height_scanner.debug_vis = False
 
         # commands
-        self.commands.base_velocity.ranges.lin_vel_x = (-1.25, 1.25)
+        self.commands.base_velocity.ranges.lin_vel_x = (-1.0, 1.0)
         self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
         self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
         self.commands.base_velocity.ranges.heading = (-math.pi, math.pi)
