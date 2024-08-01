@@ -20,6 +20,8 @@ from omni.isaac.lab.actuators import (
     DCMotorCfg,
     IdealPDActuatorCfg,
     DelayedPDActuatorCfg,
+)
+from lab.flamingo.tasks.manager_based.locomotion.velocity.actuators.actuator_cfg import (
     ActuatorNetMLPCfg,
     ActuatorNetLSTMCfg,
 )
@@ -151,51 +153,51 @@ FLAMINGO_CFG = ArticulationCfg(
         #             ".*_wheel_joint": 0.0,
         #         },
         #     ),
-        "joints": DelayedPDActuatorCfg(
-            joint_names_expr=[".*_hip_joint", ".*_shoulder_joint", ".*_leg_joint"],
-            effort_limit=23.0,
-            velocity_limit=20.0,
-            min_delay=0,  # physics time steps (min: 5.0 * 0 = 0.0ms)
-            max_delay=4,  # physics time steps (max: 5.0 * 4 = 20.0ms)
-            stiffness={
-                ".*_hip_joint": 85.0,
-                ".*_shoulder_joint": 85.0,
-                ".*_leg_joint": 85.0,
-            },  # default: 75.0
-            damping={
-                ".*_hip_joint": 0.75,
-                ".*_shoulder_joint": 0.75,
-                ".*_leg_joint": 0.75,
-            },  # default: 0.6
-            friction={
-                ".*_hip_joint": 0.0,
-                ".*_shoulder_joint": 0.0,
-                ".*_leg_joint": 0.0,
-            },
-            armature={
-                ".*_hip_joint": 0.0,
-                ".*_shoulder_joint": 0.0,
-                ".*_leg_joint": 0.0,
-            },
-        ),
-        "wheels": DelayedPDActuatorCfg(
-            joint_names_expr=[".*_wheel_joint"],
-            effort_limit=5.0,
-            velocity_limit=25.0,
-            min_delay=0,  # physics time steps (min: 5.0 * 0 = 0.0ms)
-            max_delay=4,  # physics time steps (max: 5.0 * 4 = 20.0ms)
-            stiffness={
-                ".*_wheel_joint": 0.0,
-            },
-            damping={".*_wheel_joint": 0.3},
-            friction={
-                ".*_wheel_joint": 0.0,
-            },
-            armature={
-                ".*_wheel_joint": 0.0,
-            },
-        ),
-        #     # "joints": FLAMINGO_JOINT_ACTUATOR_MLP_CFG,
-        #     # "wheels": FLAMINGO_WHEEL_ACTUATOR_LSTM_CFG,
+        # "joints": DelayedPDActuatorCfg(
+        #     joint_names_expr=[".*_hip_joint", ".*_shoulder_joint", ".*_leg_joint"],
+        #     effort_limit=23.0,
+        #     velocity_limit=20.0,
+        #     min_delay=0,  # physics time steps (min: 5.0 * 0 = 0.0ms)
+        #     max_delay=4,  # physics time steps (max: 5.0 * 4 = 20.0ms)
+        #     stiffness={
+        #         ".*_hip_joint": 75.0,
+        #         ".*_shoulder_joint": 75.0,
+        #         ".*_leg_joint": 75.0,
+        #     },  # default: 75.0
+        #     damping={
+        #         ".*_hip_joint": 0.55,
+        #         ".*_shoulder_joint": 0.55,
+        #         ".*_leg_joint": 0.55,
+        #     },  # default: 0.6
+        #     friction={
+        #         ".*_hip_joint": 0.0,
+        #         ".*_shoulder_joint": 0.0,
+        #         ".*_leg_joint": 0.0,
+        #     },
+        #     armature={
+        #         ".*_hip_joint": 0.0,
+        #         ".*_shoulder_joint": 0.0,
+        #         ".*_leg_joint": 0.0,
+        #     },
+        # ),
+        # "wheels": DelayedPDActuatorCfg(
+        #     joint_names_expr=[".*_wheel_joint"],
+        #     effort_limit=5.0,
+        #     velocity_limit=25.0,
+        #     min_delay=0,  # physics time steps (min: 5.0 * 0 = 0.0ms)
+        #     max_delay=4,  # physics time steps (max: 5.0 * 4 = 20.0ms)
+        #     stiffness={
+        #         ".*_wheel_joint": 0.0,
+        #     },
+        #     damping={".*_wheel_joint": 0.3},
+        #     friction={
+        #         ".*_wheel_joint": 0.0,
+        #     },
+        #     armature={
+        #         ".*_wheel_joint": 0.0,
+        #     },
+        # ),
+        "joints": FLAMINGO_JOINT_ACTUATOR_MLP_CFG,
+        "wheels": FLAMINGO_WHEEL_ACTUATOR_LSTM_CFG,
     },
 )

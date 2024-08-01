@@ -42,10 +42,10 @@ import omni.isaac.lab_tasks  # noqa: F401
 from omni.isaac.lab_tasks.utils import get_checkpoint_path, parse_env_cfg
 from omni.isaac.lab_tasks.utils.wrappers.rsl_rl import (
     RslRlOnPolicyRunnerCfg,
-    RslRlVecEnvWrapper,
     export_policy_as_jit,
     export_policy_as_onnx,
 )
+from lab.flamingo.tasks.utils.wrappers.rsl_rl import RslRlVecEnvWrapper
 
 # Import extensions to set up environment tasks
 import lab.flamingo.tasks  # noqa: F401  TODO: import orbit.<your_extension_name>

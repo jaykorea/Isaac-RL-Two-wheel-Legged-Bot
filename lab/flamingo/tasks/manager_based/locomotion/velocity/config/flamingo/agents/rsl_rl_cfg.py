@@ -13,10 +13,10 @@ from omni.isaac.lab_tasks.utils.wrappers.rsl_rl import (
 
 
 @configclass
-class FlamingoRoughPPORunnerCfg(RslRlOnPolicyRunnerCfg):
+class FlamingoPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 24
     max_iterations = 1500
-    save_interval = 50
+    save_interval = 100
     experiment_name = "FlamingoStand-v0"
     empirical_normalization = False
     policy = RslRlPpoActorCriticCfg(
@@ -42,18 +42,18 @@ class FlamingoRoughPPORunnerCfg(RslRlOnPolicyRunnerCfg):
 
 
 @configclass
-class FlamingoFlatPPORunnerCfg(FlamingoRoughPPORunnerCfg):
+class FlamingoFlatPPORunnerCfg(FlamingoPPORunnerCfg):
     def __post_init__(self):
         super().__post_init__()
 
-        self.max_iterations = 30000
+        self.max_iterations = 10000
         self.experiment_name = "Flamingo_stand_flat"
         self.policy.actor_hidden_dims = [512, 256, 128]
         self.policy.critic_hidden_dims = [512, 256, 128]
 
 
 @configclass
-class FlamingoRoughPPORunnerCfg(FlamingoRoughPPORunnerCfg):
+class FlamingoRoughPPORunnerCfg(FlamingoPPORunnerCfg):
     def __post_init__(self):
         super().__post_init__()
 

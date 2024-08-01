@@ -16,6 +16,49 @@ if TYPE_CHECKING:
     from omni.isaac.lab.envs import ManagerBasedRLEnv
 
 
+def track_pos_z_exp(
+    env: ManagerBasedRLEnv,
+    std: float,
+    command_name: str,
+    relative: bool = False,
+    root_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+    wheel_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+    sensor_cfg: SceneEntityCfg = SceneEntityCfg("contact_forces"),
+) -> torch.Tensor:
+    """Reward tracking of z position commands using an exponential kernel, considering relative height from wheels to base."""
+    # Extract the used quantities (to enable type-hinting)
+    root_asset: RigidObject = env.scene[root_cfg.name]
+    wheel_asset: RigidObject = env.scene[wheel_cfg.name]
+    contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
+
+    # Get the current z position of the robot's base
+    current_pos_z = root_asset.data.root_pos_w[:, 2]
+    # Get the mean z position of the wheels
+    wheel_pos_z = wheel_asset.data.body_pos_w[:, wheel_cfg.body_ids, 2].mean(dim=1)
+
+    # Calculate the relative height difference
+    if relative:
+        pos_z = current_pos_z - wheel_pos_z
+        contact_time = contact_sensor.data.current_contact_time[:, sensor_cfg.body_ids]
+        # Check if any of the body parts are in contact
+        in_contact = torch.all(contact_time > 0.0, dim=1)
+        # Assign a small constant reward if in contact
+        wheel_ground_reward = torch.where(in_contact, std**2, 0.0)
+    else:
+        pos_z = current_pos_z
+        wheel_ground_reward = torch.zeros_like(current_pos_z)
+
+    # Get the command z position relative to wheels from the command manager
+    command_pos_z = env.command_manager.get_command(command_name)[:, 3]
+
+    # Compute the error between the current height difference and the commanded height difference
+    pos_z_error = torch.square(command_pos_z - pos_z)
+
+    # Return the reward based on the exponential of the error
+    # return torch.exp(-pos_z_error / std**2) + wheel_ground_reward
+    return (pos_z_error / std**2) + wheel_ground_reward
+
+
 def feet_air_time(
     env: ManagerBasedRLEnv, command_name: str, sensor_cfg: SceneEntityCfg, threshold: float
 ) -> torch.Tensor:
@@ -128,6 +171,42 @@ class FlamingoAirTimeReward(ManagerTermBase):
         reward = stuck_air_time_reward + foot_clearance_reward
 
         return reward
+
+
+def stand_origin_base(
+    env: ManagerBasedRLEnv,
+    command_name: str,
+    asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+) -> torch.Tensor:
+    """Penalize linear velocity on x or y when the command is zero, encouraging the robot to stand still."""
+    # Extract the used quantities (to enable type-hinting)
+    asset: RigidObject = env.scene[asset_cfg.name]
+
+    # Compute the command and check if it's zero
+    command = env.command_manager.get_command(command_name)[:, :3]
+    is_zero_command = torch.all(command == 0.0, dim=1)  # Check per item in batch if command is zero
+
+    # Calculate linear and angular velocity errors
+    lin_vel = asset.data.root_lin_vel_b[:, :2]
+    lin_vel_error = torch.sum(torch.square(lin_vel), dim=1)
+
+    ang_vel = asset.data.root_ang_vel_b[:, 2]
+    ang_vel_error = torch.square(ang_vel)
+
+    # Penalize the linear and angular velocity errors
+    velocity_penalty = lin_vel_error + ang_vel_error
+
+    # Calculate deviation from origin position
+    current_pos = asset.data.root_pos_w[:, :2]
+    position_error = torch.sum(torch.square(current_pos - env.scene.env_origins[:, :2]), dim=1)
+
+    # Penalize the deviation from the origin position
+    position_penalty = position_error
+
+    # Apply the penalty only when the command is zero
+    penalty = (velocity_penalty + position_penalty) * is_zero_command.float()
+
+    return penalty
 
 
 def stand_still_base(

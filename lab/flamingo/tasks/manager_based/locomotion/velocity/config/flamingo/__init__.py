@@ -5,7 +5,13 @@
 
 import gymnasium as gym
 
-from . import agents, flat_env_cfg, flat_env_play_cfg, rough_env_cfg, rough_env_play_cfg
+from . import (
+    agents,
+    flat_env_cfg,
+    flat_env_play_cfg,
+    rough_env_cfg,
+    rough_env_play_cfg,
+)
 
 ##
 # Register Gym environments.

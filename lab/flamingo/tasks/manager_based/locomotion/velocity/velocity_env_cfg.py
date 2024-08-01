@@ -96,18 +96,38 @@ class MySceneCfg(InteractiveSceneCfg):
 class CommandsCfg:
     """Command specifications for the MDP."""
 
-    base_velocity = mdp.UniformVelocityCommandCfg(
+    base_velocity = mdp.UniformVelocityWithZCommandCfg(
         asset_name="robot",
         resampling_time_range=(10.0, 10.0),
-        rel_standing_envs=0.1,
+        rel_standing_envs=0.4,
         rel_heading_envs=1.0,
         heading_command=True,
         heading_control_stiffness=0.5,
         debug_vis=True,
-        ranges=mdp.UniformVelocityCommandCfg.Ranges(
-            lin_vel_x=(-1.0, 1.0), lin_vel_y=(-1.0, 1.0), ang_vel_z=(-1.0, 1.0), heading=(-math.pi, math.pi)
+        ranges=mdp.UniformVelocityWithZCommandCfg.Ranges(
+            lin_vel_x=(-1.0, 1.0),
+            lin_vel_y=(-1.0, 1.0),
+            ang_vel_z=(-1.0, 1.0),
+            pos_z=(0.1931942, 0.3531942),
+            heading=(-math.pi, math.pi),
         ),
     )
+
+    # base_velocity = mdp.UniformVelocityCommandCfg(
+    #     asset_name="robot",
+    #     resampling_time_range=(10.0, 10.0),
+    #     rel_standing_envs=0.4,
+    #     rel_heading_envs=1.0,
+    #     heading_command=True,
+    #     heading_control_stiffness=0.5,
+    #     debug_vis=True,
+    #     ranges=mdp.UniformVelocityCommandCfg.Ranges(
+    #         lin_vel_x=(-1.0, 1.0),
+    #         lin_vel_y=(-1.0, 1.0),
+    #         ang_vel_z=(-1.0, 1.0),
+    #         heading=(-math.pi, math.pi),
+    #     ),
+    # )
 
 
 @configclass
@@ -176,37 +196,39 @@ class ObservationsCfg:
         #         "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
         #     },
         # )
-        base_ang_vel = ObsTerm(func=mdp.base_ang_vel, noise=Unoise(n_min=-0.2, n_max=0.2))
-        base_euler = ObsTerm(func=mdp.root_euler_angle, noise=Unoise(n_min=-0.1, n_max=0.1))
+        base_ang_vel = ObsTerm(func=mdp.base_ang_vel, noise=Unoise(n_min=-0.25, n_max=0.25))
+        base_euler = ObsTerm(func=mdp.root_euler_angle, noise=Unoise(n_min=-0.15, n_max=0.15))
         actions = ObsTerm(func=mdp.last_action)
 
         """
         Stack 1
         """
 
-        prev_joint_pos = ObsTerm(func=mdp.prev_joint_pos_rel)
-        # prev_wheel_sin_pos = ObsTerm(func=mdp.prev_joint_pos_rel_sin)
-        # prev_wheel_cos_pos = ObsTerm(func=mdp.prev_joint_pos_rel_cos)
-        prev_joint_vel = ObsTerm(func=mdp.prev_joint_vel_rel)
-        # prev_base_lin_vel = ObsTerm(func=mdp.prev_base_lin_vel)
-        # prev_base_lin_acc = ObsTerm(func=mdp.prev_base_lin_acc)
-        prev_base_ang_vel = ObsTerm(func=mdp.prev_base_ang_vel)
-        prev_base_euler = ObsTerm(func=mdp.prev_root_euler_angle)
-        prev_actions = ObsTerm(func=mdp.prev_last_action)
+        prev_joint_pos = ObsTerm(
+            func=mdp.joint_pos_rel,
+            params={
+                "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_joint", ".*_shoulder_joint", ".*_leg_joint"])
+            },
+        )
+        prev_joint_vel = ObsTerm(func=mdp.joint_vel_rel)
+        prev_base_ang_vel = ObsTerm(func=mdp.base_ang_vel)
+        prev_base_euler = ObsTerm(func=mdp.root_euler_angle)
+        prev_actions = ObsTerm(func=mdp.last_action)
 
         """
         Stack 2
         """
 
-        prev2_joint_pos = ObsTerm(func=mdp.prev_prev_joint_pos_rel)
-        # prev2_wheel_sin_pos = ObsTerm(func=mdp.prev_prev_joint_pos_rel_sin)
-        # prev2_wheel_cos_pos = ObsTerm(func=mdp.prev_prev_joint_pos_rel_cos)
-        prev2_joint_vel = ObsTerm(func=mdp.prev_prev_joint_vel_rel)
-        # prev2_base_lin_vel = ObsTerm(func=mdp.prev_prev_base_lin_vel)
-        # prev2_base_lin_acc = ObsTerm(func=mdp.prev_prev_base_lin_acc)
-        prev2_base_ang_vel = ObsTerm(func=mdp.prev_prev_base_ang_vel)
-        prev2_base_euler = ObsTerm(func=mdp.prev_prev_root_euler_angle)
-        prev2_actions = ObsTerm(func=mdp.prev_prev_last_action)
+        prev2_joint_pos = ObsTerm(
+            func=mdp.joint_pos_rel,
+            params={
+                "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_joint", ".*_shoulder_joint", ".*_leg_joint"])
+            },
+        )
+        prev2_joint_vel = ObsTerm(func=mdp.joint_vel_rel)
+        prev2_base_ang_vel = ObsTerm(func=mdp.base_ang_vel)
+        prev2_base_euler = ObsTerm(func=mdp.root_euler_angle)
+        prev2_actions = ObsTerm(func=mdp.last_action)
 
         velocity_commands = ObsTerm(func=mdp.generated_commands, params={"command_name": "base_velocity"})
 
@@ -263,8 +285,8 @@ class EventCfg:
     #     func=mdp.randomize_joint_parameters,
     #     params={
     #         "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_joint", ".*_shoulder_joint", ".*_leg_joint"]),
-    #         "friction_distribution_params": (0.1, 2.0),
-    #         "armature_distribution_params": (0.3, 2.0),
+    #         "friction_distribution_params": (0.0, 0.0),
+    #         "armature_distribution_params": (0.0, 2.0),
     #         "operation": "scale",
     #         "distribution": "log_uniform",
     #     },
@@ -273,10 +295,10 @@ class EventCfg:
     #     func=mdp.randomize_joint_parameters,
     #     params={
     #         "asset_cfg": SceneEntityCfg("robot", joint_names=".*_wheel_joint"),
-    #         "friction_distribution_params": (0.5, 2.0),
-    #         "armature_distribution_params": (0.3, 3.0),
+    #         "friction_distribution_params": (0.0, 0.0),
+    #         "armature_distribution_params": (0.0, 2.0),
     #         "operation": "scale",
-    #         "distribution": "uniform",
+    #         "distribution": "log_uniform",
     #     },
     # )
     add_base_mass = EventTerm(
@@ -352,8 +374,20 @@ class RewardsCfg:
     track_ang_vel_z_exp = RewTerm(
         func=mdp.track_ang_vel_z_exp, weight=0.5, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
     )
+    track_pos_z_l2 = RewTerm(
+        func=mdp.track_pos_z_exp,
+        weight=1.0,
+        params={
+            "std": math.sqrt(0.025),
+            "command_name": "base_velocity",
+            "relative": True,
+            "root_cfg": SceneEntityCfg("robot", body_names="base_link"),
+            "wheel_cfg": SceneEntityCfg("robot", body_names=".*_wheel_link"),
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_wheel_link"),
+        },
+    )
     # -- penalties
-    lin_vel_z_l2 = RewTerm(func=mdp.lin_vel_z_l2, weight=-2.0)
+    lin_vel_z_l2 = RewTerm(func=mdp.lin_vel_z_l2, weight=-1.0)
     ang_vel_xy_l2 = RewTerm(func=mdp.ang_vel_xy_l2, weight=-0.05)
     dof_torques_l2 = RewTerm(func=mdp.joint_torques_l2, weight=-1.0e-5)
     dof_acc_l2 = RewTerm(func=mdp.joint_acc_l2, weight=-2.5e-7)  # default: -2.5e-7

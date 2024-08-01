@@ -34,7 +34,7 @@ class FlamingoFlatEnvCfg_PLAY(LocomotionVelocityFlatEnvCfg):
 
         # reset_robot_joint_zero should be called here
         self.events.reset_robot_joints.params["position_range"] = (-0.05, 0.05)
-        self.events.push_robot.interval_range_s = (2.0, 3.0)
+        self.events.push_robot.interval_range_s = (2.5, 3.5)
         self.events.push_robot.params = {
             "velocity_range": {"x": (-0.5, 0.5), "y": (-0.5, 0.5)},
         }
@@ -47,8 +47,8 @@ class FlamingoFlatEnvCfg_PLAY(LocomotionVelocityFlatEnvCfg):
         self.events.add_base_mass.params["mass_distribution_params"] = (-1.0, 1.0)
         # physics material should be called here
         self.events.physics_material.params["asset_cfg"].body_names = [".*_link"]
-        self.events.physics_material.params["static_friction_range"] = (1.0, 1.0)
-        self.events.physics_material.params["dynamic_friction_range"] = (1.0, 1.0)
+        self.events.physics_material.params["static_friction_range"] = (0.8, 1.0)
+        self.events.physics_material.params["dynamic_friction_range"] = (0.8, 1.0)
         self.events.base_external_force_torque.params["asset_cfg"].body_names = ["base_link"]
         self.events.reset_base.params = {
             "pose_range": {"x": (-0.0, 0.0), "y": (-0.0, 0.0), "yaw": (0.0, 0.0)},
@@ -56,8 +56,8 @@ class FlamingoFlatEnvCfg_PLAY(LocomotionVelocityFlatEnvCfg):
                 "x": (0.0, 0.0),
                 "y": (0.0, 0.0),
                 "z": (0.0, 0.0),
-                "roll": (-0.35, 0.35),
-                "pitch": (-0.35, 0.35),
+                "roll": (-0.15, 0.15),
+                "pitch": (-0.15, 0.15),
                 "yaw": (0.0, 0.0),
             },
         }
@@ -77,6 +77,7 @@ class FlamingoFlatEnvCfg_PLAY(LocomotionVelocityFlatEnvCfg):
         self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
         self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
         self.commands.base_velocity.ranges.heading = (-math.pi, math.pi)
+        self.commands.base_velocity.ranges.pos_z = (0.19, 0.19)  # (0.1931942, 0.3531942)
 
         # terminations
         self.terminations.base_contact.params["sensor_cfg"].body_names = [

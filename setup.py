@@ -1,4 +1,4 @@
-"""Installation script for the 'orbit.flamingo' python package."""
+"""Installation script for the 'lab.flamingo' python package."""
 
 import os
 import toml
