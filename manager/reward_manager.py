@@ -1,5 +1,11 @@
 import torch
 import math
+import sys
+import os
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from utils.math_utils import MathUtils
 
 
 class RewardManager:
@@ -40,6 +46,7 @@ class RewardManager:
         self.joint_acc = torch.tensor(self.data.qacc, requires_grad=False)
         self.contact_forces = torch.tensor(self.data.cfrc_ext[1:10], requires_grad=False)  # External contact forces
         self.actuator_forces = torch.tensor(self.data.actuator_force[:8], requires_grad=False)
+        self.base_lin_vel = torch.tensor(MathUtils.quat_to_base_vel(self.data.qpos[3:7], self.data.qvel[0:3]), requires_grad=False)
         self.is_done = is_done
 
         self.priv_obs['obs_buf'] = self.obs
@@ -47,12 +54,11 @@ class RewardManager:
         self.priv_obs['joint_acc'] = self.joint_acc
         self.priv_obs['contact_forces'] = self.contact_forces
         self.priv_obs['actuator_forces'] = self.data.actuator_force
+        self.priv_obs['base_lin_vel'] = self.base_lin_vel
         self.priv_obs['is_done'] = self.is_done
 
-    def get_observations(self, obs, step_counter, sim_step):
+    def get_observations(self, obs):
         self.obs = torch.tensor(obs, requires_grad=False)
-        self.step_counter = step_counter
-        self.sim_step = sim_step
 
         joint_pos_mean = [((self.joint_pos_limits[2 * i] + self.joint_pos_limits[2 * i + 1]) / 2) for i in range(len(self.joint_pos_limits) // 2)]
         joint_pos_range = [(self.joint_pos_limits[2 * i + 1] - self.joint_pos_limits[2 * i]) for i in range(len(self.joint_pos_limits) // 2)]
@@ -60,15 +66,15 @@ class RewardManager:
 
         self.joint_pos = self.obs[:6]
         self.joint_vel = self.obs[6:14]
-        self.base_lin_vel = self.obs[14:17]
-        self.base_ang_vel = self.obs[17:20]
-        self.base_euler = self.obs[20:23]
-        self.actions = self.obs[23:31]
-        self.prev_actions = self.obs[54:62]
-        self.joint_torques = torch.tensor(self.data.actuator_force[:6], requires_grad=False)
-        self.wheel_torques = torch.tensor(self.data.actuator_force[6:8], requires_grad=False)
+        self.base_lin_vel = self.priv_obs['base_lin_vel']
+        self.base_ang_vel = self.obs[14:17]
+        self.base_euler = self.obs[17:20]
+        self.actions = self.obs[20:28]
+        self.prev_actions = self.obs[48:56]
+        self.joint_torques = self.actuator_forces[:6]
+        self.wheel_torques = self.actuator_forces[6:8]
 
-        self.commands = torch.tensor([-0.1, 0.0, 0.0], requires_grad=False)
+        self.commands = self.obs[84:88]  # [linear_speed, angular_speed, yaw, z_position]
 
     def joint_deviation(self, joint_name, weight=1.0):
         joint_idx = self.joint_indices[joint_name]
@@ -133,7 +139,6 @@ class RewardManager:
 
     def is_terminated(self, weight=1.0):
         terminated = self.is_done
-        time_outs = torch.tensor([self.step_counter >= self.sim_step], dtype=torch.bool)
-        if terminated and not time_outs:
+        if terminated:
             return weight * torch.tensor([1.0], requires_grad=False)
         return torch.zeros(1, requires_grad=False)

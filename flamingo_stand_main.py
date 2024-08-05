@@ -4,9 +4,7 @@ from gymnasium.envs.mujoco.mujoco_rendering import MujocoRenderer
 from gymnasium.spaces import Box
 import numpy as np
 import pickle
-import xml.etree.ElementTree as ET
 import os
-import torch
 import mujoco
 import threading
 import argparse
@@ -30,17 +28,18 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
         "render_modes": ["human", "rgb_array", "depth_array"],
     }
 
-    def __init__(self, env_id='FLA_STAND-v0', model_path='./assets/flamingo_pos_vel.xml', frame_skip=4, render_mode='human'):
+    def __init__(self, env_id='FLA_STAND-v0', model_path='./assets/flamingo_torque_velocity.xml', frame_skip=4, render_mode='human'):
         self.model_path = os.path.join(os.path.dirname(__file__), model_path)
         self.frame_skip = frame_skip
         self.render_mode = render_mode
         self.viewer = None
         self.dt_ = 0.005
-        self.sim_duration = 60.0
+        self.sim_duration = 10.0
         self.sim_step = (self.sim_duration / self.dt_) / self.frame_skip
         self.id = env_id
-        self.obs_dim = 28 * 3 + 4
+        self.obs_dim = 28 * 1 + 4
         self.act_dim = 8
+        self.stacked_obs = None
         self.previous_states = []
         self.state_clip = np.inf
         self.action_scaler = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 25.0, 25.0]
@@ -49,8 +48,8 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
 
         self.save_data = False
         self.save_trajectory = False
-        self.plot_log = True
-        self.mem_save = False
+        self.plot_log = False
+        self.mem_save = True
 
         self.randomize_sensor = False
         self.randomize_inertia = False
@@ -137,6 +136,8 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
 
         self.pygame_utils.update_commands(automation=self.pygame_utils.automation_command)
 
+        # self.stacked_obs = np.clip(np.concatenate([np.concatenate(self.previous_states), self.pygame_utils.commands]), -self.state_clip, self.state_clip)
+        # return np.clip(np.concatenate([current_state, self.pygame_utils.commands]), -self.state_clip, self.state_clip)
         return np.clip(np.concatenate([np.concatenate(self.previous_states), self.pygame_utils.commands]), -self.state_clip, self.state_clip)
 
     def seed(self, seed):
@@ -148,7 +149,50 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
     def step(self, action):
         obs = self._get_obs(action)
         filtered_action = self.control_manager.low_pass_filter(action)
-        action_scaled = filtered_action * self.action_scaler
+        # action_scaled = filtered_action * self.action_scaler
+
+        # Extract joint positions and velocities from observation
+        pos_hip = obs[0:2]
+        pos_shoulder = obs[2:4]
+        pos_leg = obs[4:6]
+
+        vel_hip = obs[6:8]
+        vel_shoulder = obs[8:10]
+        vel_leg = obs[10:12]
+
+        # PD control parameters from Isaac Orbit configuration
+        kp_j = 70.0
+        kd_j = 0.65
+
+        hip_action_scaled = filtered_action[0:2] * self.action_scaler[0:2]
+        shoulder_action_scaled = filtered_action[2:4] * self.action_scaler[2:4]
+        leg_action_scaled = filtered_action[4:6] * self.action_scaler[4:6]
+        wheel_action_scaled = filtered_action[6:8] * self.action_scaler[6:8]
+
+        # Calculate torques for each joint using PD controller
+        hip_action = np.clip(
+            self.control_manager.pd_controller(kp_j, hip_action_scaled, pos_hip, kd_j, 0.0, vel_hip),
+            -23.0,
+            23.0,
+        )
+        shoulder_action = np.clip(
+            self.control_manager.pd_controller(
+                kp_j, shoulder_action_scaled, pos_shoulder, kd_j, 0.0, vel_shoulder
+            ),
+            -23.0,
+            23.0,
+        )
+        leg_action = np.clip(
+            self.control_manager.pd_controller(kp_j, leg_action_scaled, pos_leg, kd_j, 0.0, vel_leg),
+            -23.0,
+            23.0,
+        )
+
+        # Combine all actions
+        action_scaled = np.concatenate(
+            [hip_action, shoulder_action, leg_action, wheel_action_scaled]
+        )
+
         self.do_simulation(action_scaled, self.frame_skip)
         self.step_counter += 1
         obs = self._get_obs(filtered_action)
@@ -161,7 +205,7 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
         term = self._is_done()
         trun = self.step_counter >= self.sim_step
 
-        self.log_utils.plot_table(self.extra_utils.get_episode_sums(), self.step_counter, self.sim_step)
+        # self.log_utils.plot_table(self.extra_utils.get_episode_sums(), self.step_counter, self.sim_step)
 
         return obs, reward, term, trun, info
 
@@ -175,7 +219,7 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
         """
 
         self.reward_manager.get_privileged_observations(self.data, self._is_done())
-        self.reward_manager.get_observations(obs, self.step_counter, self.sim_step)
+        self.reward_manager.get_observations(obs)
 
         track_lin_vel_xy_exp = self.reward_manager.track_lin_vel_xy_exp(weight=2.0)
         track_ang_vel_z_exp = self.reward_manager.track_ang_vel_z_exp(weight=1.0)
@@ -188,13 +232,13 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
         undesired_contact = self.reward_manager.undesired_contact(weight=-1.0)
         flat_orientation_l2 = self.reward_manager.flat_orientation_l2(weight=-0.5)
         base_target_range_height = self.reward_manager.base_target_range_height(weight=15.0)
-        joint_deviation_hip = self.reward_manager.joint_deviation('left_hip', weight=-5.0) + self.reward_manager.joint_deviation('right_hip', weight=-5.0)
+        joint_deviation_hip = self.reward_manager.joint_deviation('left_hip', weight=-2.0) + self.reward_manager.joint_deviation('right_hip', weight=-2.0)
         joint_align_shoulder = self.reward_manager.joint_align('left_shoulder', 'right_shoulder', weight=-2.0)
         joint_align_leg = self.reward_manager.joint_align('left_leg', 'right_leg', weight=-2.0)
         dof_pos_limits_hip = self.reward_manager.dof_pos_limits('left_hip', 'right_hip', weight=-2.0)
         dof_pos_limits_shoulder = self.reward_manager.dof_pos_limits('left_shoulder', 'right_shoulder', weight=-10.0)
         dof_pos_limits_leg = self.reward_manager.dof_pos_limits('left_leg', 'right_leg', weight=-2.0)
-        error_vel_xy = self.reward_manager.error_vel_xy(weight=-0.05)
+        error_vel_xy = self.reward_manager.error_vel_xy(weight=-0.1)
         error_vel_yaw = self.reward_manager.error_vel_yaw(weight=-2.0)
         is_terminated = self.reward_manager.is_terminated(weight=-200.0)
 
@@ -319,7 +363,8 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
                 if self.plot_log or self.save_data or self.save_trajectory:
                     self.log_utils.log_step_data(current_time, action_clipped, env)
 
-                env.render()
+                if self.render_mode is not None:
+                    env.render()
 
                 if term or trun:
                     break
@@ -338,7 +383,7 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
                 self.mem_utils.reset()
 
                 try:
-                    with open("raw_memory20.pkl", "wb") as fw:
+                    with open("raw_memory15.pkl", "wb") as fw:
                         pickle.dump(self.mem_utils, fw)
                 except KeyboardInterrupt:
                     print("Process interrupted. File not saved.")
@@ -355,7 +400,7 @@ if __name__ == '__main__':
     input_name = session.get_inputs()[0].name
 
     env = FLA_STAND(env_id="FLA_STAND-v0")
-    env.render_mode = "human"
+    env.render_mode = None
     mujoco_thread = threading.Thread(target=env.run_mujoco, args=(session, input_name, env, 200))
     mujoco_thread.start()
 

@@ -1,6 +1,3 @@
-import numpy as np
-
-
 class ControlManager:
     @staticmethod
     def pd_controller(kp, tq, q, kd, td, d):

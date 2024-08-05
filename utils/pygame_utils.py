@@ -1,7 +1,7 @@
 import pygame
 import random
 import time
-import numpy as np
+
 
 class PygameUtils:
     def __init__(self):
@@ -9,11 +9,11 @@ class PygameUtils:
         self.screen = pygame.display.set_mode((480, 240))
         pygame.display.set_caption('Command Controller')
 
-        self.commands = [0.0, 0.0, 0.0, 0.1931942]
-        self.max_linear_speed = 1.0
+        self.commands = [0.0, 0.0, 0.0, 0.0]
+        self.max_linear_speed = 0.75
         self.max_angular_speed = 1.0
         self.range_pos_z = (0.1531942, 0.3531942)
-        self.acceleration = 0.1
+        self.acceleration = 0.05
         self.deceleration = 0.05
         self.automation_command = False
         self.automation_command_lateral = True

@@ -1,6 +1,12 @@
 import numpy as np
 import pickle
 import os
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from utils.memory_utils import MemoryUtils
+
 
 def convert_pkl_episodes_to_npy(pkl_file_path, npy_file_path):
     # Load the data from the pkl file
@@ -19,10 +25,11 @@ def convert_pkl_episodes_to_npy(pkl_file_path, npy_file_path):
 
     print(f"All episodes from {pkl_file_path} have been saved to {npy_file_path}.")
 
+
 if __name__ == "__main__":
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    load_pkl_files = [os.path.join(current_dir, f"memory3/raw_memory{i+1}.pkl") for i in range(20)]
-    output_npy_files = [os.path.join(current_dir, f"memory3/npy_memory{i+1}.npy") for i in range(20)]
+    root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    load_pkl_files = [os.path.join(root_dir, f"memory4/raw_memory{i+1}.pkl") for i in range(15, 20)]
+    output_npy_files = [os.path.join(root_dir, f"memory4/npy_memory{i+1}.npy") for i in range(15, 20)]
 
     for pkl_file, npy_file in zip(load_pkl_files, output_npy_files):
         print(f"Converting {pkl_file} to {npy_file}")

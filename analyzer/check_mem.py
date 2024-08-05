@@ -34,6 +34,6 @@ def check_episode_numbers(pkl_file_path):
 
 
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-pkl_file_path = os.path.join(root_dir, 'raw_memory8.pkl')
+pkl_file_path = os.path.join(root_dir, 'memory1/raw_memory1.pkl')
 
 check_episode_numbers(pkl_file_path)

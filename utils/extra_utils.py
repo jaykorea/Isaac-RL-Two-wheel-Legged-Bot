@@ -45,3 +45,6 @@ class ExtraUtils:
 
     def get_episode_sums(self):
         return self.episode_sums
+
+    def get_extras(self):
+        return self.extras
