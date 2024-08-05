@@ -87,7 +87,7 @@ class FlamingoRewardsCfg(RewardsCfg):
     )
     stand_origin_still = RewTerm(
         func=mdp.stand_origin_base,
-        weight=-0.0,  # default: -0.1
+        weight=-0.025,  # default: -0.1
         params={
             "command_name": "base_velocity",
             "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
@@ -107,7 +107,7 @@ class FlamingoRewardsCfg(RewardsCfg):
     base_target_height = RewTerm(
         func=mdp.base_height_l2,
         weight=-25.0,
-        params={"target_height": 0.32482, "asset_cfg": SceneEntityCfg("robot", body_names="base_link")},
+        params={"target_height": 0.35482, "asset_cfg": SceneEntityCfg("robot", body_names="base_link")},
     )  # default: 0.35482, 28482 works better
     # base_range_height = RewTerm(
     #     func=mdp.base_height_range_reward,
