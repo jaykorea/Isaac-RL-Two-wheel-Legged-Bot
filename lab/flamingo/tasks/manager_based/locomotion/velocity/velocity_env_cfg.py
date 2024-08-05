@@ -99,7 +99,7 @@ class CommandsCfg:
     base_velocity = mdp.UniformVelocityWithZCommandCfg(
         asset_name="robot",
         resampling_time_range=(10.0, 10.0),
-        rel_standing_envs=0.4,
+        rel_standing_envs=0.5,
         rel_heading_envs=1.0,
         heading_command=True,
         heading_control_stiffness=0.5,
@@ -176,30 +176,22 @@ class ObservationsCfg:
                 "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_joint", ".*_shoulder_joint", ".*_leg_joint"])
             },
         )
-
-        # wheel_sin_pos = ObsTerm(
-        #     func=mdp.joint_pos_rel_sin,
-        #     noise=Unoise(n_min=-0.01, n_max=0.01),
-        #     params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_wheel_joint"])},
-        # )
-        # wheel_cos_pos = ObsTerm(
-        #     func=mdp.joint_pos_rel_cos,
-        #     noise=Unoise(n_min=-0.01, n_max=0.01),
-        #     params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_wheel_joint"])},
-        # )
         joint_vel = ObsTerm(func=mdp.joint_vel_rel, noise=Unoise(n_min=-1.5, n_max=1.5))
-        # base_lin_vel = ObsTerm(func=mdp.base_lin_vel, noise=Unoise(n_min=-0.1, n_max=0.1), clip=(-25.0, 25.0))
-        # base_lin_acc = ObsTerm(
-        #     func=mdp.base_lin_acc,
-        #     noise=Unoise(n_min=-0.1, n_max=0.1),
-        #     params={
-        #         "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
-        #     },
-        # )
-        base_ang_vel = ObsTerm(func=mdp.base_ang_vel, noise=Unoise(n_min=-0.25, n_max=0.25))
-        base_euler = ObsTerm(func=mdp.root_euler_angle, noise=Unoise(n_min=-0.15, n_max=0.15))
+        base_ang_vel = ObsTerm(func=mdp.base_ang_vel, noise=Unoise(n_min=-0.2, n_max=0.2))
+        base_euler = ObsTerm(func=mdp.root_euler_angle, noise=Unoise(n_min=-0.1, n_max=0.1))
         actions = ObsTerm(func=mdp.last_action)
 
+        # joint_pos = ObsTerm(
+        #     func=mdp.joint_pos_rel,
+        #     noise=Gnoise(std=0.023),
+        #     params={
+        #         "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_joint", ".*_shoulder_joint", ".*_leg_joint"])
+        #     },
+        # )
+        # joint_vel = ObsTerm(func=mdp.joint_vel_rel, noise=Gnoise(std=0.866))
+        # base_ang_vel = ObsTerm(func=mdp.base_ang_vel, noise=Gnoise(std=0.115))
+        # base_euler = ObsTerm(func=mdp.root_euler_angle, noise=Gnoise(std=0.058))
+        # actions = ObsTerm(func=mdp.last_action)
         """
         Stack 1
         """
@@ -382,16 +374,6 @@ class RewardsCfg:
     dof_torques_l2 = RewTerm(func=mdp.joint_torques_l2, weight=-1.0e-5)
     dof_acc_l2 = RewTerm(func=mdp.joint_acc_l2, weight=-2.5e-7)  # default: -2.5e-7
     action_rate_l2 = RewTerm(func=mdp.action_rate_l2, weight=-0.01)  # default: -0.01
-    # feet_air_time = RewTerm(
-    #     func=mdp.feet_air_time,
-    #     weight=0.125,
-    #     params={
-    #         "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_wheel_link"),
-    #         "command_name": "base_velocity",
-    #         "threshold": 0.5,
-    #     },
-    # )
-    # Terrain-specific rewards based on elevation changes
 
 
 @configclass

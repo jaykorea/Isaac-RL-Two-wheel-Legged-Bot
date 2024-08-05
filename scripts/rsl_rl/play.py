@@ -45,6 +45,9 @@ from omni.isaac.lab_tasks.utils.wrappers.rsl_rl import (
     export_policy_as_jit,
     export_policy_as_onnx,
 )
+
+#  from omni.isaac.lab_tasks.utils.wrappers.rsl_rl import RslRlVecEnvWrapper
+
 from lab.flamingo.tasks.utils.wrappers.rsl_rl import RslRlVecEnvWrapper
 
 # Import extensions to set up environment tasks
