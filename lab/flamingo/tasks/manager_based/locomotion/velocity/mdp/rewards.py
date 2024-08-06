@@ -116,9 +116,7 @@ class FlamingoAirTimeReward(ManagerTermBase):
         super().__init__(cfg, env)
         self.stuck_threshold: float = cfg.params.get("stuck_threshold", 0.1)
         self.stuck_duration: int = cfg.params.get("stuck_duration", 5)
-        self.std: float = cfg.params.get("std", 0.1)
-        self.tanh_mult: float = cfg.params.get("tanh_mult", 1.0)
-        self.target_height: float = cfg.params.get("target_height", 0.2)
+        self.threshold: float = cfg.params.get("threshold", 0.2)
         self.asset: Articulation = env.scene[cfg.params["asset_cfg"].name]
         self.contact_sensor: ContactSensor = env.scene.sensors[cfg.params["sensor_cfg"].name]
         self.stuck_counter = torch.zeros(self.asset.data.root_lin_vel_b.shape[0], device=self.asset.device)
@@ -131,8 +129,7 @@ class FlamingoAirTimeReward(ManagerTermBase):
         env: ManagerBasedRLEnv,
         stuck_threshold: float,
         stuck_duration: int,
-        std: float,
-        tanh_mult: float,
+        threshold: float,
         asset_cfg: SceneEntityCfg,
         sensor_cfg: SceneEntityCfg,
     ) -> torch.Tensor:
@@ -145,30 +142,37 @@ class FlamingoAirTimeReward(ManagerTermBase):
         Returns:
             The reward value.
         """
-        contact_sensor = env.scene.sensors[sensor_cfg.name]
+        # Extract the necessary sensor data
+        contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
+        first_contact = contact_sensor.compute_first_contact(env.step_dt)[:, sensor_cfg.body_ids]
+        last_air_time = contact_sensor.data.last_air_time[:, sensor_cfg.body_ids]
 
-        air_time = contact_sensor.data.current_air_time[:, sensor_cfg.body_ids]
+        # Compute the base movement command and its progress
+        base_velocity_tensor = env.command_manager.get_command("base_velocity")[:, :3]
+        progress = torch.norm(base_velocity_tensor - self.asset.data.root_lin_vel_b, dim=1)
+        is_stuck = progress > self.stuck_threshold  # Detect lack of progress
 
-        # Stuck detection
-        progress = torch.norm(env.command_manager.get_command("base_velocity") - self.asset.data.root_lin_vel_b, dim=1)
-        is_stuck = progress > stuck_threshold  # Detect lack of progress
-
+        # Manage the stuck counter and determine stuck status
         self.stuck_counter = torch.where(is_stuck, self.stuck_counter + 1, torch.zeros_like(self.stuck_counter))
-        stuck = self.stuck_counter >= stuck_duration
+        stuck = self.stuck_counter >= self.stuck_duration
+        stuck = stuck.unsqueeze(1)
 
-        stuck_air_time_reward = torch.sum(air_time, dim=1) * stuck.float() * 10.0
+        # Compute the reward based on air time and first contact when stuck
+        stuck_air_time_reward = torch.sum((last_air_time - self.threshold) * first_contact * stuck.float(), dim=1)
+        # Ensure no reward is given if there is no movement command
+        stuck_air_time_reward *= torch.norm(base_velocity_tensor[:, :2], dim=1) > 0.1
 
-        # Foot clearance reward
-        foot_z_target_error = torch.square(self.asset.data.body_pos_w[:, asset_cfg.body_ids, 2] - self.target_height)
-        foot_velocity_tanh = torch.tanh(
-            tanh_mult * torch.norm(self.asset.data.body_lin_vel_w[:, asset_cfg.body_ids, :2], dim=2)
-        )
-        foot_clearance_reward = (
-            torch.exp(-torch.sum(foot_z_target_error * foot_velocity_tanh, dim=1) / std) * stuck.float()
-        )
+        # # Foot clearance reward
+        # foot_z_target_error = torch.square(self.asset.data.body_pos_w[:, asset_cfg.body_ids, 2] - self.target_height)
+        # foot_velocity_tanh = torch.tanh(
+        #     tanh_mult * torch.norm(self.asset.data.body_lin_vel_w[:, asset_cfg.body_ids, :2], dim=2)
+        # )
+        # foot_clearance_reward = (
+        #     torch.exp(-torch.sum(foot_z_target_error * foot_velocity_tanh, dim=1) / std) * stuck.float()
+        # )
 
         # Final reward: Encourage lifting legs when stuck
-        reward = stuck_air_time_reward + foot_clearance_reward
+        reward = stuck_air_time_reward  # + foot_clearance_reward
 
         return reward
 

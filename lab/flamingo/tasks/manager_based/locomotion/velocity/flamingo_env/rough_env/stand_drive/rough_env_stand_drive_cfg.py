@@ -29,21 +29,20 @@ class FlamingoCurriculumCfg:
 
     terrain_levels = CurrTerm(func=mdp.terrain_levels_vel)
 
-    curriculum_stuck_air_time = CurrTerm(
-        func=mdp.modify_reward_weight, params={"term_name": "stuck_air_time", "weight": 1.0, "num_steps": 10000}
-    )
+    # curriculum_stuck_air_time = CurrTerm(
+    #     func=mdp.modify_reward_weight, params={"term_name": "stuck_air_time", "weight": 1.0, "num_steps": 10000}
+    # )
 
 
 @configclass
 class FlamingoRewardsCfg(RewardsCfg):
     stuck_air_time = RewTerm(
         func=mdp.FlamingoAirTimeReward,
-        weight=0.0,
+        weight=1.25,
         params={
             "stuck_threshold": 0.15,
             "stuck_duration": 25,
-            "std": 0.05,
-            "tanh_mult": 2.0,
+            "threshold": 0.45,
             "asset_cfg": SceneEntityCfg("robot"),
             "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_wheel_link"),
         },
