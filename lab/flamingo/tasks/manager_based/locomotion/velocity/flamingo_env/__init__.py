@@ -39,8 +39,8 @@ gym.register(
 
 
 gym.register(
-    id="Isaac-Velocity-Rough-Flaminngo-v1",
-    entry_point="omni.isaac.lab.evs:ManagerBasedRLEnv",
+    id="Isaac-Velocity-Rough-Flamingo-v1",
+    entry_point="omni.isaac.lab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
         "env_cfg_entry_point": rough_env.rough_env_stand_drive_cfg.FlamingoRoughEnvCfg,

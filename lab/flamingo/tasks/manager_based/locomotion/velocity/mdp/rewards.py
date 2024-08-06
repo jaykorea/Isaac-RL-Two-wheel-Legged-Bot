@@ -327,7 +327,7 @@ def action_smoothness_hard(env: ManagerBasedRLEnv) -> torch.Tensor:
     return sm1 + sm2 + sm3
 
 
-def base_height_range_reward(
+def base_height_range_l2(
     env: ManagerBasedRLEnv,
     min_height: float,
     max_height: float,
@@ -342,7 +342,7 @@ def base_height_range_reward(
     in_range = (root_pos_z >= min_height) & (root_pos_z <= max_height)
 
     # Calculate the absolute deviation from the nearest range limit when out of range
-    out_of_range_penalty = torch.abs(root_pos_z - torch.where(root_pos_z < min_height, max_height, min_height))
+    out_of_range_penalty = torch.square(root_pos_z - torch.where(root_pos_z < min_height, max_height, min_height))
 
     # Assign a fixed reward if in range, and a negative penalty if out of range
     reward = torch.where(in_range, in_range_reward * torch.ones_like(root_pos_z), -out_of_range_penalty)
@@ -350,7 +350,7 @@ def base_height_range_reward(
     return reward
 
 
-def base_height_range_relative_reward(
+def base_height_range_relative_l2(
     env: ManagerBasedRLEnv,
     min_height: float,
     max_height: float,
@@ -373,10 +373,52 @@ def base_height_range_relative_reward(
     in_range = (height_diff >= min_height) & (height_diff <= max_height)
 
     # Calculate the absolute deviation from the nearest range limit when out of range
-    out_of_range_penalty = torch.abs(height_diff - torch.where(height_diff < min_height, max_height, min_height))
+    out_of_range_penalty = torch.square(height_diff - torch.where(height_diff < min_height, max_height, min_height))
 
     # Assign a fixed reward if in range, and a negative penalty if out of range
     reward = torch.where(in_range, in_range_reward * torch.ones_like(height_diff), -out_of_range_penalty)
+
+    return reward
+
+
+def base_height_dynamic_wheel_l2(
+    env: ManagerBasedRLEnv,
+    min_height: float,
+    max_height: float,
+    in_range_reward: float,
+    root_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+    wheel_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+) -> torch.Tensor:
+    """Provide a fixed reward when the asset height relative to the furthest wheel is within a specified range and penalize deviations."""
+    root_asset: RigidObject = env.scene[root_cfg.name]
+    wheel_asset: RigidObject = env.scene[wheel_cfg.name]
+
+    root_pos_z = root_asset.data.root_pos_w[:, 2]
+    # Get the z positions of all the wheels
+    wheel_pos_z = wheel_asset.data.body_pos_w[:, wheel_cfg.body_ids, 2]
+
+    # Calculate the height differences for all wheels
+    height_diffs = root_pos_z.unsqueeze(1) - wheel_pos_z
+
+    # Find the maximum height difference for each instance (both positive and negative)
+    max_height_diff, _ = torch.max(height_diffs, dim=1)
+    min_height_diff, _ = torch.min(height_diffs, dim=1)
+
+    # Choose the larger absolute value between max and min height differences
+    furthest_height_diff = torch.where(
+        torch.abs(max_height_diff) > torch.abs(min_height_diff), max_height_diff, min_height_diff
+    )
+
+    # Check if the furthest height difference is within the specified range
+    in_range = (furthest_height_diff >= min_height) & (furthest_height_diff <= max_height)
+
+    # Calculate the absolute deviation from the nearest range limit when out of range
+    out_of_range_penalty = torch.square(
+        furthest_height_diff - torch.where(furthest_height_diff < min_height, max_height, min_height)
+    )
+
+    # Assign a fixed reward if in range, and a negative penalty if out of range
+    reward = torch.where(in_range, in_range_reward * torch.ones_like(furthest_height_diff), -out_of_range_penalty)
 
     return reward
 

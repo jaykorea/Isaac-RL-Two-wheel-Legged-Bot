@@ -137,7 +137,7 @@ class FlamingoRewardsCfg(RewardsCfg):
     #     params={"target_height": 0.32482, "asset_cfg": SceneEntityCfg("robot", body_names="base_link")},
     # )  # default: 0.35482, 28482 works better
     # base_range_height = RewTerm(
-    #     func=mdp.base_height_range_reward,
+    #     func=mdp.base_height_range_l2,
     #     weight=15.0,
     #     params={
     #         "min_height": 0.32,
@@ -147,7 +147,7 @@ class FlamingoRewardsCfg(RewardsCfg):
     #     },
     # )
     base_range_relative_height = RewTerm(
-        func=mdp.base_height_range_relative_reward,
+        func=mdp.base_height_range_relative_l2,
         weight=15.0,
         params={
             "min_height": 0.267,

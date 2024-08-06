@@ -41,7 +41,7 @@ class FlamingoRewardsCfg(RewardsCfg):
         weight=0.0,
         params={
             "stuck_threshold": 0.15,
-            "stuck_duration": 50,
+            "stuck_duration": 25,
             "std": 0.05,
             "tanh_mult": 2.0,
             "asset_cfg": SceneEntityCfg("robot"),
@@ -51,25 +51,25 @@ class FlamingoRewardsCfg(RewardsCfg):
     termination_penalty = RewTerm(func=mdp.is_terminated, weight=-200.0)
     joint_deviation_hip = RewTerm(
         func=mdp.joint_deviation_l1,
-        weight=-5.0,
+        weight=-2.0,
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_joint"])},
     )
     # joint_deviation_range_shoulder = RewTerm(
     #     func=mdp.joint_target_deviation_range_l1,
-    #     weight=5.0,
+    #     weight=0.25,
     #     params={
-    #         "min_angle": -0.301799,
-    #         "max_angle": 0.0,
+    #         "min_angle": -0.30,
+    #         "max_angle": 0.1,
     #         "in_range_reward": 0.001,
     #         "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_shoulder_joint"]),
     #     },  # target: -0.261799
     # )
     # joint_deviation_range_leg = RewTerm(
     #     func=mdp.joint_target_deviation_range_l1,
-    #     weight=5.0,
+    #     weight=0.25,
     #     params={
-    #         "min_angle": 0.51810467,
-    #         "max_angle": 0.61810467,
+    #         "min_angle": 0.46810467,
+    #         "max_angle": 0.66810467,
     #         "in_range_reward": 0.001,
     #         "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_leg_joint"]),
     #     },  # target: 0.56810467
@@ -102,69 +102,36 @@ class FlamingoRewardsCfg(RewardsCfg):
         weight=-0.1,  # default: -0.1
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*_joint")},
     )
-    base_stand_still = RewTerm(
-        func=mdp.stand_still_base,
-        weight=-0.0,  # default: -0.005
+    stand_origin_still = RewTerm(
+        func=mdp.stand_origin_base,
+        weight=-0.025,  # default: -0.1
         params={
-            "std": math.sqrt(0.25),
             "command_name": "base_velocity",
             "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
         },
     )
     shoulder_align_l1 = RewTerm(
         func=mdp.joint_align_l1,
-        weight=-2.0,  # default: -0.5
+        weight=-0.5,  # default: -0.5
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*_shoulder_joint")},
     )
     leg_align_l1 = RewTerm(
         func=mdp.joint_align_l1,
-        weight=-2.0,  # default: -0.5
+        weight=-0.5,  # default: -0.5
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*_leg_joint")},
     )
     flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-5.0)
-    # base_target_height = RewTerm(
-    #     func=mdp.base_height_l2,
-    #     weight=-100.0,
-    #     params={"target_height": 0.32482, "asset_cfg": SceneEntityCfg("robot", body_names="base_link")},
-    # )  # default: 0.35482, 28482 works better
-    # base_range_height = RewTerm(
-    #     func=mdp.base_height_range_reward,
-    #     weight=15.0,
-    #     params={
-    #         "min_height": 0.32,
-    #         "max_height": 0.35,
-    #         "in_range_reward": 0.005,
-    #         "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
-    #     },
-    # )
-    base_range_relative_height = RewTerm(
-        func=mdp.base_height_range_relative_reward,
-        weight=15.0,
+    base_height_dynamic_wheel = RewTerm(
+        func=mdp.base_height_dynamic_wheel_l2,
+        weight=25.0,
         params={
-            "min_height": 0.267,
-            "max_height": 0.297,
-            "in_range_reward": 0.005,
+            "min_height": 0.30182,
+            "max_height": 0.30182,
+            "in_range_reward": 0.0,
             "root_cfg": SceneEntityCfg("robot", body_names="base_link"),
             "wheel_cfg": SceneEntityCfg("robot", body_names=".*_wheel_link"),
         },
     )
-    # ! Terms below should be off if it is first training ! #
-    # wheel_applied_torque_limits = RewTerm(
-    #     func=mdp.applied_torque_limits,
-    #     weight=-0.0,  # default: -0.025
-    #     params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*_wheel_joint")},
-    # )
-    # dof_vel_limits_wheel = RewTerm(
-    #     func=mdp.joint_vel_limits,
-    #     weight=-0.0,  # default: -0.01
-    #     params={
-    #         "soft_ratio": 0.3,
-    #         "asset_cfg": SceneEntityCfg("robot", joint_names=".*_wheel_joint"),
-    #     },
-    # )
-    # ! Terms above should be off if it is first training ! #
-
-    # action_smoothness = RewTerm(func=mdp.action_smoothness_hard, weight=-0.0)
 
 
 @configclass
@@ -180,16 +147,16 @@ class FlamingoRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         self.scene.robot = FLAMINGO_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
         self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/base_link"
         # scale down the terrains because the robot is small
-        self.scene.terrain.terrain_generator.sub_terrains["boxes"].grid_height_range = (0.025, 0.1)
+        self.scene.terrain.terrain_generator.sub_terrains["boxes"].grid_height_range = (0.025, 0.05)
         self.scene.terrain.terrain_generator.sub_terrains["random_rough"].noise_range = (0.01, 0.06)
         self.scene.terrain.terrain_generator.sub_terrains["random_rough"].noise_step = 0.01
         self.scene.terrain.terrain_generator.sub_terrains["hf_pyramid_slope"].proportion = 0.1
         self.scene.terrain.terrain_generator.sub_terrains["hf_pyramid_slope"].slope_range = (
             0.0,
-            0.1,
+            0.05,
         )  # Very gentle slope
         self.scene.terrain.terrain_generator.sub_terrains["hf_pyramid_slope_inv"].proportion = (
-            0.1  # Increase proportion if you want more of this terrain
+            0.05  # Increase proportion if you want more of this terrain
         )
         self.scene.terrain.terrain_generator.sub_terrains["hf_pyramid_slope_inv"].slope_range = (
             0.0,
@@ -198,44 +165,12 @@ class FlamingoRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         # Adjust the inverted pyramid stairs terrain
         self.scene.terrain.terrain_generator.sub_terrains["pyramid_stairs_inv"].step_height_range = (
             0.01,
-            0.1,
+            0.05,
         )  # Smaller step height for gentler steps
         self.scene.terrain.terrain_generator.sub_terrains["pyramid_stairs_inv"].step_width = (
             0.25  # Increase step width for gentler steps
         )
 
-        """ sub terrains
-        sub_terrains={
-            "pyramid_stairs": terrain_gen.MeshPyramidStairsTerrainCfg(
-                proportion=0.2,
-                step_height_range=(0.05, 0.23),
-                step_width=0.3,
-                platform_width=3.0,/
-                border_width=1.0,
-                holes=False,
-            ),
-            "pyramid_stairs_inv": terrain_gen.MeshInvertedPyramidStairsTerrainCfg(
-                proportion=0.2,
-                step_height_range=(0.05, 0.23),
-                step_width=0.3,
-                platform_width=3.0,
-                border_width=1.0,
-                holes=False,
-            ),
-            "boxes": terrain_gen.MeshRandomGridTerrainCfg(
-                proportion=0.2, grid_width=0.45, grid_height_range=(0.05, 0.2), platform_width=2.0
-            ),
-            "random_rough": terrain_gen.HfRandomUniformTerrainCfg(
-                proportion=0.2, noise_range=(0.02, 0.10), noise_step=0.02, border_width=0.25
-            ),
-            "hf_pyramid_slope": terrain_gen.HfPyramidSlopedTerrainCfg(
-                proportion=0.1, slope_range=(0.0, 0.4), platform_width=2.0, border_width=0.25
-            ),
-            "hf_pyramid_slope_inv": terrain_gen.HfInvertedPyramidSlopedTerrainCfg(
-                proportion=0.1, slope_range=(0.0, 0.4), platform_width=2.0, border_width=0.25
-            ),
-        },
-        """
         # events
         self.events.push_robot = None
         # self.events.push_robot.params = {
@@ -250,8 +185,8 @@ class FlamingoRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         self.events.add_base_mass.params["mass_distribution_params"] = (-1.0, 2.0)
 
         self.events.physics_material.params["asset_cfg"].body_names = [".*"]
-        self.events.physics_material.params["static_friction_range"] = (0.4, 1.0)
-        self.events.physics_material.params["dynamic_friction_range"] = (0.4, 0.8)
+        self.events.physics_material.params["static_friction_range"] = (0.3, 1.0)
+        self.events.physics_material.params["dynamic_friction_range"] = (0.3, 0.8)
 
         self.events.reset_robot_joints.params["position_range"] = (-0.1, 0.1)
         self.events.base_external_force_torque.params["asset_cfg"].body_names = ["base_link"]
@@ -261,9 +196,9 @@ class FlamingoRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
                 "x": (0.0, 0.0),
                 "y": (0.0, 0.0),
                 "z": (0.0, 0.0),
-                "roll": (0.0, 0.0),
-                "pitch": (0.0, 0.0),
-                "yaw": (0.0, 0.0),
+                "roll": (-0.25, 0.25),
+                "pitch": (-0.25, 0.25),
+                "yaw": (-0.0, 0.0),
             },
         }
 
@@ -276,11 +211,13 @@ class FlamingoRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         ]
 
         # rewards
-        self.rewards.dof_torques_l2.weight = -2.5e-7  # default: -5.0e-6
-        self.rewards.track_lin_vel_xy_exp.weight = 2.0
-        self.rewards.track_ang_vel_z_exp.weight = 1.0
+        self.rewards.dof_torques_l2.weight = -5.0e-4  # default: -5.0e-6
+        self.rewards.track_lin_vel_xy_exp.weight = 1.5
+        self.rewards.track_ang_vel_z_exp.weight = 0.75
+        self.rewards.lin_vel_z_l2.weight *= 1.0
+        self.rewards.ang_vel_xy_l2.weight *= 1.5
         self.rewards.action_rate_l2.weight *= 1.5  # default: 1.5
-        self.rewards.dof_acc_l2.weight *= 1.0  # default: 1.5
+        self.rewards.dof_acc_l2.weight *= 1.5  # default: 1.5
 
         # commands
         self.commands.base_velocity.ranges.lin_vel_x = (-1.0, 1.0)
