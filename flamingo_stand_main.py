@@ -28,19 +28,21 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
         "render_modes": ["human", "rgb_array", "depth_array"],
     }
 
-    def __init__(self, env_id='FLA_STAND-v0', model_path='./assets/flamingo_torque_velocity.xml', frame_skip=4, render_mode='human'):
+    def __init__(self, env_id='FLA_STAND-v0', model_path='./assets/flamingo_torque.xml', frame_skip=4, render_mode='human'):
         self.model_path = os.path.join(os.path.dirname(__file__), model_path)
         self.frame_skip = frame_skip
         self.render_mode = render_mode
         self.viewer = None
         self.dt_ = 0.005
-        self.sim_duration = 10.0
+        self.sim_duration = 20.0
         self.sim_step = (self.sim_duration / self.dt_) / self.frame_skip
         self.id = env_id
         self.obs_dim = 28 * 1 + 4
         self.act_dim = 8
         self.stacked_obs = None
         self.previous_states = []
+        self.computed_torques = np.zeros(8)
+        self.applied_torques = np.zeros(8)
         self.state_clip = np.inf
         self.action_scaler = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 25.0, 25.0]
 
@@ -48,8 +50,8 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
 
         self.save_data = False
         self.save_trajectory = False
-        self.plot_log = False
-        self.mem_save = True
+        self.plot_log = True
+        self.mem_save = False
 
         self.randomize_sensor = False
         self.randomize_inertia = False
@@ -159,10 +161,13 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
         vel_hip = obs[6:8]
         vel_shoulder = obs[8:10]
         vel_leg = obs[10:12]
+        vel_wheel = obs[12:14]
 
         # PD control parameters from Isaac Orbit configuration
-        kp_j = 70.0
-        kd_j = 0.65
+        kp_j = 75.0
+        kd_j = 0.5
+        kp_w = 0.0
+        kd_w = 0.3
 
         hip_action_scaled = filtered_action[0:2] * self.action_scaler[0:2]
         shoulder_action_scaled = filtered_action[2:4] * self.action_scaler[2:4]
@@ -170,42 +175,34 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
         wheel_action_scaled = filtered_action[6:8] * self.action_scaler[6:8]
 
         # Calculate torques for each joint using PD controller
-        hip_action = np.clip(
-            self.control_manager.pd_controller(kp_j, hip_action_scaled, pos_hip, kd_j, 0.0, vel_hip),
-            -23.0,
-            23.0,
-        )
-        shoulder_action = np.clip(
-            self.control_manager.pd_controller(
-                kp_j, shoulder_action_scaled, pos_shoulder, kd_j, 0.0, vel_shoulder
-            ),
-            -23.0,
-            23.0,
-        )
-        leg_action = np.clip(
-            self.control_manager.pd_controller(kp_j, leg_action_scaled, pos_leg, kd_j, 0.0, vel_leg),
-            -23.0,
-            23.0,
-        )
+        hip_action = self.control_manager.pd_controller(kp_j, hip_action_scaled, pos_hip, kd_j, 0.0, vel_hip)
+        shoulder_action = self.control_manager.pd_controller(kp_j, shoulder_action_scaled, pos_shoulder, kd_j, 0.0, vel_shoulder)
+        leg_action = self.control_manager.pd_controller(kp_j, leg_action_scaled, pos_leg, kd_j, 0.0, vel_leg)
+        wheel_action = self.control_manager.pd_controller(kp_w, 0.0, 0.0, kd_w, wheel_action_scaled, vel_wheel)
+
+        self.computed_torques = np.concatenate([hip_action, shoulder_action, leg_action, wheel_action])
+
+        hip_action_clipped = np.clip(hip_action, -23.0, 23.0)
+        shoulder_action_clipped = np.clip(shoulder_action, -23.0, 23.0)
+        leg_action_clipped = np.clip(leg_action, -23.0, 23.0)
+        wheel_action_clipped = np.clip(wheel_action, -5.0, 5.0)
 
         # Combine all actions
-        action_scaled = np.concatenate(
-            [hip_action, shoulder_action, leg_action, wheel_action_scaled]
-        )
+        self.applied_torques = np.concatenate([hip_action_clipped, shoulder_action_clipped, leg_action_clipped, wheel_action_clipped])
 
-        self.do_simulation(action_scaled, self.frame_skip)
+        self.do_simulation(self.applied_torques, self.frame_skip)
         self.step_counter += 1
         obs = self._get_obs(filtered_action)
 
         if self.save_data or self.save_trajectory:
-            self.log_utils.collect_and_save_data(obs, action_scaled, self.data.actuator_force)
+            self.log_utils.collect_and_save_data(obs, self.applied_torques, self.data.actuator_force)
 
         reward, info = self._get_reward(obs)
 
         term = self._is_done()
         trun = self.step_counter >= self.sim_step
 
-        # self.log_utils.plot_table(self.extra_utils.get_episode_sums(), self.step_counter, self.sim_step)
+        self.log_utils.plot_table(self.extra_utils.get_episode_sums(), self.step_counter, self.sim_step)
 
         return obs, reward, term, trun, info
 
@@ -218,7 +215,7 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
             actuator_force = info['actuator_force']  # torch.Tensor
         """
 
-        self.reward_manager.get_privileged_observations(self.data, self._is_done())
+        self.reward_manager.get_privileged_observations(self.data, self.applied_torques, self.computed_torques, self._is_done())
         self.reward_manager.get_observations(obs)
 
         track_lin_vel_xy_exp = self.reward_manager.track_lin_vel_xy_exp(weight=2.0)
@@ -227,6 +224,7 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
         anv_vel_xy_l2 = self.reward_manager.anv_vel_xy_l2(weight=-0.05)
         dof_torques_joint_l2 = self.reward_manager.dof_torques_joint_l2(weight=-1.0e-5)
         dof_torques_wheels_l2 = self.reward_manager.dof_torques_wheels_l2(weight=-1.0e-5)
+        applied_torque_limits = self.reward_manager.applied_torque_limits(weight=-0.1)
         dof_acc_l2 = self.reward_manager.dof_acc_l2(weight=-3.75e-7)
         action_rate_l2 = self.reward_manager.action_rate_l2(weight=-0.015)
         undesired_contact = self.reward_manager.undesired_contact(weight=-1.0)
@@ -244,7 +242,7 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
 
         total_reward = (track_lin_vel_xy_exp + track_ang_vel_z_exp +
                         lin_vel_z_l2 + anv_vel_xy_l2 +
-                        dof_torques_joint_l2 + dof_torques_wheels_l2 +
+                        dof_torques_joint_l2 + dof_torques_wheels_l2 + applied_torque_limits +
                         dof_acc_l2 + action_rate_l2 +
                         undesired_contact +
                         flat_orientation_l2 + base_target_range_height +
@@ -259,6 +257,7 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
             anv_vel_xy_l2=anv_vel_xy_l2,
             dof_torques_joint_l2=dof_torques_joint_l2,
             dof_torques_wheels_l2=dof_torques_wheels_l2,
+            applied_torque_limits=applied_torque_limits,
             dof_acc_l2=dof_acc_l2,
             action_rate_l2=action_rate_l2,
             undesired_contact=undesired_contact,
@@ -278,11 +277,14 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
 
         info = {}
         priv_obs = self.reward_manager.req_privileged_observations()
-        info['obs'] = priv_obs['obs_buf']
-        info['current_height'] = priv_obs['current_height']
-        info['joint_acc'] = priv_obs['joint_acc']
-        info['contact_forces'] = priv_obs['contact_forces']
-        info['actuator_forces'] = priv_obs['actuator_forces']
+        if self.mem_save:
+            info['current_height'] = priv_obs['current_height']
+            info['joint_acc'] = priv_obs['joint_acc']
+            info['contact_forces'] = priv_obs['contact_forces']
+            info['actuator_forces'] = priv_obs['actuator_forces']
+            info['base_lin_vel'] = priv_obs['base_lin_vel']
+            info['applied_torques'] = priv_obs['applied_torques']
+            info['computed_torques'] = priv_obs['computed_torques']
         # reward = torch.clamp_min(total_reward, 0.0)
 
         return total_reward.item(), info
@@ -383,7 +385,7 @@ class FLA_STAND(MujocoEnv, utils.EzPickle):
                 self.mem_utils.reset()
 
                 try:
-                    with open("raw_memory15.pkl", "wb") as fw:
+                    with open("raw_memory1.pkl", "wb") as fw:
                         pickle.dump(self.mem_utils, fw)
                 except KeyboardInterrupt:
                     print("Process interrupted. File not saved.")
@@ -400,12 +402,13 @@ if __name__ == '__main__':
     input_name = session.get_inputs()[0].name
 
     env = FLA_STAND(env_id="FLA_STAND-v0")
-    env.render_mode = None
+    env.render_mode = 'human'
     mujoco_thread = threading.Thread(target=env.run_mujoco, args=(session, input_name, env, 200))
     mujoco_thread.start()
 
     try:
-        env.pygame_utils.run_gui(mujoco_thread)
+        if env.render_mode is not None:
+            env.pygame_utils.run_gui(mujoco_thread)
     except KeyboardInterrupt:
         env.pygame_utils.close_gui()
         mujoco_thread.join()

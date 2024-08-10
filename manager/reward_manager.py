@@ -40,21 +40,24 @@ class RewardManager:
     def req_privileged_observations(self):
         return self.priv_obs
 
-    def get_privileged_observations(self, data, is_done):
-        self.data = data
-        self.current_height = torch.tensor(self.data.qpos[2], requires_grad=False)
-        self.joint_acc = torch.tensor(self.data.qacc, requires_grad=False)
-        self.contact_forces = torch.tensor(self.data.cfrc_ext[1:10], requires_grad=False)  # External contact forces
-        self.actuator_forces = torch.tensor(self.data.actuator_force[:8], requires_grad=False)
-        self.base_lin_vel = torch.tensor(MathUtils.quat_to_base_vel(self.data.qpos[3:7], self.data.qvel[0:3]), requires_grad=False)
-        self.is_done = is_done
+    def get_privileged_observations(self, data, applied_torques, computed_torques, is_done):
+        self.current_height = torch.tensor(data.qpos[2], requires_grad=False)
+        self.joint_acc = torch.tensor(data.qacc, requires_grad=False)
+        self.contact_forces = torch.tensor(data.cfrc_ext[1:10], requires_grad=False)  # External contact forces
+        self.actuator_forces = torch.tensor(data.actuator_force[:8], requires_grad=False)
+        self.base_lin_vel = torch.tensor(MathUtils.quat_to_base_vel(data.qpos[3:7], data.qvel[0:3]), requires_grad=False)
+        self.applied_torques = torch.tensor(applied_torques, requires_grad=False)
+        self.compute_torques = torch.tensor(computed_torques, requires_grad=False)
+        self.is_done = torch.tensor(is_done, requires_grad=False)
 
-        self.priv_obs['obs_buf'] = self.obs
         self.priv_obs['current_height'] = self.current_height
+        print(self.current_height)
         self.priv_obs['joint_acc'] = self.joint_acc
         self.priv_obs['contact_forces'] = self.contact_forces
-        self.priv_obs['actuator_forces'] = self.data.actuator_force
+        self.priv_obs['actuator_forces'] = self.actuator_forces
         self.priv_obs['base_lin_vel'] = self.base_lin_vel
+        self.priv_obs['applied_torques'] = self.applied_torques
+        self.priv_obs['compute_torques'] = self.compute_torques
         self.priv_obs['is_done'] = self.is_done
 
     def get_observations(self, obs):
@@ -73,6 +76,9 @@ class RewardManager:
         self.prev_actions = self.obs[48:56]
         self.joint_torques = self.actuator_forces[:6]
         self.wheel_torques = self.actuator_forces[6:8]
+
+        self.applied_torques = self.priv_obs['applied_torques']
+        self.computed_torques = self.priv_obs['compute_torques']
 
         self.commands = self.obs[84:88]  # [linear_speed, angular_speed, yaw, z_position]
 
@@ -111,6 +117,9 @@ class RewardManager:
 
     def dof_torques_wheels_l2(self, weight=1.0):
         return weight * torch.sum(torch.square(self.wheel_torques), dim=0)
+
+    def applied_torque_limits(self, weight=1.0):
+        return weight * torch.sum(torch.abs(self.applied_torques - self.computed_torques), dim=0)
 
     def dof_acc_l2(self, weight=1.0):
         return weight * torch.sum(torch.square(self.joint_acc[7:14]), dim=0)

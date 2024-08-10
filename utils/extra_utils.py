@@ -10,6 +10,7 @@ class ExtraUtils:
             "anv_vel_xy_l2": torch.zeros(1, dtype=torch.float, requires_grad=False),
             "dof_torques_joint_l2": torch.zeros(1, dtype=torch.float, requires_grad=False),
             "dof_torques_wheels_l2": torch.zeros(1, dtype=torch.float, requires_grad=False),
+            "applied_torque_limits": torch.zeros(1, dtype=torch.float, requires_grad=False),
             "dof_acc_l2": torch.zeros(1, dtype=torch.float, requires_grad=False),
             "action_rate_l2": torch.zeros(1, dtype=torch.float, requires_grad=False),
             "undesired_contact": torch.zeros(1, dtype=torch.float, requires_grad=False),
