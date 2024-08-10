@@ -104,21 +104,16 @@ class FlamingoRewardsCfg(RewardsCfg):
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*_leg_joint")},
     )
     flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-2.5)
-    base_target_height = RewTerm(
-        func=mdp.base_height_l2,
-        weight=-25.0,
-        params={"target_height": 0.35482, "asset_cfg": SceneEntityCfg("robot", body_names="base_link")},
+    base_range_height = RewTerm(
+        func=mdp.base_height_range_l2,
+        weight=15.0,
+        params={
+            "min_height": 0.35482,
+            "max_height": 0.35482,
+            "in_range_reward": 0.0,
+            "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
+        },
     )  # default: 0.35482, 28482 works better
-    # base_range_height = RewTerm(
-    #     func=mdp.base_height_range_reward,
-    #     weight=15.0,
-    #     params={
-    #         "min_height": 0.315,
-    #         "max_height": 0.375,
-    #         "in_range_reward": 0.005,
-    #         "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
-    #     },
-    # )
     # ! Terms below should be off if it is first training ! #
     # wheel_applied_torque_limits = RewTerm(
     #     func=mdp.applied_torque_limits,

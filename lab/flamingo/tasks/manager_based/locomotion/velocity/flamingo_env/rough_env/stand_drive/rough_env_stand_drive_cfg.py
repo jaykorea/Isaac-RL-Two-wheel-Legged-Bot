@@ -36,17 +36,17 @@ class FlamingoCurriculumCfg:
 
 @configclass
 class FlamingoRewardsCfg(RewardsCfg):
-    stuck_air_time = RewTerm(
-        func=mdp.FlamingoAirTimeReward,
-        weight=1.25,
-        params={
-            "stuck_threshold": 0.15,
-            "stuck_duration": 25,
-            "threshold": 0.45,
-            "asset_cfg": SceneEntityCfg("robot"),
-            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_wheel_link"),
-        },
-    )
+    # stuck_air_time = RewTerm(
+    #     func=mdp.FlamingoAirTimeReward,
+    #     weight=0.5,
+    #     params={
+    #         "stuck_threshold": 0.15,
+    #         "stuck_duration": 10,
+    #         "threshold": 0.5,
+    #         "asset_cfg": SceneEntityCfg("robot"),
+    #         "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_wheel_link"),
+    #     },
+    # )
     termination_penalty = RewTerm(func=mdp.is_terminated, weight=-200.0)
     joint_deviation_hip = RewTerm(
         func=mdp.joint_deviation_l1,
@@ -111,18 +111,18 @@ class FlamingoRewardsCfg(RewardsCfg):
     )
     shoulder_align_l1 = RewTerm(
         func=mdp.joint_align_l1,
-        weight=-0.5,  # default: -0.5
+        weight=-0.25,  # default: -0.5
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*_shoulder_joint")},
     )
     leg_align_l1 = RewTerm(
         func=mdp.joint_align_l1,
-        weight=-0.5,  # default: -0.5
+        weight=-0.25,  # default: -0.5
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*_leg_joint")},
     )
     flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-5.0)
     base_height_dynamic_wheel = RewTerm(
         func=mdp.base_height_dynamic_wheel_l2,
-        weight=25.0,
+        weight=15.0,
         params={
             "min_height": 0.30182,
             "max_height": 0.30182,
@@ -146,28 +146,28 @@ class FlamingoRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         self.scene.robot = FLAMINGO_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
         self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/base_link"
         # scale down the terrains because the robot is small
-        self.scene.terrain.terrain_generator.sub_terrains["boxes"].grid_height_range = (0.025, 0.05)
+        self.scene.terrain.terrain_generator.sub_terrains["boxes"].grid_height_range = (0.025, 0.004)
         self.scene.terrain.terrain_generator.sub_terrains["random_rough"].noise_range = (0.01, 0.06)
         self.scene.terrain.terrain_generator.sub_terrains["random_rough"].noise_step = 0.01
         self.scene.terrain.terrain_generator.sub_terrains["hf_pyramid_slope"].proportion = 0.1
         self.scene.terrain.terrain_generator.sub_terrains["hf_pyramid_slope"].slope_range = (
             0.0,
-            0.05,
+            0.005,
         )  # Very gentle slope
         self.scene.terrain.terrain_generator.sub_terrains["hf_pyramid_slope_inv"].proportion = (
             0.05  # Increase proportion if you want more of this terrain
         )
         self.scene.terrain.terrain_generator.sub_terrains["hf_pyramid_slope_inv"].slope_range = (
             0.0,
-            0.01,
+            0.005,
         )  # Very gentle slope
         # Adjust the inverted pyramid stairs terrain
         self.scene.terrain.terrain_generator.sub_terrains["pyramid_stairs_inv"].step_height_range = (
-            0.01,
-            0.05,
+            0.005,
+            0.015,
         )  # Smaller step height for gentler steps
         self.scene.terrain.terrain_generator.sub_terrains["pyramid_stairs_inv"].step_width = (
-            0.25  # Increase step width for gentler steps
+            0.45  # Increase step width for gentler steps
         )
 
         # events
@@ -204,22 +204,22 @@ class FlamingoRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         # terminations
         self.terminations.base_contact.params["sensor_cfg"].body_names = [
             "base_link",
-            ".*_hip_link",
+            # ".*_hip_link",
             # ".*_shoulder_link",
             ".*_leg_link",
         ]
 
         # rewards
         self.rewards.dof_torques_l2.weight = -5.0e-4  # default: -5.0e-6
-        self.rewards.track_lin_vel_xy_exp.weight = 1.5
-        self.rewards.track_ang_vel_z_exp.weight = 0.75
+        self.rewards.track_lin_vel_xy_exp.weight = 2.5
+        self.rewards.track_ang_vel_z_exp.weight = 1.75
         self.rewards.lin_vel_z_l2.weight *= 1.0
-        self.rewards.ang_vel_xy_l2.weight *= 1.5
+        self.rewards.ang_vel_xy_l2.weight *= 1.0
         self.rewards.action_rate_l2.weight *= 1.5  # default: 1.5
         self.rewards.dof_acc_l2.weight *= 1.5  # default: 1.5
 
         # commands
-        self.commands.base_velocity.ranges.lin_vel_x = (-1.0, 1.0)
+        self.commands.base_velocity.ranges.lin_vel_x = (-1.5, 1.5)
         self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
         self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
         self.commands.base_velocity.ranges.heading = (-math.pi, math.pi)

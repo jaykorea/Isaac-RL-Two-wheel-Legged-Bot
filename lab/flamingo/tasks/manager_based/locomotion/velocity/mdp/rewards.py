@@ -187,7 +187,7 @@ def stand_origin_base(
     asset: RigidObject = env.scene[asset_cfg.name]
 
     # Compute the command and check if it's zero
-    command = env.command_manager.get_command(command_name)[:, :3]
+    command = env.command_manager.get_command(command_name)[:, :]
     is_zero_command = torch.all(command == 0.0, dim=1)  # Check per item in batch if command is zero
 
     # Calculate linear and angular velocity errors
