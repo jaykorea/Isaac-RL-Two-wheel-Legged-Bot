@@ -24,7 +24,7 @@ class FlamingoFlatEnvCfg_PLAY(LocomotionVelocityFlatEnvCfg):
         self.observations.policy.enable_corruption = False
 
         # reset_robot_joint_zero should be called here
-        self.events.reset_robot_joints.params["position_range"] = (-0.05, 0.05)
+        self.events.reset_robot_joints.params["position_range"] = (-0.0, 0.0)
         self.events.push_robot.interval_range_s = (7.5, 8.5)
         self.events.push_robot.params = {
             "velocity_range": {"x": (-0.5, 0.5), "y": (-0.5, 0.5)},
@@ -66,7 +66,7 @@ class FlamingoFlatEnvCfg_PLAY(LocomotionVelocityFlatEnvCfg):
         # commands
         self.commands.base_velocity.ranges.lin_vel_x = (-1.0, 1.0)
         self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
-        self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
+        self.commands.base_velocity.ranges.ang_vel_z = (-1.5, 1.5)
         self.commands.base_velocity.ranges.heading = (-math.pi, math.pi)
         self.commands.base_velocity.ranges.pos_z = (0.0, 0.0)
 

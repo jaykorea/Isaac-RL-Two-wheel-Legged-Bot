@@ -173,7 +173,7 @@ class RslRlVecEnvWrapper(VecEnv):
         obs_dict, _ = self.env.reset()
         # Added for prev Obs
         self.prev_obs = obs_dict["policy"].clone()
-        self.prev2_obs = obs_dict["policy"].clone()
+        # self.prev2_obs = obs_dict["policy"].clone()
         # return observations
         return obs_dict["policy"], {"observations": obs_dict}
 
@@ -187,24 +187,25 @@ class RslRlVecEnvWrapper(VecEnv):
 
         # Initialize buffers if they are None
         if self.prev_obs is None:
-            self.prev2_obs = obs.clone()
+            # self.prev2_obs = obs.clone()
             self.prev_obs = obs.clone()
 
         # Update buffers for environments that are reset
         reset_envs = dones.nonzero(as_tuple=True)[0]
         if reset_envs.numel() > 0:
             self.prev_obs[reset_envs] = obs[reset_envs].clone()
-            self.prev2_obs[reset_envs] = obs[reset_envs].clone()
+            # self.prev2_obs[reset_envs] = obs[reset_envs].clone()
 
         # Stack observations: current, previous, and previous2 observations (excluding velocity_commands)
-        stacked_obs = torch.cat((obs[:, :28], self.prev_obs[:, :28], self.prev2_obs[:, :28]), dim=1)
+        # stacked_obs = torch.cat((obs[:, :28], self.prev_obs[:, :28], self.prev2_obs[:, :28]), dim=1)
+        stacked_obs = torch.cat((obs[:, :28], self.prev_obs[:, :28]), dim=1)
 
         # Add the last 3 velocity, 1 pos observations
-        velocity_obs = obs[:, -4:]  # Assuming the last 3 observations are velocity-related
+        velocity_obs = obs[:, -4:]  # Assuming the last 4 observations are velocity-related
         final_obs = torch.cat((stacked_obs, velocity_obs), dim=1)
 
         # Update the buffers
-        self.prev2_obs = self.prev_obs.clone()
+        # self.prev2_obs = self.prev_obs.clone()
         self.prev_obs = obs.clone()
 
         # Update the obs_dict with the new final_obs

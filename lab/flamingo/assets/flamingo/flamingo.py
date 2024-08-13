@@ -95,7 +95,7 @@ FLAMINGO_CFG = ArticulationCfg(
         ),
     ),
     init_state=ArticulationCfg.InitialStateCfg(
-        pos=(0.0, 0.0, 0.2461942),  # default: 0.0 0.0 0.2461942
+        pos=(0.0, 0.0, 0.2561942),  # default: 0.0 0.0 0.2461942
         joint_pos={
             "left_hip_joint": 0.0,
             "left_shoulder_joint": -0.0,
@@ -202,14 +202,14 @@ FLAMINGO_CFG = ArticulationCfg(
             min_delay=0,  # physics time steps (min: 5.0 * 0 = 0.0ms)
             max_delay=4,  # physics time steps (max: 5.0 * 4 = 20.0ms)
             stiffness={
-                ".*_hip_joint": 90.0,
-                ".*_shoulder_joint": 90.0,
-                ".*_leg_joint": 90.0,
+                ".*_hip_joint": 85.0,
+                ".*_shoulder_joint": 85.0,
+                ".*_leg_joint": 85.0,
             },  # default: 75.0
             damping={
-                ".*_hip_joint": 0.75,
-                ".*_shoulder_joint": 0.75,
-                ".*_leg_joint": 0.75,
+                ".*_hip_joint": 0.65,
+                ".*_shoulder_joint": 0.65,
+                ".*_leg_joint": 0.65,
             },  # default: 0.6
             friction={
                 ".*_hip_joint": 0.0,

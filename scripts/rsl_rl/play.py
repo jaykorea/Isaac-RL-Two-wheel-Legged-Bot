@@ -35,6 +35,8 @@ simulation_app = app_launcher.app
 import gymnasium as gym
 import os
 import torch
+import matplotlib.pyplot as plt
+
 
 from rsl_rl.runners import OnPolicyRunner
 
@@ -56,54 +58,79 @@ import lab.flamingo.tasks  # noqa: F401  TODO: import orbit.<your_extension_name
 
 def main():
     """Play with RSL-RL agent."""
-    # parse configuration
     env_cfg = parse_env_cfg(args_cli.task, use_gpu=not args_cli.cpu, num_envs=args_cli.num_envs)
     agent_cfg: RslRlOnPolicyRunnerCfg = cli_args.parse_rsl_rl_cfg(args_cli.task, args_cli)
 
-    # create isaac environment
     env = gym.make(args_cli.task, cfg=env_cfg)
-    # wrap around environment for rsl-rl
     env = RslRlVecEnvWrapper(env)
 
-    # specify directory for logging experiments
     log_root_path = os.path.join("logs", "rsl_rl", agent_cfg.experiment_name)
     log_root_path = os.path.abspath(log_root_path)
     print(f"[INFO] Loading experiment from directory: {log_root_path}")
     resume_path = get_checkpoint_path(log_root_path, agent_cfg.load_run, agent_cfg.load_checkpoint)
     print(f"[INFO]: Loading model checkpoint from: {resume_path}")
 
-    # load previously trained model
     ppo_runner = OnPolicyRunner(env, agent_cfg.to_dict(), log_dir=None, device=agent_cfg.device)
     ppo_runner.load(resume_path)
     print(f"[INFO]: Loading model checkpoint from: {resume_path}")
 
-    # obtain the trained policy for inference
     policy = ppo_runner.get_inference_policy(device=env.unwrapped.device)
 
-    # export policy to onnx
     export_model_dir = os.path.join(os.path.dirname(resume_path), "exported")
     export_policy_as_jit(
         ppo_runner.alg.actor_critic, ppo_runner.obs_normalizer, path=export_model_dir, filename="policy.pt"
     )
     export_policy_as_onnx(ppo_runner.alg.actor_critic, path=export_model_dir, filename="policy.onnx")
 
-    # reset environment
+    # Initialize lists to store data
+    joint_pos_list = []
+    target_joint_pos_list = []
+    joint_velocity_obs_list = []
+    target_joint_velocity_list = []
+
     obs, _ = env.get_observations()
-    # simulate environment
+
+    # Simulate environment and collect data
     while simulation_app.is_running():
-        # run everything in inference mode
         with torch.inference_mode():
-            # agent stepping
             actions = policy(obs)
-            # env stepping
             obs, _, _, _ = env.step(actions)
 
-    # close the simulator
+            # Extract the relevant slices and convert to numpy
+            joint_pos = obs[0, :6].cpu().numpy()
+            target_joint_pos = (obs[0, 48:54] * 1.0).cpu().numpy()
+            joint_velocity_obs = obs[0, 12:14].cpu().numpy()
+            target_joint_velocity = (obs[0, 54:56] * 25.0).cpu().numpy()
+
+            # Store the data
+            joint_pos_list.append(joint_pos)
+            target_joint_pos_list.append(target_joint_pos)
+            joint_velocity_obs_list.append(joint_velocity_obs)
+            target_joint_velocity_list.append(target_joint_velocity)
+
     env.close()
+
+    # Plot the collected data after the simulation ends
+    plt.figure(figsize=(14, 16))
+
+    for i in range(6):
+        plt.subplot(4, 2, i + 1)
+        plt.plot([step[i] for step in joint_pos_list], label=f"Joint Position {i+1}")
+        plt.plot([step[i] for step in target_joint_pos_list], label=f"Target Joint Position {i+1}", linestyle="--")
+        plt.title(f"Joint Position {i+1} and Target Joint Position", fontsize=10, pad=10)  # Added pad for spacing
+        plt.legend()
+
+    for i in range(2):
+        plt.subplot(4, 2, i + 7)
+        plt.plot([step[i] for step in joint_velocity_obs_list], label=f"Observed Joint Velocity {i+1}")
+        plt.plot([step[i] for step in target_joint_velocity_list], label=f"Target Joint Velocity {i+1}", linestyle="--")
+        plt.title(f"Observed and Target Joint Velocity {i+1}", fontsize=10, pad=10)  # Added pad for spacing
+        plt.legend()
+
+    plt.tight_layout()
+    plt.show()
 
 
 if __name__ == "__main__":
-    # run the main execution
     main()
-    # close sim app
     simulation_app.close()

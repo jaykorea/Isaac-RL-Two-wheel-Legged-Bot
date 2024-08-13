@@ -99,17 +99,17 @@ class CommandsCfg:
     base_velocity = mdp.UniformVelocityWithZCommandCfg(
         asset_name="robot",
         resampling_time_range=(10.0, 10.0),
-        rel_standing_envs=0.5,
+        rel_standing_envs=0.1,
         rel_heading_envs=1.0,
         heading_command=True,
         heading_control_stiffness=0.5,
         debug_vis=True,
         ranges=mdp.UniformVelocityWithZCommandCfg.Ranges(
-            lin_vel_x=(-1.0, 1.0),
+            lin_vel_x=(-1.5, 1.5),
             lin_vel_y=(-1.0, 1.0),
-            ang_vel_z=(-1.0, 1.0),
-            pos_z=(0.1931942, 0.3531942),
+            ang_vel_z=(-1.5, 1.5),
             heading=(-math.pi, math.pi),
+            pos_z=(0.1931942, 0.3531942),
         ),
     )
 
@@ -171,14 +171,14 @@ class ObservationsCfg:
 
         joint_pos = ObsTerm(
             func=mdp.joint_pos_rel,
-            noise=Unoise(n_min=-0.06, n_max=0.06),
+            noise=Unoise(n_min=-0.04, n_max=0.04),
             params={
                 "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_joint", ".*_shoulder_joint", ".*_leg_joint"])
             },
         )
         joint_vel = ObsTerm(func=mdp.joint_vel_rel, noise=Unoise(n_min=-1.5, n_max=1.5))
-        base_ang_vel = ObsTerm(func=mdp.base_ang_vel, noise=Unoise(n_min=-0.2, n_max=0.2))
-        base_euler = ObsTerm(func=mdp.root_euler_angle, noise=Unoise(n_min=-0.1, n_max=0.1))
+        base_ang_vel = ObsTerm(func=mdp.base_ang_vel, noise=Unoise(n_min=-0.15, n_max=0.15))
+        base_euler = ObsTerm(func=mdp.root_euler_angle, noise=Unoise(n_min=-0.05, n_max=0.05))
         actions = ObsTerm(func=mdp.last_action)
 
         # joint_pos = ObsTerm(
@@ -206,21 +206,6 @@ class ObservationsCfg:
         prev_base_ang_vel = ObsTerm(func=mdp.base_ang_vel)
         prev_base_euler = ObsTerm(func=mdp.root_euler_angle)
         prev_actions = ObsTerm(func=mdp.last_action)
-
-        """
-        Stack 2
-        """
-
-        prev2_joint_pos = ObsTerm(
-            func=mdp.joint_pos_rel,
-            params={
-                "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_joint", ".*_shoulder_joint", ".*_leg_joint"])
-            },
-        )
-        prev2_joint_vel = ObsTerm(func=mdp.joint_vel_rel)
-        prev2_base_ang_vel = ObsTerm(func=mdp.base_ang_vel)
-        prev2_base_euler = ObsTerm(func=mdp.root_euler_angle)
-        prev2_actions = ObsTerm(func=mdp.last_action)
 
         velocity_commands = ObsTerm(func=mdp.generated_commands, params={"command_name": "base_velocity"})
 
