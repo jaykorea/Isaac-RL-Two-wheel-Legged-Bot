@@ -36,17 +36,17 @@ class FlamingoCurriculumCfg:
 
 @configclass
 class FlamingoRewardsCfg(RewardsCfg):
-    # stuck_air_time = RewTerm(
-    #     func=mdp.FlamingoAirTimeReward,
-    #     weight=0.5,
-    #     params={
-    #         "stuck_threshold": 0.15,
-    #         "stuck_duration": 10,
-    #         "threshold": 0.5,
-    #         "asset_cfg": SceneEntityCfg("robot"),
-    #         "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_wheel_link"),
-    #     },
-    # )
+    stuck_air_time = RewTerm(
+        func=mdp.FlamingoAirTimeReward,
+        weight=0.5,
+        params={
+            "stuck_threshold": 0.15,
+            "stuck_duration": 10,
+            "threshold": 0.5,
+            "asset_cfg": SceneEntityCfg("robot"),
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_wheel_link"),
+        },
+    )
     termination_penalty = RewTerm(func=mdp.is_terminated, weight=-200.0)
     joint_deviation_hip = RewTerm(
         func=mdp.joint_deviation_l1,
@@ -103,18 +103,18 @@ class FlamingoRewardsCfg(RewardsCfg):
     )
     shoulder_align_l1 = RewTerm(
         func=mdp.joint_align_l1,
-        weight=-0.25,  # default: -0.5
+        weight=-1.5,  # default: -0.5
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*_shoulder_joint")},
     )
     leg_align_l1 = RewTerm(
         func=mdp.joint_align_l1,
-        weight=-0.25,  # default: -0.5
+        weight=-1.5,  # default: -0.5
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*_leg_joint")},
     )
     flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-5.0)
     base_height_dynamic_wheel = RewTerm(
         func=mdp.base_height_range_relative_l2,
-        weight=20.0,
+        weight=25.0,
         params={
             "min_height": 0.30182,
             "max_height": 0.30182,
@@ -137,6 +137,7 @@ class FlamingoRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         # scene
         self.scene.robot = FLAMINGO_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
         self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/base_link"
+        self.observations.policy.enable_corruption = True
         # scale down the terrains because the robot is small
         self.scene.terrain.terrain_generator.sub_terrains["boxes"].grid_height_range = (0.025, 0.004)
         self.scene.terrain.terrain_generator.sub_terrains["random_rough"].noise_range = (0.01, 0.06)
@@ -167,9 +168,6 @@ class FlamingoRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         # self.events.push_robot.params = {
         #     "velocity_range": {"x": (-0.5, 0.5), "y": (-0.5, 0.5)},
         # }
-        # # reset_robot_joint_zero should be called here
-        # self.events.reset_robot_joints.params["position_range"] = (-0.1, 0.1)
-        # self.events.push_robot.interval_range_s = (12.0, 15.0)
 
         # # add base mass should be called here
         self.events.add_base_mass.params["asset_cfg"].body_names = ["base_link"]

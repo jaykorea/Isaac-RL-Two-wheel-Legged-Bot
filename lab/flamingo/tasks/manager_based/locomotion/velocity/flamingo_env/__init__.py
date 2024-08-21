@@ -99,3 +99,23 @@ gym.register(
         "rsl_rl_cfg_entry_point": agents.rsl_rl_cfg.FlamingoRoughPPORunnerCfg_Track_Z,
     },
 )
+
+gym.register(
+    id="Isaac-Velocity-Rough-Flamingo-v3",
+    entry_point="omni.isaac.lab.envs:ManagerBasedRLEnv",
+    disable_env_checker=True,
+    kwargs={
+        "env_cfg_entry_point": rough_env.rough_env_stand_walk_cfg.FlamingoRoughEnvCfg,
+        "rsl_rl_cfg_entry_point": agents.rsl_rl_cfg.FlamingoRoughPPORunnerCfg_Stand_Walk,
+    },
+)
+
+gym.register(
+    id="Isaac-Velocity-Rough-Flamingo-Play-v3",
+    entry_point="omni.isaac.lab.envs:ManagerBasedRLEnv",
+    disable_env_checker=True,
+    kwargs={
+        "env_cfg_entry_point": rough_env.rough_env_stand_walk_play_cfg.FlamingoRoughEnvCfg_PLAY,
+        "rsl_rl_cfg_entry_point": agents.rsl_rl_cfg.FlamingoRoughPPORunnerCfg_Stand_Walk,
+    },
+)

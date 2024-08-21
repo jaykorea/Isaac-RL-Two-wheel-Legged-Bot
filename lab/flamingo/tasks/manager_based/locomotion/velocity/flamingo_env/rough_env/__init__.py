@@ -1,2 +1,3 @@
 from .stand_drive import rough_env_stand_drive_cfg, rough_env_stand_drive_play_cfg
+from .stand_walk import rough_env_stand_walk_cfg, rough_env_stand_walk_play_cfg
 from .track_z import rough_env_track_z_cfg, rough_env_track_z_play_cfg

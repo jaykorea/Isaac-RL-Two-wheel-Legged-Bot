@@ -79,11 +79,16 @@ class MySceneCfg(InteractiveSceneCfg):
     # lights
     light = AssetBaseCfg(
         prim_path="/World/light",
-        spawn=sim_utils.DistantLightCfg(color=(0.75, 0.75, 0.75), intensity=3000.0),
+        spawn=sim_utils.DistantLightCfg(
+            color=(0.75, 0.75, 0.75), intensity=3000.0
+        ),  # Warmer color with higher intensity
     )
+
     sky_light = AssetBaseCfg(
         prim_path="/World/skyLight",
-        spawn=sim_utils.DomeLightCfg(color=(0.13, 0.13, 0.13), intensity=1000.0),
+        spawn=sim_utils.DomeLightCfg(
+            color=(0.53, 0.81, 0.98), intensity=1500.0
+        ),  # Sky blue color with increased intensity
     )
 
 
@@ -178,7 +183,7 @@ class ObservationsCfg:
         )
         joint_vel = ObsTerm(func=mdp.joint_vel_rel, noise=Unoise(n_min=-1.5, n_max=1.5))
         base_ang_vel = ObsTerm(func=mdp.base_ang_vel, noise=Unoise(n_min=-0.15, n_max=0.15))
-        base_euler = ObsTerm(func=mdp.root_euler_angle, noise=Unoise(n_min=-0.05, n_max=0.05))
+        base_euler = ObsTerm(func=mdp.root_euler_angle, noise=Unoise(n_min=-0.125, n_max=0.125))
         actions = ObsTerm(func=mdp.last_action)
 
         # joint_pos = ObsTerm(

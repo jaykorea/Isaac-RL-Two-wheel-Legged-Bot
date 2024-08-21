@@ -31,3 +31,4 @@ __version__ = FLAMINGO_ASSETS_METADATA["package"]["version"]
 # Configuration for different assets.
 ##
 from .flamingo import *
+from .flamingo_walk import *

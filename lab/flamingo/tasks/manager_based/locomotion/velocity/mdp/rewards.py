@@ -6,9 +6,9 @@
 from __future__ import annotations
 
 import torch
-import torch.nn.functional as F
 from typing import TYPE_CHECKING
 
+from omni.isaac.lab.assets import Articulation
 from omni.isaac.lab.managers import SceneEntityCfg, ManagerTermBase, RewardTermCfg
 from omni.isaac.lab.sensors import ContactSensor
 
@@ -331,6 +331,11 @@ def action_smoothness_hard(env: ManagerBasedRLEnv) -> torch.Tensor:
     return sm1 + sm2 + sm3
 
 
+def force_action_zero(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
+    force_zero_action = torch.abs(env.action_manager.action[:, asset_cfg.joint_ids])
+    return torch.sum(force_zero_action, dim=1)
+
+
 def base_height_range_l2(
     env: ManagerBasedRLEnv,
     min_height: float,
@@ -453,3 +458,10 @@ def joint_target_deviation_range_l1(
 
     # Sum the rewards over all joint ids
     return torch.sum(reward, dim=1)
+
+
+def joint_velocity_penalty(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg) -> torch.Tensor:
+    """Penalize joint velocities on the articulation."""
+    # extract the used quantities (to enable type-hinting)
+    asset: Articulation = env.scene[asset_cfg.name]
+    return torch.linalg.norm((asset.data.joint_vel), dim=1)

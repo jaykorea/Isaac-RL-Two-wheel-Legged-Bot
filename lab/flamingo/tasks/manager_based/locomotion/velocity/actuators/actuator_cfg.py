@@ -5,8 +5,17 @@ from omni.isaac.lab.utils import configclass
 from omni.isaac.lab.actuators.actuator_cfg import (
     ActuatorNetLSTMCfg as BaseActuatorNetLSTMCfg,
     ActuatorNetMLPCfg as BaseActuatorNetMLPCfg,
+    IdealPDActuatorCfg as BaseIdealPDActuatorCfg,
 )
 from .actuator_net import ActuatorNetLSTM, ActuatorNetMLP
+from .actuator_force_zero import ForceZeroActuator
+
+
+@configclass
+class ForceZeroActuatorCfg(BaseIdealPDActuatorCfg):
+    """Configuration for LSTM-based actuator model."""
+
+    class_type: type = ForceZeroActuator
 
 
 @configclass
