@@ -59,7 +59,7 @@ FLAMINGO_WALK_CFG = ArticulationCfg(
         },
         joint_vel={".*": 0.0},
     ),
-    soft_joint_pos_limit_factor=0.9,
+    soft_joint_pos_limit_factor=0.8,
     # joint_positions=[0.0, 0.0, -0.2161799, -0.2161799, 0.56810467, 0.56810467],
     actuators={
         "joints": DelayedPDActuatorCfg(
@@ -89,17 +89,15 @@ FLAMINGO_WALK_CFG = ArticulationCfg(
                 ".*_leg_joint": 0.0,
             },
         ),
-        "wheels": DelayedPDActuatorCfg(
+        "wheels": ForceZeroActuatorCfg(
             joint_names_expr=[".*_wheel_joint"],
             effort_limit=5.0,
-            velocity_limit=25.0,
-            min_delay=0,  # physics time steps (min: 5.0 * 0 = 0.0ms)
-            max_delay=4,  # physics time steps (max: 5.0 * 4 = 20.0ms)
+            velocity_limit=55.0,
             stiffness={
                 ".*_wheel_joint": 0.0,
             },
             damping={
-                ".*_wheel_joint": 10.0,
+                ".*_wheel_joint": 1.0,
             },
             friction={
                 ".*_wheel_joint": 0.0,
