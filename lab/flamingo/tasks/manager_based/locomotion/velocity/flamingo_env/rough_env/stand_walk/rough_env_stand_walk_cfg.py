@@ -160,10 +160,10 @@ class FlamingoRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         self.rewards.dof_torques_l2.weight = -5.0e-6
         self.rewards.track_lin_vel_xy_exp.weight = 2.0
         self.rewards.track_ang_vel_z_exp.weight = 1.0
-        self.rewards.lin_vel_z_l2.weight *= 0.25
-        self.rewards.ang_vel_xy_l2.weight *= 0.25
-        self.rewards.action_rate_l2.weight *= 0.25
-        self.rewards.dof_acc_l2.weight *= 0.05
+        self.rewards.lin_vel_z_l2.weight *= 0.5
+        self.rewards.ang_vel_xy_l2.weight *= 0.1
+        self.rewards.action_rate_l2.weight *= 0.2
+        self.rewards.dof_acc_l2.weight *= 0.2
         # commands
         self.commands.base_velocity.rel_standing_envs = 0.0
         self.commands.base_velocity.ranges.lin_vel_x = (2.0, 2.0)
