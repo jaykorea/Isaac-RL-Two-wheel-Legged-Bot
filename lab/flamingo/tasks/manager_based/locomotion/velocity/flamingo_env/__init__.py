@@ -21,7 +21,7 @@ gym.register(
     disable_env_checker=True,
     kwargs={
         "env_cfg_entry_point": flat_env.flat_env_stand_drive_cfg.FlamingoFlatEnvCfg,
-        "rsl_rl_cfg_entry_point": agents.rsl_rl_cfg.FlamingoFlatPPORunnerCfg_Stand_Drive,
+        "rsl_rl_cfg_entry_point": agents.rsl_rl_ppo_cfg.FlamingoFlatPPORunnerCfg_Stand_Drive,
         "rl_games_cfg_entry_point": f"{agents.__name__}:rl_games_ppo_cfg.yaml",
     },
 )
@@ -32,7 +32,7 @@ gym.register(
     disable_env_checker=True,
     kwargs={
         "env_cfg_entry_point": flat_env.flat_env_stand_drive_play_cfg.FlamingoFlatEnvCfg_PLAY,
-        "rsl_rl_cfg_entry_point": agents.rsl_rl_cfg.FlamingoFlatPPORunnerCfg_Stand_Drive,
+        "rsl_rl_cfg_entry_point": agents.rsl_rl_ppo_cfg.FlamingoFlatPPORunnerCfg_Stand_Drive,
         "rl_games_cfg_entry_point": f"{agents.__name__}:rl_games_ppo_cfg.yaml",
     },
 )
@@ -44,7 +44,7 @@ gym.register(
     disable_env_checker=True,
     kwargs={
         "env_cfg_entry_point": rough_env.rough_env_stand_drive_cfg.FlamingoRoughEnvCfg,
-        "rsl_rl_cfg_entry_point": agents.rsl_rl_cfg.FlamingoRoughPPORunnerCfg_Stand_Drive,
+        "rsl_rl_cfg_entry_point": agents.rsl_rl_ppo_cfg.FlamingoRoughPPORunnerCfg_Stand_Drive,
     },
 )
 
@@ -54,7 +54,7 @@ gym.register(
     disable_env_checker=True,
     kwargs={
         "env_cfg_entry_point": rough_env.rough_env_stand_drive_play_cfg.FlamingoRoughEnvCfg_PLAY,
-        "rsl_rl_cfg_entry_point": agents.rsl_rl_cfg.FlamingoRoughPPORunnerCfg_Stand_Drive,
+        "rsl_rl_cfg_entry_point": agents.rsl_rl_ppo_cfg.FlamingoRoughPPORunnerCfg_Stand_Drive,
     },
 )
 
@@ -64,7 +64,7 @@ gym.register(
     disable_env_checker=True,
     kwargs={
         "env_cfg_entry_point": flat_env.flat_env_track_z_cfg.FlamingoFlatEnvCfg,
-        "rsl_rl_cfg_entry_point": agents.rsl_rl_cfg.FlamingoFlatPPORunnerCfg_Track_Z,
+        "rsl_rl_cfg_entry_point": agents.rsl_rl_ppo_cfg.FlamingoFlatPPORunnerCfg_Track_Z,
         "rl_games_cfg_entry_point": f"{agents.__name__}:rl_games_ppo_cfg.yaml",
     },
 )
@@ -75,7 +75,7 @@ gym.register(
     disable_env_checker=True,
     kwargs={
         "env_cfg_entry_point": flat_env.flat_env_track_z_play_cfg.FlamingoFlatEnvCfg_PLAY,
-        "rsl_rl_cfg_entry_point": agents.rsl_rl_cfg.FlamingoFlatPPORunnerCfg_Track_Z,
+        "rsl_rl_cfg_entry_point": agents.rsl_rl_ppo_cfg.FlamingoFlatPPORunnerCfg_Track_Z,
         "rl_games_cfg_entry_point": f"{agents.__name__}:rl_games_ppo_cfg.yaml",
     },
 )
@@ -86,7 +86,7 @@ gym.register(
     disable_env_checker=True,
     kwargs={
         "env_cfg_entry_point": rough_env.rough_env_track_z_cfg.FlamingoRoughEnvCfg,
-        "rsl_rl_cfg_entry_point": agents.rsl_rl_cfg.FlamingoRoughPPORunnerCfg_Track_Z,
+        "rsl_rl_cfg_entry_point": agents.rsl_rl_ppo_cfg.FlamingoRoughPPORunnerCfg_Track_Z,
     },
 )
 
@@ -96,7 +96,7 @@ gym.register(
     disable_env_checker=True,
     kwargs={
         "env_cfg_entry_point": rough_env.rough_env_track_z_play_cfg.FlamingoRoughEnvCfg_PLAY,
-        "rsl_rl_cfg_entry_point": agents.rsl_rl_cfg.FlamingoRoughPPORunnerCfg_Track_Z,
+        "rsl_rl_cfg_entry_point": agents.rsl_rl_ppo_cfg.FlamingoRoughPPORunnerCfg_Track_Z,
     },
 )
 
@@ -106,7 +106,7 @@ gym.register(
     disable_env_checker=True,
     kwargs={
         "env_cfg_entry_point": rough_env.rough_env_stand_walk_cfg.FlamingoRoughEnvCfg,
-        "rsl_rl_cfg_entry_point": agents.rsl_rl_cfg.FlamingoRoughPPORunnerCfg_Stand_Walk,
+        "rsl_rl_cfg_entry_point": agents.rsl_rl_ppo_cfg.FlamingoRoughPPORunnerCfg_Stand_Walk,
     },
 )
 
@@ -116,6 +116,6 @@ gym.register(
     disable_env_checker=True,
     kwargs={
         "env_cfg_entry_point": rough_env.rough_env_stand_walk_play_cfg.FlamingoRoughEnvCfg_PLAY,
-        "rsl_rl_cfg_entry_point": agents.rsl_rl_cfg.FlamingoRoughPPORunnerCfg_Stand_Walk,
+        "rsl_rl_cfg_entry_point": agents.rsl_rl_ppo_cfg.FlamingoRoughPPORunnerCfg_Stand_Walk,
     },
 )
