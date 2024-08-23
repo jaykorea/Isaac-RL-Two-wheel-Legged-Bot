@@ -49,7 +49,7 @@ class FlamingoRewardsCfg(RewardsCfg):
     #         "asset_cfg": SceneEntityCfg("robot", body_names=".*_wheel_link"),
     #     },
     # )
-    termination_penalty = RewTerm(func=mdp.is_terminated, weight=-10.0)
+    termination_penalty = RewTerm(func=mdp.is_terminated, weight=-200.0)
     # joint_deviation_hip = RewTerm(
     #     func=mdp.joint_deviation_l1,
     #     weight=-0.2,
@@ -103,7 +103,6 @@ class FlamingoRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         # Terrain curriculum
         self.curriculum.terrain_levels = None
 
-        # scale down the terrains because the robot is small
         # self.scene.terrain.terrain_generator.sub_terrains["boxes"].grid_height_range = (0.025, 0.004)
         # self.scene.terrain.terrain_generator.sub_terrains["random_rough"].noise_range = (0.01, 0.06)
         # self.scene.terrain.terrain_generator.sub_terrains["random_rough"].noise_step = 0.01
@@ -157,15 +156,17 @@ class FlamingoRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         ]
 
         # rewards
-        # self.rewards.undesired_contacts = None
-        # self.rewards.dof_torques_l2.weight = -5.0e-6
-        # self.rewards.track_lin_vel_xy_exp.weight = 2.0
-        # self.rewards.track_ang_vel_z_exp.weight = 1.0
-        # self.rewards.action_rate_l2.weight *= 1.0
-        # self.rewards.dof_acc_l2.weight *= 1.0
+        self.rewards.undesired_contacts = None
+        self.rewards.dof_torques_l2.weight = -5.0e-6
+        self.rewards.track_lin_vel_xy_exp.weight = 2.0
+        self.rewards.track_ang_vel_z_exp.weight = 1.0
+        self.rewards.lin_vel_z_l2.weight *= 0.25
+        self.rewards.ang_vel_xy_l2.weight *= 0.25
+        self.rewards.action_rate_l2.weight *= 0.25
+        self.rewards.dof_acc_l2.weight *= 0.05
         # commands
         self.commands.base_velocity.rel_standing_envs = 0.0
-        self.commands.base_velocity.ranges.lin_vel_x = (1.5, 1.5)
+        self.commands.base_velocity.ranges.lin_vel_x = (2.0, 2.0)
         self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
         self.commands.base_velocity.ranges.ang_vel_z = (-0.0, 0.0)
         self.commands.base_velocity.ranges.heading = (-0.0, 0.0)

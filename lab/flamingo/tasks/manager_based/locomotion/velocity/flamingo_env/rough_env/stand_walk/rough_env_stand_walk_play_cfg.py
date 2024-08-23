@@ -22,11 +22,11 @@ class FlamingoRoughEnvCfg_PLAY(LocomotionVelocityRoughEnvCfg):
         self.scene.num_envs = 100
         self.scene.env_spacing = 2.5
         # change terrain to flat
-        self.scene.terrain.terrain_type = "plane"
-        self.scene.terrain.terrain_generator = None
+        # self.scene.terrain.terrain_type = "plane"
+        # self.scene.terrain.terrain_generator = None
 
-        # Terrain curriculum
-        self.curriculum.terrain_levels = None
+        # # Terrain curriculum
+        # self.curriculum.terrain_levels = None
         # spawn the robot randomly in the grid (instead of their terrain levels)
         # self.scene.terrain.max_init_terrain_level = None
         # # reduce the number of terrains to save memory
@@ -39,30 +39,30 @@ class FlamingoRoughEnvCfg_PLAY(LocomotionVelocityRoughEnvCfg):
         self.scene.robot = FLAMINGO_WALK_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
         self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/base_link"
         # # scale down the terrains because the robot is small
-        # self.scene.terrain.terrain_generator.sub_terrains["boxes"].grid_height_range = (0.025, 0.1)
-        # self.scene.terrain.terrain_generator.sub_terrains["random_rough"].noise_range = (0.01, 0.06)
-        # self.scene.terrain.terrain_generator.sub_terrains["random_rough"].noise_step = 0.01
+        self.scene.terrain.terrain_generator.sub_terrains["boxes"].grid_height_range = (0.025, 0.1)
+        self.scene.terrain.terrain_generator.sub_terrains["random_rough"].noise_range = (0.01, 0.06)
+        self.scene.terrain.terrain_generator.sub_terrains["random_rough"].noise_step = 0.01
 
-        # self.scene.terrain.terrain_generator.sub_terrains["hf_pyramid_slope"].proportion = 0.1
-        # self.scene.terrain.terrain_generator.sub_terrains["hf_pyramid_slope"].slope_range = (
-        #     0.0,
-        #     0.01,
-        # )  # Very gentle slope
-        # self.scene.terrain.terrain_generator.sub_terrains["hf_pyramid_slope_inv"].proportion = (
-        #     0.1  # Increase proportion if you want more of this terrain
-        # )
-        # self.scene.terrain.terrain_generator.sub_terrains["hf_pyramid_slope_inv"].slope_range = (
-        #     0.0,
-        #     0.01,
-        # )  # Very gentle slope
-        # # Adjust the inverted pyramid stairs terrain
-        # self.scene.terrain.terrain_generator.sub_terrains["pyramid_stairs_inv"].step_height_range = (
-        #     0.01,
-        #     0.05,
-        # )  # Smaller step height for gentler steps
-        # self.scene.terrain.terrain_generator.sub_terrains["pyramid_stairs_inv"].step_width = (
-        #     0.5  # Increase step width for gentler steps
-        # )
+        self.scene.terrain.terrain_generator.sub_terrains["hf_pyramid_slope"].proportion = 0.1
+        self.scene.terrain.terrain_generator.sub_terrains["hf_pyramid_slope"].slope_range = (
+            0.0,
+            0.01,
+        )  # Very gentle slope
+        self.scene.terrain.terrain_generator.sub_terrains["hf_pyramid_slope_inv"].proportion = (
+            0.1  # Increase proportion if you want more of this terrain
+        )
+        self.scene.terrain.terrain_generator.sub_terrains["hf_pyramid_slope_inv"].slope_range = (
+            0.0,
+            0.01,
+        )  # Very gentle slope
+        # Adjust the inverted pyramid stairs terrain
+        self.scene.terrain.terrain_generator.sub_terrains["pyramid_stairs_inv"].step_height_range = (
+            0.01,
+            0.05,
+        )  # Smaller step height for gentler steps
+        self.scene.terrain.terrain_generator.sub_terrains["pyramid_stairs_inv"].step_width = (
+            0.5  # Increase step width for gentler steps
+        )
 
         # events
         self.events.push_robot = None

@@ -3,4 +3,4 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-from . import rsl_rl_cfg  # noqa: F401, F403
+from . import rsl_rl_ppo_cfg  # noqa: F401, F403
