@@ -7,9 +7,9 @@
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://pre-commit.com/)
 [![License](https://img.shields.io/badge/license-MIT-yellow.svg)](https://opensource.org/license/mit)
 ## Sim2Real
-<img src="https://github.com/user-attachments/assets/61598430-9132-42a7-a2fd-ec9b0a823c90" width="600" />
-<img src="https://github.com/user-attachments/assets/b47ad3c0-8da9-437b-a456-8783fb796388" width="600" />
 
+![sd](https://github.com/user-attachments/assets/c91ba750-e462-44ca-8211-8ba422db7054)
+![sd-copy-0](https://github.com/user-attachments/assets/ca084861-55a5-4787-9207-74d5ca249db7)
 
 ## Isaac Lab Flamingo
 
