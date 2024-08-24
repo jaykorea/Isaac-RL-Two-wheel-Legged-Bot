@@ -1,13 +1,13 @@
 # Isaac LAB for Flamingo
 
-[![IsaacSim](https://img.shields.io/badge/IsaacSim-4.0-silver.svg)](https://docs.omniverse.nvidia.com/isaacsim/latest/overview.html)
-[![Orbit](https://img.shields.io/badge/Lab-0.3.0-silver)](https://isaac-orbit.github.io/orbit/)
+[![IsaacSim](https://img.shields.io/badge/IsaacSim-4.1-silver.svg)](https://docs.omniverse.nvidia.com/isaacsim/latest/overview.html)
+[![IsaacLab](https://img.shields.io/badge/Lab-0.3.0-silver)](https://isaac-orbit.github.io/orbit/)
 [![Python](https://img.shields.io/badge/python-3.10-blue.svg)](https://docs.python.org/3/whatsnew/3.10.html)
 [![Linux platform](https://img.shields.io/badge/platform-linux--64-orange.svg)](https://releases.ubuntu.com/20.04/)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://pre-commit.com/)
 [![License](https://img.shields.io/badge/license-MIT-yellow.svg)](https://opensource.org/license/mit)
-## Sim2Real - ZeroShot Transfer
 
+## Sim2Real - ZeroShot Transfer
 | ![cd3](https://github.com/user-attachments/assets/8f9f990d-e8e9-400a-82b2-1131ff73f891) | ![sd-min](https://github.com/user-attachments/assets/93c6b187-4680-435e-800a-9e6d3d570d13)  |
 |---|---|
 | ![sd](https://github.com/user-attachments/assets/9991ff73-5b3e-4d10-9b63-548197f18e54) | ![sf](https://github.com/user-attachments/assets/545fd258-1add-499a-8c62-520e113a951b) |
