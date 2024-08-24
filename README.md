@@ -7,9 +7,11 @@
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://pre-commit.com/)
 [![License](https://img.shields.io/badge/license-MIT-yellow.svg)](https://opensource.org/license/mit)
 ## Sim2Real - ZeroShot Transfer
-![cd3](https://github.com/user-attachments/assets/8f9f990d-e8e9-400a-82b2-1131ff73f891)
-![sf](https://github.com/user-attachments/assets/545fd258-1add-499a-8c62-520e113a951b)
-![sd](https://github.com/user-attachments/assets/9991ff73-5b3e-4d10-9b63-548197f18e54)
+
+| ![cd3](https://github.com/user-attachments/assets/8f9f990d-e8e9-400a-82b2-1131ff73f891) | ![sf](https://github.com/user-attachments/assets/545fd258-1add-499a-8c62-520e113a951b) |
+|---|---|
+| ![sd](https://github.com/user-attachments/assets/9991ff73-5b3e-4d10-9b63-548197f18e54) |  |
+
 
 ## Isaac Lab Flamingo
 
