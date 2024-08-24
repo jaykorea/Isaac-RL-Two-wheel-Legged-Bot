@@ -8,8 +8,8 @@
 [![License](https://img.shields.io/badge/license-MIT-yellow.svg)](https://opensource.org/license/mit)
 ## Sim2Real
 
-![sd](https://github.com/user-attachments/assets/c91ba750-e462-44ca-8211-8ba422db7054)
 ![sd-copy-0](https://github.com/user-attachments/assets/ca084861-55a5-4787-9207-74d5ca249db7)
+![sd](https://github.com/user-attachments/assets/c91ba750-e462-44ca-8211-8ba422db7054)
 
 ## Isaac Lab Flamingo
 
