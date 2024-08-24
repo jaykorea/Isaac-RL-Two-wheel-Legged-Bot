@@ -46,7 +46,7 @@ class FlamingoNavigationEnvPPORunnerCfg(NavigationEnvPPORunnerCfg):
     def __post_init__(self):
         super().__post_init__()
 
-        self.max_iterations = 1500
+        self.max_iterations = 50000
         self.experiment_name = "Flamingo_Flat_Navigation"
         self.policy.actor_hidden_dims = [128, 128]
         self.policy.critic_hidden_dims = [128, 128]

@@ -218,11 +218,6 @@ class ObservationsCfg:
             self.enable_corruption = True
             self.concatenate_terms = True
 
-            # if self.enable_corruption:
-            #     self.actions = ObsTerm(func=mdp.delayed_last_action, noise=Unoise(n_min=-0.01, n_max=0.01))
-            # else:
-            #     self.actions = ObsTerm(func=mdp.last_action, noise=Unoise(n_min=-0.01, n_max=0.01))
-
     # observation groups
     policy: PolicyCfg = PolicyCfg()
 
@@ -353,10 +348,10 @@ class RewardsCfg:
 
     # -- task
     track_lin_vel_xy_exp = RewTerm(
-        func=mdp.track_lin_vel_xy_exp, weight=1.0, params={"command_name": "base_velocity", "std": math.sqrt(5.0)}
+        func=mdp.track_lin_vel_xy_exp, weight=1.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
     )
     track_ang_vel_z_exp = RewTerm(
-        func=mdp.track_ang_vel_z_exp, weight=0.5, params={"command_name": "base_velocity", "std": math.sqrt(5.0)}
+        func=mdp.track_ang_vel_z_exp, weight=0.5, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
     )
     # -- penalties
     lin_vel_z_l2 = RewTerm(func=mdp.lin_vel_z_l2, weight=-1.0)

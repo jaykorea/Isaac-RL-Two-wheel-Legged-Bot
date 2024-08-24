@@ -67,7 +67,7 @@ class PreTrainedPolicyAction(ActionTerm):
 
     @property
     def action_dim(self) -> int:
-        return 4
+        return 3
 
     @property
     def raw_actions(self) -> torch.Tensor:

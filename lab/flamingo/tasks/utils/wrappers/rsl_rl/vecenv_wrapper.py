@@ -198,6 +198,7 @@ class RslRlVecEnvWrapper(VecEnv):
 
         # Stack observations: current, previous, and previous2 observations (excluding velocity_commands)
         # stacked_obs = torch.cat((obs[:, :28], self.prev_obs[:, :28], self.prev2_obs[:, :28]), dim=1)
+        
         stacked_obs = torch.cat((obs[:, :28], self.prev_obs[:, :28]), dim=1)
 
         # Add the last 3 velocity, 1 pos observations
@@ -209,8 +210,11 @@ class RslRlVecEnvWrapper(VecEnv):
         self.prev_obs = obs.clone()
 
         # Update the obs_dict with the new final_obs
-        obs_dict["policy"] = final_obs
-        obs = obs_dict["policy"]
+        if stacked_obs.shape[1] == 60:
+            obs_dict["policy"] = final_obs
+            obs = obs_dict["policy"]
+        else:
+            obs_dict["policy"] = obs
 
         extras["observations"] = obs_dict
         # move time out information to the extras dict

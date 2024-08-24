@@ -3,18 +3,23 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
+from __future__ import annotations
 
 import math
+from dataclasses import MISSING
+
+# import torch
 
 from omni.isaac.lab.envs import ManagerBasedRLEnvCfg
-from omni.isaac.lab.managers import EventTermCfg as EventTerm
+
 from omni.isaac.lab.managers import ObservationGroupCfg as ObsGroup
 from omni.isaac.lab.managers import ObservationTermCfg as ObsTerm
+from omni.isaac.lab.managers import EventTermCfg as EventTerm
 from omni.isaac.lab.managers import RewardTermCfg as RewTerm
 from omni.isaac.lab.managers import SceneEntityCfg
 from omni.isaac.lab.managers import TerminationTermCfg as DoneTerm
 from omni.isaac.lab.utils import configclass
-
+from omni.isaac.lab.utils.noise import AdditiveUniformNoiseCfg as Unoise
 from lab.flamingo.assets.flamingo import FLAMINGO_ASSETS_DATA_DIR
 
 # import omni.isaac.orbit_tasks.locomotion.velocity.mdp as mdp
@@ -22,8 +27,6 @@ import lab.flamingo.tasks.manager_based.navigation.mdp as mdp
 from lab.flamingo.tasks.manager_based.locomotion.velocity.flamingo_env.flat_env.stand_drive.flat_env_stand_drive_cfg import (
     FlamingoFlatEnvCfg,
 )
-
-# from omni.isaac.lab_tasks.manager_based.locomotion.velocity.config.anymal_c.flat_env_cfg import AnymalCFlatEnvCfg
 
 LOW_LEVEL_ENV_CFG = FlamingoFlatEnvCfg()
 
@@ -54,7 +57,7 @@ class ActionsCfg:
     """Action terms for the MDP."""
 
     flamingo_pre_trained_policy_action: mdp.FlamingoPreTrainedPolicyActionCfg = mdp.FlamingoPreTrainedPolicyActionCfg(
-        asset_name="robot",  # Asset name should be inside the FlamingoPreTrainedPolicyActionCfg
+        asset_name="robot",
         policy_path=f"{FLAMINGO_ASSETS_DATA_DIR}/LLP/exported/policy.pt",
         low_level_decimation=4,
         low_level_actions_joints=LOW_LEVEL_ENV_CFG.actions.joint_pos,
@@ -72,29 +75,9 @@ class ObservationsCfg:
         """Observations for policy group."""
 
         # observation terms (order preserved)
-        base_lin_vel_1 = ObsTerm(func=mdp.base_lin_vel)
-        base_lin_vel_2 = ObsTerm(func=mdp.base_lin_vel)
-        base_lin_vel_3 = ObsTerm(func=mdp.base_lin_vel)
-        base_lin_vel_4 = ObsTerm(func=mdp.base_lin_vel)
-        base_lin_vel_5 = ObsTerm(func=mdp.base_lin_vel)
-        base_lin_vel_6 = ObsTerm(func=mdp.base_lin_vel)
-        base_lin_vel_7 = ObsTerm(func=mdp.base_lin_vel)
-        base_lin_vel_8 = ObsTerm(func=mdp.base_lin_vel)
-        base_lin_vel_9 = ObsTerm(func=mdp.base_lin_vel)
-        base_lin_vel_10 = ObsTerm(func=mdp.base_lin_vel)
-        base_lin_vel_11 = ObsTerm(func=mdp.base_lin_vel)
-        base_lin_vel_12 = ObsTerm(func=mdp.base_lin_vel)
-        base_lin_vel_13 = ObsTerm(func=mdp.base_lin_vel)
-        base_lin_vel_14 = ObsTerm(func=mdp.base_lin_vel)
-        base_lin_vel_15 = ObsTerm(func=mdp.base_lin_vel)
-        base_lin_vel_16 = ObsTerm(func=mdp.base_lin_vel)
-        base_lin_vel_17 = ObsTerm(func=mdp.base_lin_vel)
-        base_lin_vel_18 = ObsTerm(func=mdp.base_lin_vel)
-        base_lin_vel_19 = ObsTerm(func=mdp.base_lin_vel)
-        base_lin_vel_20 = ObsTerm(func=mdp.base_lin_vel)
-
-        # projected_gravity = ObsTerm(func=mdp.projected_gravity)
-        # pose_command = ObsTerm(func=mdp.generated_commands, params={"command_name": "pose_command"})
+        base_lin_vel = ObsTerm(func=mdp.base_lin_vel)
+        projected_gravity = ObsTerm(func=mdp.projected_gravity)
+        pose_command = ObsTerm(func=mdp.generated_commands, params={"command_name": "pose_command"})
 
     # observation groups
     policy: PolicyCfg = PolicyCfg()
@@ -184,6 +167,14 @@ class NavigationEnvCfg(ManagerBasedRLEnvCfg):
             )
         if self.scene.contact_forces is not None:
             self.scene.contact_forces.update_period = self.sim.dt
+
+        # terminations
+        self.terminations.base_contact.params["sensor_cfg"].body_names = [
+            "base_link",
+            ".*_hip_link",
+            ".*_shoulder_link",
+            ".*_leg_link",
+        ]
 
 
 class NavigationEnvCfg_PLAY(NavigationEnvCfg):
