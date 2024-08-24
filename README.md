@@ -9,7 +9,6 @@
 ## Sim2Real
 ![cd3](https://github.com/user-attachments/assets/8f9f990d-e8e9-400a-82b2-1131ff73f891)
 ![sf](https://github.com/user-attachments/assets/545fd258-1add-499a-8c62-520e113a951b)
-![sd-copy-0](https://github.com/user-attachments/assets/ca084861-55a5-4787-9207-74d5ca249db7)
 ![sd](https://github.com/user-attachments/assets/9991ff73-5b3e-4d10-9b63-548197f18e54)
 
 ## Isaac Lab Flamingo
