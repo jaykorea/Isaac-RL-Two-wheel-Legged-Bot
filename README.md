@@ -10,8 +10,7 @@
 
 | ![cd3](https://github.com/user-attachments/assets/8f9f990d-e8e9-400a-82b2-1131ff73f891) | ![sf](https://github.com/user-attachments/assets/545fd258-1add-499a-8c62-520e113a951b) |
 |---|---|
-| ![sd](https://github.com/user-attachments/assets/9991ff73-5b3e-4d10-9b63-548197f18e54) |  |
-
+| ![sd](https://github.com/user-attachments/assets/9991ff73-5b3e-4d10-9b63-548197f18e54) | ![sd-min](https://github.com/user-attachments/assets/93c6b187-4680-435e-800a-9e6d3d570d13) |
 
 ## Isaac Lab Flamingo
 
