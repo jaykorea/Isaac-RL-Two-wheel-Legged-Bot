@@ -47,15 +47,25 @@ class FlamingoPreTrainedPolicyAction(ActionTerm):
         self._raw_actions = torch.zeros(self.num_envs, self.action_dim, device=self.device)
 
         # prepare low level actions
-        self._low_level_action_joints_term: ActionTerm = cfg.low_level_actions_joints.class_type(cfg.low_level_actions_joints, env)
-        self._low_level_action_wheels_term: ActionTerm = cfg.low_level_actions_wheels.class_type(cfg.low_level_actions_wheels, env)
-        self.low_level_actions_joints = torch.zeros(self.num_envs, self._low_level_action_joints_term.action_dim, device=self.device)
-        self.low_level_actions_wheels = torch.zeros(self.num_envs, self._low_level_action_wheels_term.action_dim, device=self.device)
+        self._low_level_action_joints_term: ActionTerm = cfg.low_level_actions_joints.class_type(
+            cfg.low_level_actions_joints, env
+        )
+        self._low_level_action_wheels_term: ActionTerm = cfg.low_level_actions_wheels.class_type(
+            cfg.low_level_actions_wheels, env
+        )
+        self.low_level_actions_joints = torch.zeros(
+            self.num_envs, self._low_level_action_joints_term.action_dim, device=self.device
+        )
+        self.low_level_actions_wheels = torch.zeros(
+            self.num_envs, self._low_level_action_wheels_term.action_dim, device=self.device
+        )
         self.low_level_actions = torch.cat([self.low_level_actions_joints, self.low_level_actions_wheels], dim=1)
 
         # remap some of the low level observations to internal observations
         cfg.low_level_observations.actions.func = lambda dummy_env: self.low_level_actions
         cfg.low_level_observations.actions.params = dict()
+        cfg.low_level_observations.prev_actions.func = lambda dummy_env: self.low_level_actions
+        cfg.low_level_observations.prev_actions.params = dict()
         cfg.low_level_observations.velocity_commands.func = lambda dummy_env: self._raw_actions
         cfg.low_level_observations.velocity_commands.params = dict()
 
@@ -74,9 +84,9 @@ class FlamingoPreTrainedPolicyAction(ActionTerm):
 
     @property
     def raw_actions(self) -> torch.Tensor:
-        
+
         ### To make last command element "0"
-        self._raw_actions[:,-1] = 0
+        self._raw_actions[:, -1] = 0
         return self._raw_actions
 
     @property
@@ -89,7 +99,7 @@ class FlamingoPreTrainedPolicyAction(ActionTerm):
 
     def process_actions(self, actions: torch.Tensor):
         self._raw_actions[:] = actions
-        
+
     def apply_actions(self):
         if self._counter % self.cfg.low_level_decimation == 0:
             low_level_obs = self._low_level_obs_manager.compute_group("ll_policy")

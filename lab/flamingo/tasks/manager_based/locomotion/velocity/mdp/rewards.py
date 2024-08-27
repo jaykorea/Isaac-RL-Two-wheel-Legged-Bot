@@ -293,6 +293,7 @@ def stand_still(
 def joint_align_l1(
     env: ManagerBasedRLEnv,
     asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+    velocity_threshold: float = 0.0,
 ) -> torch.Tensor:
     """Penalize joint mis-alignments.
 
@@ -301,8 +302,12 @@ def joint_align_l1(
     # extract the used quantities (to enable type-hinting)
     asset: Articulation = env.scene[asset_cfg.name]
     # compute out of limits constraints
-    mis_aligned = torch.abs(
-        asset.data.joint_pos[:, asset_cfg.joint_ids[0]] - asset.data.joint_pos[:, asset_cfg.joint_ids[1]]
+    cmd = torch.norm(env.command_manager.get_command("base_velocity"), dim=1)
+
+    mis_aligned = torch.where(
+        cmd <= velocity_threshold,
+        torch.abs(asset.data.joint_pos[:, asset_cfg.joint_ids[0]] - asset.data.joint_pos[:, asset_cfg.joint_ids[1]]),
+        torch.tensor(0.0),
     )
 
     return mis_aligned
@@ -475,3 +480,89 @@ def joint_velocity_penalty(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg) ->
     # extract the used quantities (to enable type-hinting)
     asset: Articulation = env.scene[asset_cfg.name]
     return torch.linalg.norm((asset.data.joint_vel), dim=1)
+
+
+class GaitReward(ManagerTermBase):
+    """Gait enforcing reward term for bipeds.
+
+    This reward penalizes contact timing differences between the two feet to bias the policy towards a natural walking gait.
+    """
+
+    def __init__(self, cfg: RewardTermCfg, env: ManagerBasedRLEnv):
+        """Initialize the term.
+
+        Args:
+            cfg: The configuration of the reward.
+            env: The RL environment instance.
+        """
+        super().__init__(cfg, env)
+        self.std: float = cfg.params["std"]
+        self.max_err: float = cfg.params["max_err"]
+        self.velocity_threshold: float = cfg.params["velocity_threshold"]
+        self.contact_sensor: ContactSensor = env.scene.sensors[cfg.params["sensor_cfg"].name]
+        self.asset: Articulation = env.scene[cfg.params["asset_cfg"].name]
+
+        # Parse and validate synced feet pair names
+        synced_feet_pair_names = cfg.params["synced_feet_pair_names"]
+        if len(synced_feet_pair_names) != 2:
+            raise ValueError("This reward requires exactly two pairs of feet for bipedal walking.")
+
+        # Convert foot names to body IDs
+        self.foot_0 = self.contact_sensor.find_bodies(synced_feet_pair_names[0])[0]
+        self.foot_1 = self.contact_sensor.find_bodies(synced_feet_pair_names[1])[0]
+
+    def __call__(
+        self,
+        env: ManagerBasedRLEnv,
+        std: float,
+        max_err: float,
+        velocity_threshold: float,
+        synced_feet_pair_names,
+        asset_cfg: SceneEntityCfg,
+        sensor_cfg: SceneEntityCfg,
+    ) -> torch.Tensor:
+        """Compute the reward.
+
+        This reward enforces that one foot is in the air while the other is in contact with the ground.
+
+        Args:
+            env: The RL environment instance.
+        Returns:
+            The reward value.
+        """
+        # Calculate the asynchronous reward for the two feet
+        async_reward = self._async_reward_func(self.foot_0, self.foot_1)
+
+        # only enforce gait if the command velocity or body velocity is above a certain threshold
+        cmd = torch.norm(env.command_manager.get_command("base_velocity"), dim=1)
+        body_vel = torch.linalg.norm(self.asset.data.root_lin_vel_b[:, :2], dim=1)
+        return torch.where(
+            torch.logical_or(cmd > 0.0, body_vel > self.velocity_threshold), async_reward, torch.tensor(0.0)
+        )
+
+    """
+    Helper functions.
+    """
+
+    def _async_reward_func(self, foot_0: int, foot_1: int) -> torch.Tensor:
+        """Reward anti-synchronization of two feet."""
+        air_time = self.contact_sensor.data.current_air_time
+        contact_time = self.contact_sensor.data.current_contact_time
+
+        # Ensure the tensors are properly broadcasted by selecting only the relevant dimensions
+        se_act_0 = torch.clip(torch.square(air_time[:, foot_0] - contact_time[:, foot_1]), max=self.max_err**2)
+        se_act_1 = torch.clip(torch.square(contact_time[:, foot_0] - air_time[:, foot_1]), max=self.max_err**2)
+
+        # Summing over the appropriate axis to reduce to the correct size
+        return torch.exp(-(se_act_0 + se_act_1) / self.std).squeeze()
+
+
+def foot_clearance_reward(
+    env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg, target_height: float, std: float, tanh_mult: float
+) -> torch.Tensor:
+    """Reward the swinging feet for clearing a specified height off the ground"""
+    asset: RigidObject = env.scene[asset_cfg.name]
+    foot_z_target_error = torch.square(asset.data.body_pos_w[:, asset_cfg.body_ids, 2] - target_height)
+    foot_velocity_tanh = torch.tanh(tanh_mult * torch.norm(asset.data.body_lin_vel_w[:, asset_cfg.body_ids, :2], dim=2))
+    reward = foot_z_target_error * foot_velocity_tanh
+    return torch.exp(-torch.sum(reward, dim=1) / std)

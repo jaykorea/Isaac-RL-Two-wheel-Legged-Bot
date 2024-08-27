@@ -6,27 +6,55 @@ import math
 
 from omni.isaac.lab.utils import configclass
 
-from lab.flamingo.tasks.manager_based.locomotion.velocity.velocity_env_cfg import LocomotionVelocityRoughEnvCfg
 import lab.flamingo.tasks.manager_based.locomotion.velocity.mdp as mdp
 from lab.flamingo.assets.flamingo import FLAMINGO_WALK_CFG  # isort: skip
+from lab.flamingo.tasks.manager_based.locomotion.velocity.velocity_env_cfg import (
+    LocomotionVelocityRoughEnvCfg,
+    CommandsCfg,
+)
+
+
+@configclass
+class FalmingoCommandsCfg(CommandsCfg):
+    """Command specifications for the MDP."""
+
+    base_velocity = mdp.UniformVelocityWithZCommandCfg(
+        asset_name="robot",
+        resampling_time_range=(10.0, 10.0),
+        rel_standing_envs=0.1,
+        rel_heading_envs=0.0,
+        heading_command=False,
+        debug_vis=True,
+        ranges=mdp.UniformVelocityWithZCommandCfg.Ranges(
+            lin_vel_x=(-1.5, 1.5),
+            lin_vel_y=(-1.0, 1.0),
+            ang_vel_z=(-1.5, 1.5),
+            pos_z=(0.1931942, 0.3531942),
+        ),
+    )
 
 
 @configclass
 class FlamingoRoughEnvCfg_PLAY(LocomotionVelocityRoughEnvCfg):
 
+    commands: FalmingoCommandsCfg = FalmingoCommandsCfg()
+
     def __post_init__(self):
         # post init of parent
         super().__post_init__()
-
+        # scene
+        self.scene.robot = FLAMINGO_WALK_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
+        self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/base_link"
         # make a smaller scene for play
         self.scene.num_envs = 100
         self.scene.env_spacing = 2.5
         # change terrain to flat
-        # self.scene.terrain.terrain_type = "plane"
-        # self.scene.terrain.terrain_generator = None
+        self.scene.terrain.terrain_type = "plane"
+        self.scene.terrain.terrain_generator = None
 
-        # # Terrain curriculum
-        # self.curriculum.terrain_levels = None
+        # Terrain curriculum
+        self.curriculum.terrain_levels = None
+
         # spawn the robot randomly in the grid (instead of their terrain levels)
         # self.scene.terrain.max_init_terrain_level = None
         # # reduce the number of terrains to save memory
@@ -34,36 +62,10 @@ class FlamingoRoughEnvCfg_PLAY(LocomotionVelocityRoughEnvCfg):
         #     self.scene.terrain.terrain_generator.num_rows = 5
         #     self.scene.terrain.terrain_generator.num_cols = 5
         #     self.scene.terrain.terrain_generator.curriculum = False
-
-        # # scene
-        self.scene.robot = FLAMINGO_WALK_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
-        self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/base_link"
         # # scale down the terrains because the robot is small
-        self.scene.terrain.terrain_generator.sub_terrains["boxes"].grid_height_range = (0.025, 0.1)
-        self.scene.terrain.terrain_generator.sub_terrains["random_rough"].noise_range = (0.01, 0.06)
-        self.scene.terrain.terrain_generator.sub_terrains["random_rough"].noise_step = 0.01
-
-        self.scene.terrain.terrain_generator.sub_terrains["hf_pyramid_slope"].proportion = 0.1
-        self.scene.terrain.terrain_generator.sub_terrains["hf_pyramid_slope"].slope_range = (
-            0.0,
-            0.01,
-        )  # Very gentle slope
-        self.scene.terrain.terrain_generator.sub_terrains["hf_pyramid_slope_inv"].proportion = (
-            0.1  # Increase proportion if you want more of this terrain
-        )
-        self.scene.terrain.terrain_generator.sub_terrains["hf_pyramid_slope_inv"].slope_range = (
-            0.0,
-            0.01,
-        )  # Very gentle slope
-        # Adjust the inverted pyramid stairs terrain
-        self.scene.terrain.terrain_generator.sub_terrains["pyramid_stairs_inv"].step_height_range = (
-            0.01,
-            0.05,
-        )  # Smaller step height for gentler steps
-        self.scene.terrain.terrain_generator.sub_terrains["pyramid_stairs_inv"].step_width = (
-            0.5  # Increase step width for gentler steps
-        )
-
+        # self.scene.terrain.terrain_generator.sub_terrains["boxes"].grid_height_range = (0.025, 0.1)
+        # self.scene.terrain.terrain_generator.sub_terrains["random_rough"].noise_range = (0.01, 0.06)
+        # self.scene.terrain.terrain_generator.sub_terrains["random_rough"].noise_step = 0.01
         # events
         self.events.push_robot = None
         self.events.add_base_mass = None
@@ -93,10 +95,11 @@ class FlamingoRoughEnvCfg_PLAY(LocomotionVelocityRoughEnvCfg):
             ".*_leg_link",
         ]
 
-        self.commands.base_velocity.ranges.lin_vel_x = (-0.5, 0.5)
-        self.commands.base_velocity.ranges.lin_vel_y = (0.25, 0.25)
-        self.commands.base_velocity.ranges.ang_vel_z = (-0.5, 0.5)
-        self.commands.base_velocity.ranges.heading = (-math.pi, math.pi)
+        # commands
+        self.commands.base_velocity.rel_standing_envs = 0.0
+        self.commands.base_velocity.ranges.lin_vel_x = (1.0, 2.0)
+        self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
+        self.commands.base_velocity.ranges.ang_vel_z = (-0.0, 0.0)
         self.commands.base_velocity.ranges.pos_z = (0.0, 0.0)
         # disable randomization for play
         self.observations.policy.enable_corruption = False

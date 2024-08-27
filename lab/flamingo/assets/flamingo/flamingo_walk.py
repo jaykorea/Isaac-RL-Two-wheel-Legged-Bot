@@ -46,21 +46,22 @@ FLAMINGO_WALK_CFG = ArticulationCfg(
         ),
     ),
     init_state=ArticulationCfg.InitialStateCfg(
-        pos=(0.0, 0.0, 0.40168),  # default: 0.0 0.0 0.2461942
+        pos=(0.0, 0.0, 0.2461942),  # default: 0.2461942(initial), 0.40168(stand)
         joint_pos={
             "left_hip_joint": 0.0,
-            "left_shoulder_joint": -0.436332,
-            "left_leg_joint": 0.820305,
+            "left_shoulder_joint": -0.0,
+            "left_leg_joint": 0.0,
             "left_wheel_joint": 0.0,
             "right_hip_joint": 0.0,
-            "right_shoulder_joint": -0.436332,
-            "right_leg_joint": 0.820305,
+            "right_shoulder_joint": -0.0,
+            "right_leg_joint": 0.0,
             "right_wheel_joint": 0.0,
         },
         joint_vel={".*": 0.0},
     ),
     soft_joint_pos_limit_factor=0.8,
-    # joint_positions=[0.0, 0.0, -0.2161799, -0.2161799, 0.56810467, 0.56810467],
+    # joint_positions=[0.0, 0.0, -0.2161799, -0.2161799, 0.56810467, 0.56810467] (initial)
+    # joint_positions=[0.0, 0.0, -0.436332, -0.436332, 0.820305, 0.820305] (stand)
     actuators={
         "joints": DelayedPDActuatorCfg(
             joint_names_expr=[".*_hip_joint", ".*_shoulder_joint", ".*_leg_joint"],
@@ -89,7 +90,7 @@ FLAMINGO_WALK_CFG = ArticulationCfg(
                 ".*_leg_joint": 0.0,
             },
         ),
-        "wheels": ForceZeroActuatorCfg(
+        "wheels": DelayedPDActuatorCfg(
             joint_names_expr=[".*_wheel_joint"],
             effort_limit=5.0,
             velocity_limit=55.0,
@@ -97,7 +98,7 @@ FLAMINGO_WALK_CFG = ArticulationCfg(
                 ".*_wheel_joint": 0.0,
             },
             damping={
-                ".*_wheel_joint": 1.0,
+                ".*_wheel_joint": 0.3,
             },
             friction={
                 ".*_wheel_joint": 0.0,

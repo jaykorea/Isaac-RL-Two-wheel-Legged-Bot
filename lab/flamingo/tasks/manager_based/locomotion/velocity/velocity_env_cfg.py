@@ -34,6 +34,7 @@ import lab.flamingo.tasks.manager_based.locomotion.velocity.mdp as mdp
 # Pre-defined configs
 ##
 from omni.isaac.lab.terrains.config.rough import ROUGH_TERRAINS_CFG  # isort: skip
+import torch
 
 
 ##
@@ -101,38 +102,34 @@ class MySceneCfg(InteractiveSceneCfg):
 class CommandsCfg:
     """Command specifications for the MDP."""
 
-    base_velocity = mdp.UniformVelocityWithZCommandCfg(
-        asset_name="robot",
-        resampling_time_range=(10.0, 10.0),
-        rel_standing_envs=0.1,
-        rel_heading_envs=1.0,
-        heading_command=True,
-        heading_control_stiffness=0.5,
-        debug_vis=True,
-        ranges=mdp.UniformVelocityWithZCommandCfg.Ranges(
-            lin_vel_x=(-1.5, 1.5),
-            lin_vel_y=(-1.0, 1.0),
-            ang_vel_z=(-1.5, 1.5),
-            heading=(-math.pi, math.pi),
-            pos_z=(0.1931942, 0.3531942),
-        ),
-    )
-
-    # base_velocity = mdp.UniformVelocityCommandCfg(
+    # base_velocity = mdp.UniformVelocityWithZCommandCfg(
     #     asset_name="robot",
     #     resampling_time_range=(10.0, 10.0),
-    #     rel_standing_envs=0.4,
+    #     rel_standing_envs=0.1,
     #     rel_heading_envs=1.0,
     #     heading_command=True,
     #     heading_control_stiffness=0.5,
     #     debug_vis=True,
-    #     ranges=mdp.UniformVelocityCommandCfg.Ranges(
-    #         lin_vel_x=(-1.0, 1.0),
+    #     ranges=mdp.UniformVelocityWithZCommandCfg.Ranges(
+    #         lin_vel_x=(-1.5, 1.5),
     #         lin_vel_y=(-1.0, 1.0),
-    #         ang_vel_z=(-1.0, 1.0),
+    #         ang_vel_z=(-1.5, 1.5),
     #         heading=(-math.pi, math.pi),
+    #         pos_z=(0.1931942, 0.3531942),
     #     ),
     # )
+
+    base_velocity = mdp.UniformVelocityWithZCommandCfg(
+        asset_name="robot",
+        resampling_time_range=(10.0, 10.0),
+        rel_standing_envs=0.1,
+        rel_heading_envs=0.0,
+        heading_command=False,
+        debug_vis=True,
+        ranges=mdp.UniformVelocityWithZCommandCfg.Ranges(
+            lin_vel_x=(-1.0, 1.0), lin_vel_y=(-0.0, 0.0), ang_vel_z=(-2.0, 2.0), pos_z=(0.1931942, 0.3531942)
+        ),
+    )
 
 
 @configclass
@@ -200,17 +197,11 @@ class ObservationsCfg:
         """
         Stack 1
         """
-
-        prev_joint_pos = ObsTerm(
-            func=mdp.joint_pos_rel,
-            params={
-                "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_joint", ".*_shoulder_joint", ".*_leg_joint"])
-            },
-        )
-        prev_joint_vel = ObsTerm(func=mdp.joint_vel_rel)
-        prev_base_ang_vel = ObsTerm(func=mdp.base_ang_vel)
-        prev_base_euler = ObsTerm(func=mdp.root_euler_angle)
-        prev_actions = ObsTerm(func=mdp.last_action)
+        prev_joint_pos = joint_pos
+        prev_joint_vel = joint_vel
+        prev_base_ang_vel = base_ang_vel
+        prev_base_euler = base_euler
+        prev_actions = actions
 
         velocity_commands = ObsTerm(func=mdp.generated_commands, params={"command_name": "base_velocity"})
 

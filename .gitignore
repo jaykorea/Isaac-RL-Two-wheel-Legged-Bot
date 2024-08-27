@@ -3,3 +3,7 @@
 logs/
 *.pt
 *.onnx
+outputs/
+build/
+modified_source/
+manipulation.zip
