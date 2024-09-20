@@ -20,8 +20,10 @@ class ForceZeroActuator(BaseIdealPDActuator):
         self, control_action: ArticulationActions, joint_pos: torch.Tensor, joint_vel: torch.Tensor
     ) -> ArticulationActions:
         # compute errors
-        error_pos = 0.0 - joint_pos
-        error_vel = 0.0 - joint_vel
+        control_action.joint_positions = 0.0
+        control_action.joint_velocities = 0.0
+        error_pos = control_action.joint_positions - joint_pos
+        error_vel = control_action.joint_velocities - joint_vel
         # calculate the desired joint torques
         self.computed_effort = self.stiffness * error_pos + self.damping * error_vel + control_action.joint_efforts
         # Clip the torques based on the motor limits

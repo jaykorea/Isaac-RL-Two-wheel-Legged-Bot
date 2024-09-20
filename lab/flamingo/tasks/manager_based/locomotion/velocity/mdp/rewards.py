@@ -293,7 +293,7 @@ def stand_still(
 def joint_align_l1(
     env: ManagerBasedRLEnv,
     asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
-    velocity_threshold: float = 0.0,
+    cmd_threshold: float = -1.0,
 ) -> torch.Tensor:
     """Penalize joint mis-alignments.
 
@@ -304,11 +304,18 @@ def joint_align_l1(
     # compute out of limits constraints
     cmd = torch.norm(env.command_manager.get_command("base_velocity"), dim=1)
 
-    mis_aligned = torch.where(
-        cmd <= velocity_threshold,
-        torch.abs(asset.data.joint_pos[:, asset_cfg.joint_ids[0]] - asset.data.joint_pos[:, asset_cfg.joint_ids[1]]),
-        torch.tensor(0.0),
-    )
+    if cmd_threshold != -1.0:
+        mis_aligned = torch.where(
+            cmd <= cmd_threshold,
+            torch.abs(
+                asset.data.joint_pos[:, asset_cfg.joint_ids[0]] - asset.data.joint_pos[:, asset_cfg.joint_ids[1]]
+            ),
+            torch.tensor(0.0),
+        )
+    else:
+        mis_aligned = torch.abs(
+            asset.data.joint_pos[:, asset_cfg.joint_ids[0]] - asset.data.joint_pos[:, asset_cfg.joint_ids[1]]
+        )
 
     return mis_aligned
 
@@ -346,9 +353,26 @@ def action_smoothness_hard(env: ManagerBasedRLEnv) -> torch.Tensor:
     return sm1 + sm2 + sm3
 
 
-def force_action_zero(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
-    force_zero_action = torch.abs(env.action_manager.action[:, asset_cfg.joint_ids])
-    return torch.sum(force_zero_action, dim=1)
+def force_action_zero(
+    env: ManagerBasedRLEnv,
+    asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+    velocity_threshold: float = -1.0,
+    cmd_threshold: float = -1.0,
+) -> torch.Tensor:
+    asset: Articulation = env.scene[asset_cfg.name]
+
+    cmd = torch.norm(env.command_manager.get_command("base_velocity"), dim=1)
+    body_vel = torch.linalg.norm(asset.data.root_lin_vel_b[:, :2], dim=1)
+
+    if cmd_threshold != -1.0 or velocity_threshold != -1.0:
+        force_action_zero = torch.where(
+            torch.logical_or(cmd.unsqueeze(1) <= cmd_threshold, body_vel.unsqueeze(1) <= velocity_threshold),
+            torch.tensor(0.0),
+            torch.abs(env.action_manager.action[:, asset_cfg.joint_ids]),
+        )
+    else:
+        force_action_zero = torch.abs(env.action_manager.action[:, asset_cfg.joint_ids])
+    return torch.sum(force_action_zero, dim=1)
 
 
 def base_height_range_l2(
@@ -452,10 +476,12 @@ def joint_target_deviation_range_l1(
     min_angle: float,
     max_angle: float,
     in_range_reward: float,
+    cmd_threshold: float = -1.0,
     asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
 ) -> torch.Tensor:
     """Provide a fixed reward when the joint angle is within a specified range and penalize deviations."""
     asset: Articulation = env.scene[asset_cfg.name]
+    cmd = torch.norm(env.command_manager.get_command("base_velocity"), dim=1)
 
     # Get the current joint positions
     current_joint_pos = asset.data.joint_pos[:, asset_cfg.joint_ids]
@@ -468,11 +494,20 @@ def joint_target_deviation_range_l1(
         current_joint_pos - torch.where(current_joint_pos < min_angle, min_angle, max_angle)
     )
 
-    # Assign a fixed reward if in range, and a negative penalty if out of range
-    reward = torch.where(in_range, in_range_reward * torch.ones_like(current_joint_pos), -out_of_range_penalty)
+    if cmd_threshold != -1.0:
+        joint_deviation_range = torch.where(
+            cmd.unsqueeze(1) <= cmd_threshold,
+            torch.where(in_range, in_range_reward * torch.ones_like(current_joint_pos), -out_of_range_penalty),
+            torch.tensor(0.0),
+        )
+    else:
+        # Assign a fixed reward if in range, and a negative penalty if out of range
+        joint_deviation_range = torch.where(
+            in_range, in_range_reward * torch.ones_like(current_joint_pos), -out_of_range_penalty
+        )
 
     # Sum the rewards over all joint ids
-    return torch.sum(reward, dim=1)
+    return torch.sum(joint_deviation_range, dim=1)
 
 
 def joint_velocity_penalty(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg) -> torch.Tensor:
@@ -499,6 +534,7 @@ class GaitReward(ManagerTermBase):
         self.std: float = cfg.params["std"]
         self.max_err: float = cfg.params["max_err"]
         self.velocity_threshold: float = cfg.params["velocity_threshold"]
+        self.cmd_threshold: float = cfg.params["cmd_threshold"]
         self.contact_sensor: ContactSensor = env.scene.sensors[cfg.params["sensor_cfg"].name]
         self.asset: Articulation = env.scene[cfg.params["asset_cfg"].name]
 
@@ -520,6 +556,7 @@ class GaitReward(ManagerTermBase):
         synced_feet_pair_names,
         asset_cfg: SceneEntityCfg,
         sensor_cfg: SceneEntityCfg,
+        cmd_threshold: float = 0.0,
     ) -> torch.Tensor:
         """Compute the reward.
 
@@ -537,7 +574,9 @@ class GaitReward(ManagerTermBase):
         cmd = torch.norm(env.command_manager.get_command("base_velocity"), dim=1)
         body_vel = torch.linalg.norm(self.asset.data.root_lin_vel_b[:, :2], dim=1)
         return torch.where(
-            torch.logical_or(cmd > 0.0, body_vel > self.velocity_threshold), async_reward, torch.tensor(0.0)
+            torch.logical_or(cmd > self.cmd_threshold, body_vel > self.velocity_threshold),
+            async_reward,
+            torch.tensor(0.0),
         )
 
     """
@@ -558,11 +597,25 @@ class GaitReward(ManagerTermBase):
 
 
 def foot_clearance_reward(
-    env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg, target_height: float, std: float, tanh_mult: float
+    env: ManagerBasedRLEnv,
+    asset_cfg: SceneEntityCfg,
+    target_height: float,
+    std: float,
+    tanh_mult: float,
+    cmd_threshold: float = -1.0,
 ) -> torch.Tensor:
     """Reward the swinging feet for clearing a specified height off the ground"""
     asset: RigidObject = env.scene[asset_cfg.name]
+    cmd = torch.norm(env.command_manager.get_command("base_velocity"), dim=1)
     foot_z_target_error = torch.square(asset.data.body_pos_w[:, asset_cfg.body_ids, 2] - target_height)
     foot_velocity_tanh = torch.tanh(tanh_mult * torch.norm(asset.data.body_lin_vel_w[:, asset_cfg.body_ids, :2], dim=2))
-    reward = foot_z_target_error * foot_velocity_tanh
-    return torch.exp(-torch.sum(reward, dim=1) / std)
+    if cmd_threshold != -1.0:
+        foot_clearance = torch.where(
+            cmd <= cmd_threshold,
+            torch.tensor(0.0),
+            torch.exp(-torch.sum(foot_z_target_error * foot_velocity_tanh, dim=1) / std),
+        )
+    else:
+        foot_clearance = torch.exp(-torch.sum(foot_z_target_error * foot_velocity_tanh, dim=1) / std)
+
+    return foot_clearance

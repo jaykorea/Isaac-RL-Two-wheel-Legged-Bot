@@ -42,6 +42,7 @@ class FlamingoRoughEnvCfg_PLAY(LocomotionVelocityRoughEnvCfg):
     def __post_init__(self):
         # post init of parent
         super().__post_init__()
+        self.episode_length_s = 5.0
         # scene
         self.scene.robot = FLAMINGO_WALK_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
         self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/base_link"
@@ -73,7 +74,7 @@ class FlamingoRoughEnvCfg_PLAY(LocomotionVelocityRoughEnvCfg):
         self.events.physics_material.params["static_friction_range"] = (0.6, 1.0)
         self.events.physics_material.params["dynamic_friction_range"] = (0.6, 0.8)
 
-        self.events.reset_robot_joints.params["position_range"] = (-0.15, 0.15)
+        self.events.reset_robot_joints.params["position_range"] = (-0.0, 0.0)
         self.events.base_external_force_torque.params["asset_cfg"].body_names = ["base_link"]
         self.events.reset_base.params = {
             "pose_range": {"x": (-0.5, 0.5), "y": (-0.5, 0.5), "yaw": (-3.14, 3.14)},
@@ -96,8 +97,8 @@ class FlamingoRoughEnvCfg_PLAY(LocomotionVelocityRoughEnvCfg):
         ]
 
         # commands
-        self.commands.base_velocity.rel_standing_envs = 0.0
-        self.commands.base_velocity.ranges.lin_vel_x = (1.0, 2.0)
+        self.commands.base_velocity.rel_standing_envs = 0.1
+        self.commands.base_velocity.ranges.lin_vel_x = (0.1, 2.0)
         self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
         self.commands.base_velocity.ranges.ang_vel_z = (-0.0, 0.0)
         self.commands.base_velocity.ranges.pos_z = (0.0, 0.0)

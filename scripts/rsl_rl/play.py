@@ -10,6 +10,7 @@
 import argparse
 
 from omni.isaac.lab.app import AppLauncher
+import matplotlib.pyplot as plt
 
 # local imports
 import cli_args  # isort: skip
@@ -108,25 +109,58 @@ def main():
         ppo_runner.alg.actor_critic, normalizer=ppo_runner.obs_normalizer, path=export_model_dir, filename="policy.onnx"
     )
 
+    # Initialize lists to store data
+    joint_pos_list = []
+    target_joint_pos_list = []
+    joint_velocity_obs_list = []
+    target_joint_velocity_list = []
+
     # reset environment
     obs, _ = env.get_observations()
     timestep = 0
-    # simulate environment
+    # Simulate environment and collect data
     while simulation_app.is_running():
-        # run everything in inference mode
         with torch.inference_mode():
-            # agent stepping
             actions = policy(obs)
-            # env stepping
             obs, _, _, _ = env.step(actions)
         if args_cli.video:
             timestep += 1
             # Exit the play loop after recording one video
             if timestep == args_cli.video_length:
                 break
+        # Extract the relevant slices and convert to numpy
+        joint_pos = obs[0, :6].cpu().numpy()
+        target_joint_pos = (obs[0, 48:54] * 1.0).cpu().numpy()
+        joint_velocity_obs = obs[0, 12:14].cpu().numpy()
+        target_joint_velocity = (obs[0, 54:56] * 55.0).cpu().numpy()
 
-    # close the simulator
+        # Store the data
+        joint_pos_list.append(joint_pos)
+        target_joint_pos_list.append(target_joint_pos)
+        joint_velocity_obs_list.append(joint_velocity_obs)
+        target_joint_velocity_list.append(target_joint_velocity)
+
     env.close()
+
+    # Plot the collected data after the simulation ends
+    plt.figure(figsize=(14, 16))
+
+    for i in range(6):
+        plt.subplot(4, 2, i + 1)
+        plt.plot([step[i] for step in joint_pos_list], label=f"Joint Position {i+1}")
+        plt.plot([step[i] for step in target_joint_pos_list], label=f"Target Joint Position {i+1}", linestyle="--")
+        plt.title(f"Joint Position {i+1} and Target Joint Position", fontsize=10, pad=10)  # Added pad for spacing
+        plt.legend()
+
+    for i in range(2):
+        plt.subplot(4, 2, i + 7)
+        plt.plot([step[i] for step in joint_velocity_obs_list], label=f"Observed Joint Velocity {i+1}")
+        plt.plot([step[i] for step in target_joint_velocity_list], label=f"Target Joint Velocity {i+1}", linestyle="--")
+        plt.title(f"Observed and Target Joint Velocity {i+1}", fontsize=10, pad=10)  # Added pad for spacing
+        plt.legend()
+
+    plt.tight_layout()
+    plt.show()
 
 
 if __name__ == "__main__":
