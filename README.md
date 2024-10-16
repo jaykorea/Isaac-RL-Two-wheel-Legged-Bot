@@ -7,7 +7,7 @@
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://pre-commit.com/)
 [![License](https://img.shields.io/badge/license-MIT-yellow.svg)](https://opensource.org/license/mit)
 
-## Sim2Real - ZeroShot Transfer
+## Sim2Real - ZeroShot Transfer (Indoor)
 
 <table>
   <tr>
@@ -20,6 +20,17 @@
   </tr>
 </table>
 
+## Sim2Real - ZeroShot Transfer (Outdoor)
+<table>
+  <tr>
+    <td><img src="https://github.com/user-attachments/assets/548268e2-5919-425c-90b0-045b9368280a" width="520" height="240"/></td>
+    <td><img src="https://github.com/user-attachments/assets/3796372c-2241-49f3-95de-2a0f41276bb0" width="520" height="240"/></td>
+  </tr>
+  <tr>
+    <td><img src="https://github.com/user-attachments/assets/103e50bf-6405-4115-a34b-cfea6a31bbee" width="520" height="240"/></td>
+    <td><img src="https://github.com/user-attachments/assets/cb895df4-2b38-4a6f-945f-406fa8502f2c" width="520" height="240"/></td>
+  </tr>
+</table>
 
 ## Isaac Lab Flamingo
 
