@@ -32,7 +32,7 @@
   </tr>
 </table>
 
-## Isaac Lab Flamingo
+## Isaac Lab Training FlaminGO
 
 <table>
   <tr>
