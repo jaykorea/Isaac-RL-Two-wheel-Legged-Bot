@@ -42,7 +42,12 @@
 </table>
 
 ## Sim 2 Sim framework - Lab to MuJoCo
-![mujoco_sim2sim](https://github.com/user-attachments/assets/61778cd7-be18-4a9f-9f1e-633af2f66ce2)
+<table>
+  <tr>
+    <td><img src="https://github.com/user-attachments/assets/61778cd7-be18-4a9f-9f1e-633af2f66ce2" width="520" height="240"/></td>
+    <td><img src="https://github.com/user-attachments/assets/5d2fe780-9c15-4a28-8213-78aa9f85e09d" width="520" height="240"/></td>
+  </tr>
+</table>
 
 - Simulation to Simulation framework is available on sim2sim_onnx branch
 - You can simply inference trained policy (basically export as .onnx from isaac lab)
