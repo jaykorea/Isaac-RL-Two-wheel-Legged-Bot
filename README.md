@@ -51,11 +51,12 @@ This repo is tested on Ubuntu 20.04, and I recommend you to install 'local insta
    git clone https://github.com/jaykorea/Isaac-RL-Two-wheel-Legged-Bot
    ```
 2. install lab.flamingo pip package by running below command
+   run it on 'lab.flamingo' root path
    ```
    conda activate env_isaaclab # change to you conda env
    pip install -e .
    ```
-3. Unzip assets(usd asset) on folder
+4. Unzip assets(usd asset) on folder
    Since git does not correctly upload '.usd' file, you should manually unzip the usd files on assests folder
    ```
     path example: lab/flamingo/assets/data/Robots/Flamingo/flamingo_rev01_4_1/
@@ -63,7 +64,7 @@ This repo is tested on Ubuntu 20.04, and I recommend you to install 'local insta
 
 ### Launch script
 #### Train flamingo
-on lab.flamingo root path, launch it on terminal
+  run it on 'lab.flamingo' root path
   ```
     python scripts/co_rl/train.py --task {task name} --algo ppo --num_envs 4096 --headless --num_policy_stacks {stack number on policy obs} --num_critic_stacks {stack number on critic obs}
   ```
@@ -72,7 +73,7 @@ on lab.flamingo root path, launch it on terminal
     python scripts/co_rl/train.py --task Isaac-Velocity-Flat-Flamingo-v1-ppo --num_envs 4096 --headless --num_policy_stacks 2 --num_critic_stacks 2
   ```
 #### play flamingo
-on lab.flamingo root path, launch it on terminal
+  run it on 'lab.flamingo' root path
   ```
     python scripts/co_rl/play.py --task {task name} --algo ppo --num_envs 64 --num_policy_stacks {stack number on policy obs} --num_critic_stacks {stack number on critic obs} --load_run {folder name} --plot False
   ```
