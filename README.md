@@ -7,8 +7,8 @@
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://pre-commit.com/)
 [![License](https://img.shields.io/badge/license-MIT-yellow.svg)](https://opensource.org/license/mit)
 # New Features - Updated
-- Stack Environment: Observations can be stacked with arguments. (see velocity_env_cfg.py)
-- Constraint Manager: [Constraints as Termination (CaT)](https://arxiv.org/abs/2401.12345) method implementation added. You can easily adapt Constraint RL using "Constraint Manager".
+- Stack Environment: Observations can be stacked with arguments.
+- Constraint Manager: [Constraints as Termination (CaT)](https://arxiv.org/abs/2401.12345) method implementation added.
 - CoRL: Based on [rsl_rl](https://github.com/leggedrobotics/rsl_rl) library, off-polciy algorithms are implemented on off_policy_runner.
 ## Sim2Real - ZeroShot Transfer
 <table>
