@@ -7,9 +7,14 @@
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://pre-commit.com/)
 [![License](https://img.shields.io/badge/license-MIT-yellow.svg)](https://opensource.org/license/mit)
 # New Features - Updated
-- Constraint Manager
-   Constraints as Termination method implementation added
-    You can easily adapt Contraint RL using "Constraint Manager"
+- Constraint Manager:  Constraints as Termination(CaT) method implementation added. You can easily adapt Contraint RL using "Constraint Manager" 
+@inproceedings{chane2024cat,
+      title={CaT: Constraints as Terminations for Legged Locomotion Reinforcement Learning},
+      author={Elliot Chane-Sane and Pierre-Alexandre Leziart and Thomas Flayols and Olivier Stasse and Philippe Sou{\`e}res and Nicolas Mansard},
+      booktitle={IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
+      year={2024}
+}
+
 
 ## Sim2Real - ZeroShot Transfer
 <table>
