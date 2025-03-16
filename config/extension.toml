@@ -1,0 +1,42 @@
+[package]
+
+# Semantic Versioning is used: https://semver.org/
+version = "1.0.0"
+
+# Description
+category = "lab"
+readme  = "README.md"
+
+# TODO: Change your package specifications
+# -----------------------------------------------------------------
+title = "Extension Template"
+author = "Isaac Lab Project Developers"
+maintainer = "Nico Burger"
+maintainer_email = "jaehyungcho@postech.ac.kr"
+description="Extension Template for Isaaclab"
+repository = "https://github.com/jaykorea/lab.flamingo.git"
+keywords = ["extension", "template", "isaaclab"]
+# -----------------------------------------------------------------
+
+[dependencies]
+"isaaclab" = {}
+"isaaclab_assets" = {}
+"isaaclab_mimic" = {}
+"isaaclab_rl" = {}
+"isaaclab_tasks" = {}
+# NOTE: Add additional dependencies here
+
+[[python.module]]
+# TODO: Change your package name
+# -----------------------------------------------------------------
+name = "lab.flamingo"
+# -----------------------------------------------------------------
+
+[lab_settings]
+# TODO: Uncomment and list any apt dependencies here.
+#       If none, leave it commented out.
+# apt_deps = ["example_package"]
+# TODO: Uncomment and provide path to a ros_ws
+#       with rosdeps to be installed. If none,
+#       leave it commented out.
+# ros_ws = "path/from/extension_root/to/ros_ws"

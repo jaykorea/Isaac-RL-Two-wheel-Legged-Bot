@@ -1,0 +1,18 @@
+[package]
+# Semantic Versioning is used: https://semver.org/
+version = "1.0.0"
+
+# Description
+title =  "LAB Assets"
+description="Extension containing configuration instances of different assets and sensors"
+readme  = "docs/README.md"
+repository = "https://github.com/NVIDIA-Omniverse/IsaacLab"
+category = "robotics"
+keywords = ["kit", "robotics", "assets", "isaaclab"]
+
+[dependencies]
+"isaaclab" = {}
+
+# Main python module this extension provides.
+[[python.module]]
+name = "lab.flamingo.assets"
