@@ -10,7 +10,7 @@
 ## Sim2Real - ZeroShot Transfer
 
 <table>
-    ![sim2rea](https://github.com/user-attachments/assets/9922bfca-aa3d-4682-8f5e-4ecbd4a99362)
+    <td><img src="https://github.com/user-attachments/assets/8f9f990d-e8e9-400a-82b2-1131ff73f891" width="520" height="240"/></td>
 </table>
 <table>
   <tr>
