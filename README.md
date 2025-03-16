@@ -8,9 +8,8 @@
 [![License](https://img.shields.io/badge/license-MIT-yellow.svg)](https://opensource.org/license/mit)
 
 ## Sim2Real - ZeroShot Transfer
-
 <table>
-    <td><img src="https://github.com/user-attachments/assets/8f9f990d-e8e9-400a-82b2-1131ff73f891" width="520" height="240"/></td>
+    <td><img src="https://github.com/user-attachments/assets/fdf8c6c4-4400-4d55-a046-4557bc14e3fb" width="520" height="240"/></td>
 </table>
 <table>
   <tr>
