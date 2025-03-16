@@ -37,14 +37,13 @@ https://github.com/jaykorea/Isaac-RL-Two-wheel-Legged-Bot/assets/95605860/a36183
 ## Setup
 This repo is tested on Ubuntu 20.04, and I recommend you to install 'local install'
 ### Install Isaac Sim
-```
-https://isaac-sim.github.io/IsaacLab/main/source/setup/installation/binaries_installation.html
-```
+  ```
+  https://isaac-sim.github.io/IsaacLab/main/source/setup/installation/binaries_installation.html
+  ```
 ### Install Isaac Lab
-```
-https://github.com/isaac-sim/IsaacLab
-
-```
+  ```
+  https://github.com/isaac-sim/IsaacLab
+  ```
 
 ### Install lab.flamingo package
 1. clone repository
