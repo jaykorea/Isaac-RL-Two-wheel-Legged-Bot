@@ -78,7 +78,7 @@ iii. Unzip assets(usd asset) on folder
   ```
 ### Train example - track velocity
   ```
-    python scripts/co_rl/train.py --task Isaac-Velocity-Flat-Flamingo-v1-ppo --num_envs 4096 --headless --num_policy_stacks 2 --num_critic_stacks 2
+    python scripts/co_rl/train.py --task Isaac-Velocity-Flat-Flamingo-v1-ppo --algo ppo --num_envs 4096 --headless --num_policy_stacks 2 --num_critic_stacks 2
   ```
 ### play flamingo
   - run it on 'lab.flamingo' root path
