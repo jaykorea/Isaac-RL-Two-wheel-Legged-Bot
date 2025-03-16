@@ -38,11 +38,12 @@ https://github.com/jaykorea/Isaac-RL-Two-wheel-Legged-Bot/assets/95605860/a36183
 This repo is tested on Ubuntu 20.04, and I recommend you to install 'local install'
 ### Install Isaac Sim
 ```
-[[https://docs.omniverse.nvidia.com/isaacsim/latest/installation/index.html](https://isaac-sim.github.io/IsaacLab/main/source/setup/installation/index.html#local-installation)](https://isaac-sim.github.io/IsaacLab/main/source/setup/installation/index.html#local-installation)
+https://isaac-sim.github.io/IsaacLab/main/source/setup/installation/binaries_installation.html
 ```
 ### Install Isaac Lab
 ```
-[https://isaac-sim.github.io/IsaacLab/source/setup/installation/index.html](https://isaac-sim.github.io/IsaacLab/main/source/setup/installation/binaries_installation.html)
+https://github.com/isaac-sim/IsaacLab
+
 ```
 
 ### Install lab.flamingo package
@@ -52,12 +53,13 @@ This repo is tested on Ubuntu 20.04, and I recommend you to install 'local insta
    ```
 2. install lab.flamingo pip package by running below command
    ```
+   conda activate env_isaaclab # change to you conda env
    pip install -e .
    ```
 3. Unzip assets(usd asset) on folder
    Since git does not correctly upload '.usd' file, you should manually unzip the usd files on assests folder
    ```
-   lab/flamingo/assets/data/Robots/Flamingo/flamingo_rev01_4_1
+    path example: lab/flamingo/assets/data/Robots/Flamingo/flamingo_rev01_4_1/
    ```
 
 ### Launch script
