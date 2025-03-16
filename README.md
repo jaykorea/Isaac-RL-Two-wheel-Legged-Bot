@@ -7,19 +7,13 @@
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://pre-commit.com/)
 [![License](https://img.shields.io/badge/license-MIT-yellow.svg)](https://opensource.org/license/mit)
 
-### **✨ New Features - Updated 🚀**
+## **✨ New Features - Updated 🚀**
 ✔️ **Flamingo rev.0.1.4**: Latest version of Flamingo added.  
 ✔️ **Flamingo Edu v1**: Flamingo Edu version added.  
 ✔️ **Stack Environment**: Observations can be stacked with arguments.  
 ✔️ **Constraint Manager**: [Constraints as Termination (CaT)](https://arxiv.org/abs/2401.12345) method implementation added.  
 ✔️ **CoRL**: Based on [rsl_rl](https://github.com/leggedrobotics/rsl_rl) library, off-policy algorithms are implemented on `off_policy_runner`.  
 
-# New Features - Updated
-- Flamingo rev.0.1.4: Latest version of Flamingo added.
-- Flamingo Edu v1: Flamingo Edu version added.
-- Stack Environment: Observations can be stacked with arguments.
-- Constraint Manager: [Constraints as Termination (CaT)](https://arxiv.org/abs/2401.12345) method implementation added.
-- CoRL: Based on [rsl_rl](https://github.com/leggedrobotics/rsl_rl) library, off-polciy algorithms are implemented on off_policy_runner.
 ## Sim2Real - ZeroShot Transfer
 <table>
     <td><img src="https://github.com/user-attachments/assets/bb14612c-85c2-43ce-a7df-8b09ee4d3f69" width="800" height="400"/></td>
