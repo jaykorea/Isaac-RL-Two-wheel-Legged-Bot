@@ -31,46 +31,50 @@ https://github.com/jaykorea/Isaac-RL-Two-wheel-Legged-Bot/assets/95605860/a36183
 ## Sim 2 Sim framework - Lab to MuJoCo
 ![image](https://github.com/jaykorea/Isaac-RL-Two-wheel-Legged-Bot/assets/95605860/c242590d-b1d4-427e-8f52-4190cafc38e9)
 
-- Simulation to Simulation framework is available on sim2sim_onnx branch
+- Simulation to Simulation framework is available on sim2sim_onnx branch (Currently on migration update)
 - You can simply inference trained policy (basically export as .onnx from isaac lab)
 
 ## Setup
+This repo is tested on Ubuntu 20.04, and I recommend you to install 'local install'
 ### Install Isaac Sim
 ```
-https://docs.omniverse.nvidia.com/isaacsim/latest/installation/index.html
+[[https://docs.omniverse.nvidia.com/isaacsim/latest/installation/index.html](https://isaac-sim.github.io/IsaacLab/main/source/setup/installation/index.html#local-installation)](https://isaac-sim.github.io/IsaacLab/main/source/setup/installation/index.html#local-installation)
 ```
 ### Install Isaac Lab
 ```
-https://isaac-sim.github.io/IsaacLab/source/setup/installation/index.html
+[https://isaac-sim.github.io/IsaacLab/source/setup/installation/index.html](https://isaac-sim.github.io/IsaacLab/main/source/setup/installation/binaries_installation.html)
 ```
 
 ### Install lab.flamingo package
-1. Set the ISAACSIM_PATH environment variable to point to your isaaclab installation directory(register on your environment [.bashrc])
+1. clone repository
    ```
-   export ISAACSIM_PATH="${HOME}/.local/share/ov/pkg/isaac-sim-4.0.0"
-   export ISAACSIM_PYTHON_EXE="${ISAACSIM_PATH}/python.sh"
-   export ISAACLAB_PATH="${HOME}/IsaacLab"
+   git clone https://github.com/jaykorea/Isaac-RL-Two-wheel-Legged-Bot
    ```
-2. clone repository
+2. install lab.flamingo pip package by running below command
    ```
-   git clone -b flamingo_isaac_lab_envs
+   pip install -e .
    ```
-3. replace 'source' folder into your isaaclab 'source' folder
+3. Unzip assets(usd asset) on folder
+   Since git does not correctly upload '.usd' file, you should manually unzip the usd files on assests folder
    ```
-   cp ${HOME}/lab.flamingo/modified_source/source ${HOME}/IsaacLab/source
+   lab/flamingo/assets/data/Robots/Flamingo/flamingo_rev01_4_1
    ```
-5. install lab.flamingo pip package by running below command
-   ```
-   ${ISAACLAB_PATH}/isaaclab.sh -p -m pip install --upgrade pip
-   ${ISAACLAB_PATH}/isaaclab.sh -p -m pip install -e .
-   ```
+
 ### Launch script
-#### train flamingo
-on lab.flamingo root path, type
-```
-${ISAACLAB_PATH}/isaaclab.sh -p scripts/rsl_rl/train.py --task Isaac-Velocity-Flat-Flamingo-v1 --num_envs 4096 --headless
-```
+#### Train flamingo
+on lab.flamingo root path, launch it on terminal
+  ```
+    python scripts/co_rl/train.py --task {task name} --algo ppo --num_envs 4096 --headless --num_policy_stacks {stack number on policy obs} --num_critic_stacks {stack number on critic obs}
+  ```
+### Train example - track velocity
+  ```
+    python scripts/co_rl/train.py --task Isaac-Velocity-Flat-Flamingo-v1-ppo --num_envs 4096 --headless --num_policy_stacks 2 --num_critic_stacks 2
+  ```
 #### play flamingo
-```
-${ISAACLAB_PATH}/isaaclab.sh -p scripts/rsl_rl/play.py --task Isaac-Velocity-Flat-Flamingo-Play-v1 --num_envs 32
-```
+on lab.flamingo root path, launch it on terminal
+  ```
+    python scripts/co_rl/play.py --task {task name} --algo ppo --num_envs 64 --num_policy_stacks {stack number on policy obs} --num_critic_stacks {stack number on critic obs} --load_run {folder name} --plot False
+  ```
+  ```
+    python scripts/co_rl/play.py --task Isaac-Velocity-Flat-Flamingo-Play-v1-ppo --algo ppo --num_envs 64 --num_policy_stacks {stack number on policy obs} --num_critic_stacks {stack number on critic obs} --load_run 2025-03-16_17-09-35 --plot False
+  ```
