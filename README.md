@@ -11,7 +11,7 @@
 ✔️ **Flamingo rev.0.1.4**: Latest version of Flamingo added.  
 ✔️ **Flamingo Edu v1**: Flamingo Edu version added.  
 ✔️ **Stack Environment**: Observations can be stacked with arguments.  
-✔️ **Constraint Manager**: [Constraints as Termination (CaT)](https://arxiv.org/abs/2401.12345) method implementation added.  
+✔️ **Constraint Manager**: [Constraints as Termination (CaT)](https://arxiv.org/abs/2403.18765) method implementation added.  
 ✔️ **CoRL**: Based on [rsl_rl](https://github.com/leggedrobotics/rsl_rl) library, off-policy algorithms are implemented on `off_policy_runner`.  
 
 ## Sim2Real - ZeroShot Transfer
