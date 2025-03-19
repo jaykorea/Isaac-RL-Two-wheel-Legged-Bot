@@ -306,20 +306,11 @@ class EventCfg:
         },
     )
 
-    add_battery_mass = EventTerm(
+    add_base_mass = EventTerm(
         func=mdp.randomize_rigid_body_mass,
         mode="startup",
         params={
-            "asset_cfg": SceneEntityCfg("robot", body_names=["battery_link"]),
-            "mass_distribution_params": (-2.5, 2.5),
-            "operation": "add",
-        },
-    )
-    add_motor_mass = EventTerm(
-        func=mdp.randomize_rigid_body_mass,
-        mode="startup",
-        params={
-            "asset_cfg": SceneEntityCfg("robot", body_names=["battery_link"]),
+            "asset_cfg": SceneEntityCfg("robot", body_names=["base_link"]),
             "mass_distribution_params": (-2.5, 2.5),
             "operation": "add",
         },
@@ -360,19 +351,6 @@ class EventCfg:
         },
     )
 
-
-@configclass
-class RewardsCfg:
-    """Reward terms for the MDP."""
-
-    # -- task
-    track_lin_vel_xy_exp = RewTerm(
-        func=mdp.track_lin_vel_xy_link_exp, weight=2.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
-    )
-    track_ang_vel_z_exp = RewTerm(
-        func=mdp.track_ang_vel_z_link_exp, weight=1.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
-    )
-
 @configclass
 class CurriculumCfg:
     """Curriculum terms for the MDP."""
@@ -396,7 +374,7 @@ class LocomotionVelocityRoughEnvCfg(ManagerBasedRLEnvCfg):
     actions = None
     commands: CommandsCfg = CommandsCfg()
     # MDP settings
-    rewards: RewardsCfg = RewardsCfg()
+    rewards = None
     constraints = None
     events: EventCfg = EventCfg()
     curriculum: CurriculumCfg = CurriculumCfg()
@@ -444,7 +422,7 @@ class LocomotionVelocityFlatEnvCfg(ManagerBasedRLEnvCfg):
     actions = None
     commands: CommandsCfg = CommandsCfg()
     # MDP settings
-    rewards: RewardsCfg = RewardsCfg()
+    rewards = None
     constraints = None
     events: EventCfg = EventCfg()
     curriculum: CurriculumCfg = CurriculumCfg()

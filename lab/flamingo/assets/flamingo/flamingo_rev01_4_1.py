@@ -17,7 +17,7 @@ from lab.flamingo.assets.flamingo import FLAMINGO_ASSETS_DATA_DIR
 
 FLAMINGO_CFG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
-        usd_path=f"{FLAMINGO_ASSETS_DATA_DIR}/Robots/Flamingo/flamingo_rev01_4_1/flamingo_rev01_4_1_raw.usd",
+        usd_path=f"{FLAMINGO_ASSETS_DATA_DIR}/Robots/Flamingo/flamingo_rev01_4_1/flamingo_rev01_4_1.usd",
         activate_contact_sensors=True,
         rigid_props=sim_utils.RigidBodyPropertiesCfg(
             disable_gravity=False,
@@ -61,9 +61,9 @@ FLAMINGO_CFG = ArticulationCfg(
                 ".*_leg_joint": 150.0,
             },
             damping={
-                ".*_hip_joint": 5.0,
-                ".*_shoulder_joint": 5.0,
-                ".*_leg_joint": 5.0,
+                ".*_hip_joint": 1.5,
+                ".*_shoulder_joint": 1.5,
+                ".*_leg_joint": 2.0,
             },
             friction={
                 ".*_hip_joint": 0.0,
@@ -85,7 +85,7 @@ FLAMINGO_CFG = ArticulationCfg(
             stiffness={
                 ".*_wheel_joint": 0.0,
             },
-            damping={".*_wheel_joint": 0.45},
+            damping={".*_wheel_joint": 0.5},
             friction={
                 ".*_wheel_joint": 0.0,
             },

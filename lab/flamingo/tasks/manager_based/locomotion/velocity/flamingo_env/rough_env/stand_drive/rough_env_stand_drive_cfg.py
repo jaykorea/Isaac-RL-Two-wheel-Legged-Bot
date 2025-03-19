@@ -11,7 +11,6 @@ from isaaclab.managers import CurriculumTermCfg as CurrTerm
 import lab.flamingo.tasks.manager_based.locomotion.velocity.mdp as mdp
 from lab.flamingo.tasks.manager_based.locomotion.velocity.velocity_env_cfg import (
     LocomotionVelocityRoughEnvCfg,
-    RewardsCfg,
     CurriculumCfg,
 )
 
@@ -35,8 +34,20 @@ class FlamingoCurriculumCfg(CurriculumCfg):
 
 
 @configclass
-class FlamingoRewardsCfg(RewardsCfg):
+class FlamingoRewardsCfg():
+    # -- task
+    track_lin_vel_xy_exp = RewTerm(
+        func=mdp.track_lin_vel_xy_link_exp, weight=2.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
+    )
+    track_ang_vel_z_exp = RewTerm(
+        func=mdp.track_ang_vel_z_link_exp, weight=1.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
+    )
+
+
     termination_penalty = RewTerm(func=mdp.is_terminated, weight=-200.0)
+
+    lin_vel_z_l2 = RewTerm(func=mdp.lin_vel_z_link_l2, weight=-1.0)
+    ang_vel_xy_l2 = RewTerm(func=mdp.ang_vel_xy_link_l2, weight=-0.05)
 
     joint_deviation_hip = RewTerm(
         func=mdp.joint_deviation_l1,
@@ -92,7 +103,11 @@ class FlamingoRewardsCfg(RewardsCfg):
             "sensor_cfg": SceneEntityCfg("base_height_scanner"),
         },
     )
-    # action_smoothness = RewTerm(func=mdp.action_smoothness_hard, weight=-0.0)
+
+    dof_torques_l2 = RewTerm(func=mdp.joint_torques_l2, weight=-5.0e-5)
+    dof_acc_l2 = RewTerm(func=mdp.joint_acc_l2, weight=-2.5e-7)  # default: -2.5e-7
+    action_rate_l2 = RewTerm(func=mdp.action_rate_l2, weight=-0.01)  # default: -0.01
+
 
 
 @configclass
@@ -148,14 +163,6 @@ class FlamingoRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
                 "yaw": (-0.0, 0.0),
             },
         }
-        # rewards
-        self.rewards.dof_torques_l2.weight = -5.0e-5  # default: -5.0e-6
-        self.rewards.track_lin_vel_xy_exp.weight = 2.0
-        self.rewards.track_ang_vel_z_exp.weight = 1.0
-        self.rewards.lin_vel_z_l2.weight *= 1.0
-        self.rewards.ang_vel_xy_l2.weight *= 1.0
-        self.rewards.action_rate_l2.weight *= 1.0  # default: 1.5
-        self.rewards.dof_acc_l2.weight *= 1.0  # default: 1.5
 
         # commands
         self.commands.base_velocity.ranges.lin_vel_x = (-1.5, 1.5)

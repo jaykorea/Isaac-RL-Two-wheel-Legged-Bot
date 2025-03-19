@@ -6,4 +6,5 @@ logs/
 outputs/
 build/
 *.usd
-Edu_v1_urdf/
+*.thumbs
+.thumbs/

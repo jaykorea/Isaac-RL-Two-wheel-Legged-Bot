@@ -11,7 +11,6 @@ from isaaclab.managers import CurriculumTermCfg as CurrTerm
 import lab.flamingo.tasks.manager_based.locomotion.velocity.mdp as mdp
 from lab.flamingo.tasks.manager_based.locomotion.velocity.velocity_env_cfg import (
     LocomotionVelocityFlatEnvCfg,
-    RewardsCfg,
     CurriculumCfg,
 )
 
@@ -32,8 +31,20 @@ class FlamingoCurriculumCfg(CurriculumCfg):
 
 
 @configclass
-class FlamingoRewardsCfg(RewardsCfg):
+class FlamingoRewardsCfg():
+        # -- task
+    track_lin_vel_xy_exp = RewTerm(
+        func=mdp.track_lin_vel_xy_link_exp, weight=2.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
+    )
+    track_ang_vel_z_exp = RewTerm(
+        func=mdp.track_ang_vel_z_link_exp, weight=1.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
+    )
+
     termination_penalty = RewTerm(func=mdp.is_terminated, weight=-200.0)
+
+    lin_vel_z_l2 = RewTerm(func=mdp.lin_vel_z_link_l2, weight=-1.0)
+    ang_vel_xy_l2 = RewTerm(func=mdp.ang_vel_xy_link_l2, weight=-0.05)
+
     joint_deviation_hip = RewTerm(
         func=mdp.joint_deviation_zero_l1,
         weight=-5.0,
@@ -94,6 +105,11 @@ class FlamingoRewardsCfg(RewardsCfg):
         },
     )
 
+    dof_torques_l2 = RewTerm(func=mdp.joint_torques_l2, weight=-5.0e-5)
+    dof_acc_l2 = RewTerm(func=mdp.joint_acc_l2, weight=-2.5e-7)  # default: -2.5e-7
+    action_rate_l2 = RewTerm(func=mdp.action_rate_l2, weight=-0.01)  # default: -0.01
+
+
 
 @configclass
 class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
@@ -132,10 +148,9 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
             "velocity_range": {"x": (-1.0, 1.0), "y": (-1.0, 1.0), "z": (-1.5, 1.5)},
         }
         # add base mass should be called here
-        self.events.add_battery_mass.params["asset_cfg"].body_names = ["battery_link"]
-        self.events.add_battery_mass.params["mass_distribution_params"] = (-0.75, 3.0)
-        self.events.add_motor_mass.params["asset_cfg"].body_names = ["base_left_motor_link", "base_right_motor_link"]
-        self.events.add_motor_mass.params["mass_distribution_params"] = (-0.25, 0.25)
+        self.events.add_base_mass.params["asset_cfg"].body_names = ["battery_link"]
+        self.events.add_base_mass.params["mass_distribution_params"] = (-0.75, 3.0)
+
         # physics material should be called here
         self.events.physics_material.params["asset_cfg"].body_names = [".*_link"]
         self.events.physics_material.params["static_friction_range"] = (0.3, 1.0)
@@ -151,14 +166,6 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
                 "yaw": (-0.0, 0.0),
             },
         }
-        # rewards
-        self.rewards.dof_torques_l2.weight = -5.0e-5  # default: -5.0e-6
-        self.rewards.track_lin_vel_xy_exp.weight = 2.0
-        self.rewards.track_ang_vel_z_exp.weight = 1.0
-        self.rewards.lin_vel_z_l2.weight *= 1.0
-        self.rewards.ang_vel_xy_l2.weight *= 1.25
-        self.rewards.action_rate_l2.weight *= 1.0  # default: 1.5
-        self.rewards.dof_acc_l2.weight *= 1.0  # default: 1.5
 
         # change terrain to flat
         self.scene.terrain.terrain_type = "plane"
@@ -166,10 +173,6 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
 
         # Terrain curriculum
         self.curriculum.terrain_levels = None
-
-        # height scan
-        # self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/base_link"
-        # self.scene.height_scanner.debug_vis = False
 
         # commands
         self.commands.base_velocity.ranges.lin_vel_x = (-1.5, 1.5)
@@ -213,10 +216,9 @@ class FlamingoFlatEnvCfg_PLAY(FlamingoFlatEnvCfg):
         }
 
         # add base mass should be called here
-        self.events.add_battery_mass.params["asset_cfg"].body_names = ["battery_link"]
-        self.events.add_battery_mass.params["mass_distribution_params"] = (-0.75, 1.0)
-        self.events.add_motor_mass.params["asset_cfg"].body_names = ["base_left_motor_link", "base_right_motor_link"]
-        self.events.add_motor_mass.params["mass_distribution_params"] = (-0.25, 0.25)
+        self.events.add_base_mass.params["asset_cfg"].body_names = ["battery_link"]
+        self.events.add_base_mass.params["mass_distribution_params"] = (-0.75, 1.0)
+
         # physics material should be called here
         self.events.physics_material.params["asset_cfg"].body_names = [".*_link"]
         self.events.physics_material.params["static_friction_range"] = (0.3, 1.0)
@@ -239,10 +241,6 @@ class FlamingoFlatEnvCfg_PLAY(FlamingoFlatEnvCfg):
 
         # Terrain curriculum
         self.curriculum.terrain_levels = None
-
-        # height scan
-        # self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/base_link"
-        # self.scene.height_scanner.debug_vis = False
 
         # commands
         self.commands.base_velocity.ranges.lin_vel_x = (-1.5, 1.5)
