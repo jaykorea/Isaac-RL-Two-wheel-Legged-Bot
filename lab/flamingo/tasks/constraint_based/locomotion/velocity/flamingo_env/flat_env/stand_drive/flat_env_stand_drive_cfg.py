@@ -280,7 +280,7 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
             "velocity_range": {"x": (-1.0, 1.0), "y": (-1.0, 1.0), "z": (-1.5, 1.5)},
         }
         # add base mass should be called here
-        self.events.add_base_mass.params["asset_cfg"].body_names = ["battery_link"]
+        self.events.add_base_mass.params["asset_cfg"].body_names = ["base_link"]
         self.events.add_base_mass.params["mass_distribution_params"] = (-0.75, 3.0)
 
         # physics material should be called here
@@ -347,7 +347,7 @@ class FlamingoFlatEnvCfg_PLAY(FlamingoFlatEnvCfg):
         # self.events.robot_joint_stiffness_and_damping.params["stiffness_distribution_params"] = (1.0, 1.0)
         # self.events.robot_joint_stiffness_and_damping.params["damping_distribution_params"] = (1.0, 1.0)
         # add base mass should be called here
-        self.events.add_base_mass.params["asset_cfg"].body_names = ["battery_link"]
+        self.events.add_base_mass.params["asset_cfg"].body_names = ["base_link"]
         self.events.add_base_mass.params["mass_distribution_params"] = (-0.5, 3.0)
 
         # physics material should be called here
