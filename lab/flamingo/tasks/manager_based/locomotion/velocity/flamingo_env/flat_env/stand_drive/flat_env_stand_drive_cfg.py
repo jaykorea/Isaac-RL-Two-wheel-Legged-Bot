@@ -32,7 +32,7 @@ class FlamingoCurriculumCfg(CurriculumCfg):
 
 @configclass
 class FlamingoRewardsCfg():
-        # -- task
+    # -- task
     track_lin_vel_xy_exp = RewTerm(
         func=mdp.track_lin_vel_xy_link_exp, weight=2.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
     )
@@ -86,7 +86,7 @@ class FlamingoRewardsCfg():
     )
     shoulder_align_l1 = RewTerm(
         func=mdp.joint_align_l1,
-        weight=-0.1,  # default: -0.5
+        weight=-0.2,  # default: -0.5
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*_shoulder_joint")},
     )
     leg_align_l1 = RewTerm(
@@ -145,7 +145,7 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
         # self.events.push_robot = True
         self.events.push_robot.interval_range_s = (13.0, 15.0)
         self.events.push_robot.params = {
-            "velocity_range": {"x": (-1.0, 1.0), "y": (-1.0, 1.0), "z": (-1.5, 1.5)},
+            "velocity_range": {"x": (-1.0, 1.0), "y": (-1.0, 1.0), "z": (-1.0, 1.0)},
         }
         # add base mass should be called here
         self.events.add_base_mass.params["asset_cfg"].body_names = ["base_link"]
