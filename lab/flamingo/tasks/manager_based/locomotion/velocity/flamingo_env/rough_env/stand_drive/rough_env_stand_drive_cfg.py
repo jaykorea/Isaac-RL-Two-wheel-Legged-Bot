@@ -144,10 +144,9 @@ class FlamingoRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
             "velocity_range": {"x": (-1.0, 1.0), "y": (-1.0, 1.0), "z": (-1.0, 1.0)},
         }
         # add base mass should be called here
-        self.events.add_battery_mass.params["asset_cfg"].body_names = ["base_link"]
-        self.events.add_battery_mass.params["mass_distribution_params"] = (-0.75, 3.0)
-        self.events.add_motor_mass.params["asset_cfg"].body_names = ["base_left_motor_link", "base_right_motor_link"]
-        self.events.add_motor_mass.params["mass_distribution_params"] = (-0.25, 0.25)
+        self.events.add_base_mass.params["asset_cfg"].body_names = ["base_link"]
+        self.events.add_base_mass.params["mass_distribution_params"] = (-0.75, 3.0)
+
         # physics material should be called here
         self.events.physics_material.params["asset_cfg"].body_names = [".*_link"]
         self.events.physics_material.params["static_friction_range"] = (0.3, 1.0)
@@ -210,10 +209,9 @@ class FlamingoRoughEnvCfg_PLAY(FlamingoRoughEnvCfg):
         self.events.push_robot = None
 
         # add base mass should be called here
-        self.events.add_battery_mass.params["asset_cfg"].body_names = ["base_link"]
-        self.events.add_battery_mass.params["mass_distribution_params"] = (-0.75, 1.0)
-        self.events.add_motor_mass.params["asset_cfg"].body_names = ["base_left_motor_link", "base_right_motor_link"]
-        self.events.add_motor_mass.params["mass_distribution_params"] = (-0.25, 0.25)
+        self.events.add_base_mass.params["asset_cfg"].body_names = ["base_link"]
+        self.events.add_base_mass.params["mass_distribution_params"] = (-0.75, 1.0)
+
         # physics material should be called here
         self.events.physics_material.params["asset_cfg"].body_names = [".*_link"]
         self.events.physics_material.params["static_friction_range"] = (0.3, 1.0)
