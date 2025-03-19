@@ -176,11 +176,14 @@ def main():
             )
 
     # TODO Should Generalize this using argparser
-    # Initialize lists to store data
-    joint_pos_list = []
-    target_joint_pos_list = []
-    joint_velocity_obs_list = []
-    target_joint_velocity_list = []
+    if args_cli.plot == True:
+        if "Edu" in args_cli.task:
+            flamingo_edu = True
+        # Initialize lists to store data
+        joint_pos_list = []
+        target_joint_pos_list = []
+        joint_velocity_obs_list = []
+        target_joint_velocity_list = []
 
     # reset environment
     obs, _ = env.get_observations()
@@ -193,44 +196,70 @@ def main():
                 actions = policy(encoded_obs)
             else:
                 actions = policy(obs)
-            obs, _, _, _ = env.step(actions)
+            clipped_actions = torch.clamp(actions, -1.0, 1.0)
+            obs, _, _, _ = env.step(clipped_actions)
         if args_cli.video:
             timestep += 1
             # Exit the play loop after recording one video
             if timestep == args_cli.video_length:
                 break
         # Extract the relevant slices and convert to numpy
-        joint_pos = obs[0, :6].cpu().numpy()
-        target_joint_pos = (obs[0, 20:26] * 2.0).cpu().numpy()
-        joint_velocity_obs = obs[0, 12:14].cpu().numpy()
-        target_joint_velocity = (obs[0, 26:28] * 20.0).cpu().numpy()
+        if args_cli.plot == True:
+            if flamingo_edu:
+                joint_pos = obs[0, :2].cpu().numpy()
+                target_joint_pos = (clipped_actions[0, :2] * 1.25).cpu().numpy()
+                joint_velocity_obs = obs[0, 2:4].cpu().numpy()
+                target_joint_velocity = (clipped_actions[0, 2:4] * 30.0).cpu().numpy()
+            else:
+                joint_pos = obs[0, :6].cpu().numpy()
+                target_joint_pos = (clipped_actions[0, :6] * 2.0).cpu().numpy()
+                joint_velocity_obs = obs[0, 12:14].cpu().numpy()
+                target_joint_velocity = (clipped_actions[0, 6:8] * 20.0).cpu().numpy()
 
-        # Store the data
-        joint_pos_list.append(joint_pos)
-        target_joint_pos_list.append(target_joint_pos)
-        joint_velocity_obs_list.append(joint_velocity_obs)
-        target_joint_velocity_list.append(target_joint_velocity)
+            # Store the data
+            joint_pos_list.append(joint_pos)
+            target_joint_pos_list.append(target_joint_pos)
+            joint_velocity_obs_list.append(joint_velocity_obs)
+            target_joint_velocity_list.append(target_joint_velocity)
 
     env.close()
 
-    if args_cli.plot == "True":
-        plt.figure(figsize=(14, 16))
+    if args_cli.plot == True:
+        if flamingo_edu:
+            plt.figure(figsize=(14, 16))
+            for i in range(2):
+                plt.subplot(2, 2, i + 1)
+                plt.plot([step[i] for step in joint_pos_list], label=f"Joint Position {i+1}")
+                plt.plot([step[i] for step in target_joint_pos_list], label=f"Target Joint Position {i+1}", linestyle="--")
+                plt.title(f"Joint Position {i+1} and Target Joint Position", fontsize=10, pad=10)
+                plt.legend()
 
-        for i in range(6):
-            plt.subplot(4, 2, i + 1)
-            plt.plot([step[i] for step in joint_pos_list], label=f"Joint Position {i+1}")
-            plt.plot([step[i] for step in target_joint_pos_list], label=f"Target Joint Position {i+1}", linestyle="--")
-            plt.title(f"Joint Position {i+1} and Target Joint Position", fontsize=10, pad=10)
-            plt.legend()
+            for i in range(2):
+                plt.subplot(2, 2, i + 3)
+                plt.plot([step[i] for step in joint_velocity_obs_list], label=f"Observed Joint Velocity {i+1}")
+                plt.plot(
+                    [step[i] for step in target_joint_velocity_list], label=f"Target Joint Velocity {i+1}", linestyle="--"
+                )
+                plt.title(f"Observed and Target Joint Velocity {i+1}", fontsize=10, pad=10)
+                plt.legend()
+        else:
+            plt.figure(figsize=(14, 16))
 
-        for i in range(2):
-            plt.subplot(4, 2, i + 7)
-            plt.plot([step[i] for step in joint_velocity_obs_list], label=f"Observed Joint Velocity {i+1}")
-            plt.plot(
-                [step[i] for step in target_joint_velocity_list], label=f"Target Joint Velocity {i+1}", linestyle="--"
-            )
-            plt.title(f"Observed and Target Joint Velocity {i+1}", fontsize=10, pad=10)
-            plt.legend()
+            for i in range(6):
+                plt.subplot(4, 2, i + 1)
+                plt.plot([step[i] for step in joint_pos_list], label=f"Joint Position {i+1}")
+                plt.plot([step[i] for step in target_joint_pos_list], label=f"Target Joint Position {i+1}", linestyle="--")
+                plt.title(f"Joint Position {i+1} and Target Joint Position", fontsize=10, pad=10)
+                plt.legend()
+
+            for i in range(2):
+                plt.subplot(4, 2, i + 7)
+                plt.plot([step[i] for step in joint_velocity_obs_list], label=f"Observed Joint Velocity {i+1}")
+                plt.plot(
+                    [step[i] for step in target_joint_velocity_list], label=f"Target Joint Velocity {i+1}", linestyle="--"
+                )
+                plt.title(f"Observed and Target Joint Velocity {i+1}", fontsize=10, pad=10)
+                plt.legend()
 
         plt.tight_layout()
         plt.show()
