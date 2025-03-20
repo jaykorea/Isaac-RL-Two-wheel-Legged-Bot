@@ -50,9 +50,9 @@ def track_ang_vel_z_link_exp(
     )
     return torch.exp(-ang_vel_error / std**2)
 
-def track_lin_vel_xy_link_exp_v2(env: ManagerBasedRLEnv, temperature: float, command_name: str, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")):
+def track_lin_vel_xy_link_exp_v2(env: ManagerBasedRLEnv, temperature: float, command_name: str = "base_veloicty", asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")):
     asset: RigidObject = env.scene[asset_cfg.name]
-    lin_vel_error = torch.sum(torch.abs(env.command_manager.get_command("base_velocity")[:, :2]  - asset.data.root_link_lin_vel_b[:, :2]), dim=1)
+    lin_vel_error = torch.sum(torch.abs(env.command_manager.get_command(command_name)[:, :2]  - asset.data.root_link_lin_vel_b[:, :2]), dim=1)
     return torch.exp(-temperature * lin_vel_error)
 
 def track_ang_vel_z_link_exp_v2(

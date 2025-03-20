@@ -226,7 +226,7 @@ class ObservationsCfg:
     @configclass
     class NoneStackCriticCfg(ObsGroup):
         velocity_commands = ObsTerm(func=mdp.generated_commands, params={"command_name": "base_velocity"})
-        # roll_pitch_commands = ObsTerm(func=mdp.generated_commands, params={"command_name": "roll_pitch"})
+        roll_pitch_commands = ObsTerm(func=mdp.generated_commands, params={"command_name": "roll_pitch"})
         back_flip = ObsTerm(func=mdp.generated_commands, params={"command_name": "backflip_commands"})
 
         height_scan = ObsTerm(
@@ -346,15 +346,15 @@ class EventCfg:
         },
     )
 
-    randomize_com_positions = EventTerm(
-        func=mdp.randomize_com_positions,
-        mode="startup",
-        params={
-            "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
-            "com_distribution_params": (-0.05, 0.05),
-            "operation": "add",
-        },
-    )
+    # randomize_com_positions = EventTerm(
+    #     func=mdp.randomize_com_positions,
+    #     mode="startup",
+    #     params={
+    #         "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
+    #         "com_distribution_params": (-0.015, 0.035),
+    #         "operation": "add",
+    #     },
+    # )
 
     add_base_mass = EventTerm(
         func=mdp.randomize_rigid_body_mass,
