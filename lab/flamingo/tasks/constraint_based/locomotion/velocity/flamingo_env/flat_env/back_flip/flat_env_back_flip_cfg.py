@@ -18,7 +18,7 @@ from lab.flamingo.tasks.constraint_based.locomotion.velocity.velocity_env_cfg im
 
 import lab.flamingo.tasks.constraint_based.locomotion.velocity.flamingo_env.flat_env.back_flip.rewards as backflip_mdp
 
-from lab.flamingo.assets.flamingo.flamingo_rev01_4_2 import FLAMINGO_CFG  # isort: skip
+from lab.flamingo.assets.flamingo.flamingo_rev01_4_3 import FLAMINGO_CFG  # isort: skip
 
 
 @configclass

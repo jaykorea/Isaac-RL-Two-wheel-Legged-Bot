@@ -40,14 +40,20 @@ class FlamingoEduActionsCfg:
 @configclass
 class FlamingoRewardsCfg():
     # -- task
+    # track_lin_vel_xy_exp = RewTerm(
+    #     func=mdp.track_lin_vel_xy_link_exp, weight=3.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
+    # )
+    # track_ang_vel_z_exp = RewTerm(
+    #     func=mdp.track_ang_vel_z_link_exp, weight=1.5, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
+    # )
     track_lin_vel_xy_exp = RewTerm(
-        func=mdp.track_lin_vel_xy_link_exp, weight=2.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
+        func=mdp.track_lin_vel_xy_link_exp_v2, weight=2.5, params={"command_name": "base_velocity", "temperature": 4.0}
     )
     track_ang_vel_z_exp = RewTerm(
-        func=mdp.track_ang_vel_z_link_exp, weight=1.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
+        func=mdp.track_ang_vel_z_link_exp_v2, weight=2.5, params={"command_name": "base_velocity", "temperature": 4.0}
     )
 
-    lin_vel_z_l2 = RewTerm(func=mdp.lin_vel_z_link_l2, weight=-2.0)
+    lin_vel_z_l2 = RewTerm(func=mdp.lin_vel_z_link_l2, weight=-1.5)
     ang_vel_xy_l2 = RewTerm(func=mdp.ang_vel_xy_link_l2, weight=-0.1)
 
     dof_pos_limits_shoulder = RewTerm(
@@ -71,25 +77,55 @@ class FlamingoRewardsCfg():
     )
     shoulder_align_l1 = RewTerm(
         func=mdp.joint_align_l1,
-        weight=-0.1,  # default: -0.5
+        weight=-0.25,  # default: -0.5
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*_shoulder_joint")},
     )
 
-    flat_orientation = RewTerm(func=mdp.flat_euler_angle_l2, weight=-5.0)
+    flat_orientation = RewTerm(func=mdp.flat_euler_angle_l2, weight=-0.25)
+    # base_height = RewTerm(
+    #     func=mdp.base_height_adaptive_l2,
+    #     weight=-50.0,
+    #     params={
+    #         "target_height": 0.36752, # default" 0.37452
+    #         "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
+    #     },
+    # )
     base_height = RewTerm(
-        func=mdp.base_height_adaptive_l2,
-        weight=-25.0,
+        func=mdp.base_target_range_height_v2,
+        weight=3.0,
         params={
-            "target_height": 0.36452, # default" 0.39782
+            "min_target_height": 0.33452,
+            "max_target_height": 0.36452,
+            "minimum_height": 0.21881,
+            "sharpness": 1.5,
             "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
         },
     )
+    dof_torques_joints_l2 = RewTerm(
+        func=mdp.joint_torques_l2,
+        weight=-5.0e-4,
+        params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_shoulder_joint"])},
+    )
+    dof_torques_wheels_l2 = RewTerm(
+        func=mdp.joint_torques_l2,
+        weight=-5.0e-4,
+        params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_wheel_joint"])},
+    )
 
-    dof_torques_l2 = RewTerm(func=mdp.joint_torques_l2, weight=-5.0e-4)
-    dof_acc_l2 = RewTerm(func=mdp.joint_acc_l2, weight=-2.5e-7)  # default: -2.5e-7
+    dof_acc_joints_l2 = RewTerm(
+        func=mdp.joint_acc_l2,
+        weight=-2.5e-7,
+        params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_shoulder_joint"])},
+    )
+    dof_acc_wheels_l2 = RewTerm(
+        func=mdp.joint_acc_l2,
+        weight=-2.5e-7,
+        params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_wheel_joint"])},
+    )
+
     action_rate_l2 = RewTerm(func=mdp.action_rate_l2, weight=-0.01)  # default: -0.01
 
-    termination_penalty = RewTerm(func=mdp.is_terminated, weight=-200.0)
+    # termination_penalty = RewTerm(func=mdp.is_terminated, weight=-200.0)
 
 
 @configclass

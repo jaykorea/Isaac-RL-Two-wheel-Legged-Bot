@@ -976,6 +976,24 @@ def base_height_adaptive_l2(
     # Compute the L2 squared penalty
     return torch.square(asset.data.root_link_pos_w[:, 2] - adjusted_target_height)
 
+def base_target_range_height_v2(
+        env: ManagerBasedRLEnv,
+        asset_cfg: SceneEntityCfg,
+        min_target_height=0.33126,
+        max_target_height=0.37126,
+        minimum_height=0.2607,
+        sharpness=2.0,
+    ):
+    # Ensure reward is zero when current height is at or below the minimum height
+    asset: RigidObject = env.scene[asset_cfg.name]
+    current_height = asset.data.root_link_pos_w[:,2]
+
+    # print(current_height)
+    reward = torch.where(min_target_height <= current_height , torch.ones_like(current_height), 1 * (current_height - minimum_height) / (min_target_height - minimum_height))
+    reward = torch.where(current_height <= max_target_height, reward, 1 * (1.0 - (current_height - max_target_height) / (min_target_height - minimum_height)))
+
+    return (reward.clamp(min=0.0) ** sharpness)
+
 def track_pos_z(
     env: ManagerBasedRLEnv,
     sharpness: float,
