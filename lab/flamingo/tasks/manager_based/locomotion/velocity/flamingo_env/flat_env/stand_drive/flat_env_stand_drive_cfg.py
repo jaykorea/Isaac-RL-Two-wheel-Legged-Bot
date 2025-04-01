@@ -14,7 +14,7 @@ from lab.flamingo.tasks.manager_based.locomotion.velocity.velocity_env_cfg impor
     CurriculumCfg,
 )
 
-from lab.flamingo.assets.flamingo.flamingo_rev01_4_2 import FLAMINGO_CFG  # isort: skip
+from lab.flamingo.assets.flamingo.flamingo_rev01_4_3 import FLAMINGO_CFG  # isort: skip
 
 
 @configclass
@@ -136,6 +136,7 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
         super().__post_init__()
         # scene
         self.scene.robot = FLAMINGO_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
+        self.sim.physx.gpu_max_rigid_patch_count = 10 * 2**15
 
 
         #! ****************** Observations setup ****************** !#

@@ -346,12 +346,35 @@ class EventCfg:
         },
     )
 
+    # robot_joint_stiffness_and_damping = EventTerm(
+    #     func=mdp.randomize_actuator_gains,
+    #     mode="startup",
+    #     params={
+    #         "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_joint", ".*_shoulder_joint", ".*_leg_joint"]),
+    #         "stiffness_distribution_params": (0.9, 1.1),
+    #         "damping_distribution_params": (0.85, 1.15),
+    #         "operation": "scale",
+    #         "distribution": "gaussian",
+    #     },
+    # )
+    randomize_actuator_gains = EventTerm(
+        func=mdp.randomize_actuator_gains,
+        mode="reset",
+        params={
+            "asset_cfg": SceneEntityCfg("robot", joint_names=".*"),
+            "stiffness_distribution_params": (0.7, 1.5),
+            "damping_distribution_params": (0.7, 1.5),
+            "operation": "scale",
+            "distribution": "log_uniform",
+        },
+    )
+
     # randomize_com_positions = EventTerm(
     #     func=mdp.randomize_com_positions,
     #     mode="startup",
     #     params={
     #         "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
-    #         "com_distribution_params": (-0.015, 0.035),
+    #         "com_distribution_params": (-0.0, 0.05),
     #         "operation": "add",
     #     },
     # )
