@@ -8,3 +8,5 @@ build/
 *.usd
 *.thumbs
 .thumbs/
+*.asset_hash
+configuration/
