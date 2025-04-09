@@ -213,6 +213,7 @@ class FlamingoFlatEnvCfg_PLAY(FlamingoFlatEnvCfg):
         # post init of parent
         super().__post_init__()
         self.episode_length_s = 20.0
+        self.sim.render_interval = self.decimation
         self.debug_vis = True
         # scene
         self.scene.robot = FLAMINGO_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
@@ -227,7 +228,7 @@ class FlamingoFlatEnvCfg_PLAY(FlamingoFlatEnvCfg):
         self.events.reset_robot_joints.params["position_range"] = (-0.2, 0.2)
         self.events.push_robot.interval_range_s = (5.5, 6.5)
         self.events.push_robot.params = {
-            "velocity_range": {"x": (-1.0, 1.0), "y": (-1.0, 1.0), "z": (-2.0, 2.0)},
+            "velocity_range": {"x": (-0.0, 0.0), "y": (-0.0, 0.0), "z": (0.0, 0.0)},
         }
 
         # add base mass should be called here
@@ -240,7 +241,7 @@ class FlamingoFlatEnvCfg_PLAY(FlamingoFlatEnvCfg):
         self.events.physics_material.params["dynamic_friction_range"] = (0.3, 0.8)
 
         self.events.reset_base.params = {
-            "pose_range": {"x": (-0.0, 0.0), "y": (-0.0, 0.0), "yaw": (1.5708, 1.5708)},
+            "pose_range": {"x": (-0.0, 0.0), "y": (-0.0, 0.0), "yaw": (0.0, 0.0)},
             "velocity_range": {
                 "x": (0.0, 0.0),
                 "y": (0.0, 0.0),
