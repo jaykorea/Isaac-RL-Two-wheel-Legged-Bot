@@ -70,7 +70,7 @@ class FlamingoRewardsCfg():
         func=mdp.undesired_contacts,
         weight=-1.0,
         params={
-            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=[".*_shoulder_link", ".*_hip_link"]),
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=[".*_shoulder_link", ".*_leg_link"]),
             "threshold": 1.0,
         },
     )
@@ -93,7 +93,7 @@ class FlamingoRewardsCfg():
 
     track_base_height = RewTerm(
         func=mdp.track_pos_z_exp,
-        weight=2.0,
+        weight=3.0,
         params={
             "temperature": 8.0,
             "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
@@ -101,7 +101,7 @@ class FlamingoRewardsCfg():
     )
     track_base_height_fine_grained = RewTerm(
         func=mdp.track_pos_z_exp,
-        weight=1.0,
+        weight=1.5,
         params={
             "temperature": 32.0,
             "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
@@ -155,7 +155,7 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
 
         # physics material should be called here
         self.events.physics_material.params["asset_cfg"].body_names = [".*_link"]
-        self.events.physics_material.params["static_friction_range"] = (0.3, 1.0)
+        self.events.physics_material.params["static_friction_range"] = (0.3, 1.2)
         self.events.physics_material.params["dynamic_friction_range"] = (0.3, 0.8)
         self.events.reset_base.params = {
             "pose_range": {"x": (-0.5, 0.5), "y": (-0.5, 0.5), "yaw": (-3.14, 3.14)},
@@ -171,7 +171,7 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
 
         # commands
         self.commands.base_velocity.resampling_time_range = (3.0, 8.0)
-        self.commands.base_velocity.ranges.lin_vel_x = (-0.75, 0.75)
+        self.commands.base_velocity.ranges.lin_vel_x = (-1.5, 1.5)
         self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
         self.commands.base_velocity.ranges.ang_vel_z = (-2.5, 2.5)
         # self.commands.base_velocity.ranges.heading = (-math.pi, math.pi)
@@ -247,11 +247,11 @@ class FlamingoFlatEnvCfg_PLAY(FlamingoFlatEnvCfg):
 
         # commands
         self.commands.base_velocity.resampling_time_range = (3.0, 8.0)
-        self.commands.base_velocity.ranges.lin_vel_x = (-0.5, 0.5)
+        self.commands.base_velocity.ranges.lin_vel_x = (-2.0, 2.0)
         self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
-        self.commands.base_velocity.ranges.ang_vel_z = (-0.5, 0.5)
+        self.commands.base_velocity.ranges.ang_vel_z = (-2.5, 2.5)
         self.commands.base_velocity.ranges.heading = (-0.0, 0.0)
-        self.commands.base_velocity.ranges.pos_z = (0.2, 0.36288)
+        self.commands.base_velocity.ranges.pos_z = (0.19972, 0.36288)
 
         # terminations
         self.terminations.base_contact.params["sensor_cfg"].body_names = [

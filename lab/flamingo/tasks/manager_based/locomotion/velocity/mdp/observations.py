@@ -199,7 +199,13 @@ def height_scan_raw(env: ManagerBasedEnv, sensor_cfg: SceneEntityCfg) -> torch.T
     return sensor.data.ray_hits_w[..., 2]
 
 
-
 def generated_partial_commands(env: ManagerBasedRLEnv, command_name: str) -> torch.Tensor:
     """The generated command from command term in the command manager with the given name."""
     return env.command_manager.get_command(command_name)[:, 0]
+
+
+def generated_scaled_commands(env: ManagerBasedRLEnv, command_name: str, scale: tuple) -> torch.Tensor:
+    """The generated command from command term in the command manager with the given name."""
+    scaled_command = env.command_manager.get_command(command_name).clone()
+    scaled_command[:, :3] *= torch.tensor(scale, device=env.device)
+    return scaled_command

@@ -23,7 +23,7 @@ parser.add_argument("--video_length", type=int, default=200, help="Length of the
 parser.add_argument(
     "--disable_fabric", action="store_true", default=False, help="Disable fabric and use USD I/O operations."
 )
-parser.add_argument("--num_envs", type=int, default=None, help="Number of environments to simulate.")
+parser.add_argument("--num_envs", type=int, default=64, help="Number of environments to simulate.")
 parser.add_argument("--algo", type=str, default="ppo", help="Name of the task.")
 parser.add_argument("--stack_frames", type=int, default=None, help="Number of frames to stack.")
 parser.add_argument("--plot", type=str2bool, default="False", help="Plot the data.")
@@ -34,10 +34,10 @@ parser.add_argument(
     action="store_true",
     help="Use the pre-trained checkpoint from Nucleus.",
 )
-parser.add_argument("--real-time", action="store_true", default=False, help="Run in real-time, if possible.")
+parser.add_argument("--real-time", action="store_true", default=True, help="Run in real-time, if possible.")
 
-parser.add_argument("--num_policy_stacks", type=int, default=None, help="Number of policy stacks.")
-parser.add_argument("--num_critic_stacks", type=int, default=None, help="Number of critic stacks.")
+parser.add_argument("--num_policy_stacks", type=int, default=2, help="Number of policy stacks.")
+parser.add_argument("--num_critic_stacks", type=int, default=2, help="Number of critic stacks.")
 
 # append CO-RL cli arguments
 cli_args.add_co_rl_args(parser)

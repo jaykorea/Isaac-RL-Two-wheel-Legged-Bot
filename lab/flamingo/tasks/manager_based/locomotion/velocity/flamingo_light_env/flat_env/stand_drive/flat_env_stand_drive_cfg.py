@@ -82,25 +82,15 @@ class FlamingoRewardsCfg():
     )
 
     flat_orientation = RewTerm(func=mdp.flat_euler_angle_l2, weight=-0.25)
-    # base_height = RewTerm(
-    #     func=mdp.base_height_adaptive_l2,
-    #     weight=-50.0,
-    #     params={
-    #         "target_height": 0.36752, # default" 0.37452
-    #         "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
-    #     },
-    # )
     base_height = RewTerm(
-        func=mdp.base_target_range_height_v2,
-        weight=3.0,
+        func=mdp.base_height_adaptive_l2,
+        weight=-25.0,
         params={
-            "min_target_height": 0.33452,
-            "max_target_height": 0.36452,
-            "minimum_height": 0.21881,
-            "sharpness": 1.5,
+            "target_height": 0.36752, # default" 0.37452
             "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
         },
     )
+
     dof_torques_joints_l2 = RewTerm(
         func=mdp.joint_torques_l2,
         weight=-5.0e-4,
@@ -125,7 +115,7 @@ class FlamingoRewardsCfg():
 
     action_rate_l2 = RewTerm(func=mdp.action_rate_l2, weight=-0.01)  # default: -0.01
 
-    # termination_penalty = RewTerm(func=mdp.is_terminated, weight=-200.0)
+    termination_penalty = RewTerm(func=mdp.is_terminated, weight=-200.0)
 
 
 @configclass
