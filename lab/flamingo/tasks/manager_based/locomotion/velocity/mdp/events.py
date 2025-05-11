@@ -144,6 +144,7 @@ def randomize_com_positions(
     # Set the randomized COM offsets into the simulation
     asset.root_physx_view.set_coms(com_offsets, env_ids)
 
+@staticmethod
 def _randomize_prop_by_op(
     data: torch.Tensor,
     distribution_parameters: tuple[float | torch.Tensor, float | torch.Tensor],

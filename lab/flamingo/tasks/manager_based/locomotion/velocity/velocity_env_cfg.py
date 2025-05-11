@@ -228,7 +228,7 @@ class ObservationsCfg:
     class NoneStackCriticCfg(ObsGroup):
         velocity_commands = ObsTerm(func=mdp.generated_scaled_commands, params={"command_name": "base_velocity", "scale": (2.0, 0.0, 0.25)})
         roll_pitch_commands = ObsTerm(func=mdp.generated_commands, params={"command_name": "roll_pitch"})
-        back_flip = ObsTerm(func=mdp.generated_commands, params={"command_name": "backflip_commands"})
+        event_commands = ObsTerm(func=mdp.generated_commands, params={"command_name": "event"})
 
         height_scan = ObsTerm(
             func=mdp.height_scan,
@@ -251,8 +251,9 @@ class ObservationsCfg:
             params={"sensor_cfg": SceneEntityCfg("right_wheel_height_scanner"), 'offset': 0.0},
             clip=(-1.0, 1.0),
         )
-
-        base_lin_vel = ObsTerm(func=mdp.base_lin_vel_x_link, scale=2.0)
+        base_lin_vel_z = ObsTerm(func=mdp.base_lin_vel_z_link)
+        base_lin_vel_y = ObsTerm(func=mdp.base_lin_vel_y_link)
+        base_lin_vel_x = ObsTerm(func=mdp.base_lin_vel_x_link, scale=2.0)
         base_pos_z = ObsTerm(func=mdp.base_pos_z_rel_link, params={"sensor_cfg": SceneEntityCfg("base_height_scanner")})
         current_reward = ObsTerm(func=mdp.current_reward)
 
@@ -301,7 +302,7 @@ class ObservationsCfg:
         """Observations for None-Stack policy group."""
         velocity_commands = ObsTerm(func=mdp.generated_scaled_commands, params={"command_name": "base_velocity", "scale": (2.0, 0.0, 0.25)})
         roll_pitch_commands = ObsTerm(func=mdp.generated_commands, params={"command_name": "roll_pitch"})
-        back_flip = ObsTerm(func=mdp.generated_commands, params={"command_name": "backflip_commands"})
+        event_commands = ObsTerm(func=mdp.generated_commands, params={"command_name": "event"})
 
         base_lin_vel = ObsTerm(func=mdp.base_lin_vel_x_link, scale=2.0)
         base_pos_z = ObsTerm(func=mdp.base_pos_z_rel_link, params={"sensor_cfg": SceneEntityCfg("base_height_scanner")})
@@ -365,7 +366,7 @@ class EventCfg:
         mode="startup",
         params={
             "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
-            "com_distribution_params": (-0.05, -0.02),
+            "com_distribution_params": (-0.025, 0.0),
             "operation": "add",
         },
     )
@@ -526,6 +527,14 @@ class LocomotionVelocityFlatEnvCfg(ManagerBasedRLEnvCfg):
         self.sim.dt = 0.005
         self.sim.disable_contact_processing = True
         self.sim.physics_material = self.scene.terrain.physics_material
+        
+        # change terrain to flat
+        self.scene.terrain.terrain_type = "plane"
+        self.scene.terrain.terrain_generator = None
+
+        # Terrain curriculum
+        self.curriculum.terrain_levels = None
+
         # update sensor update periods
         # we tick all the sensors based on the smallest update period (physics update period)
         if self.scene.base_height_scanner is not None:

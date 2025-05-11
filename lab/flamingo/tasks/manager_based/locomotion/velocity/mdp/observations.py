@@ -35,6 +35,18 @@ def base_lin_vel_x_link(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg = SceneE
     asset: RigidObject = env.scene[asset_cfg.name]
     return asset.data.root_link_lin_vel_b[:, 0].unsqueeze(-1)
 
+def base_lin_vel_y_link(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
+    """Root linear velocity in the asset's root frame."""
+    # extract the used quantities (to enable type-hinting)
+    asset: RigidObject = env.scene[asset_cfg.name]
+    return asset.data.root_link_lin_vel_b[:, 1].unsqueeze(-1)
+
+def base_lin_vel_z_link(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
+    """Root linear velocity in the asset's root frame."""
+    # extract the used quantities (to enable type-hinting)
+    asset: RigidObject = env.scene[asset_cfg.name]
+    return asset.data.root_link_lin_vel_b[:, 1].unsqueeze(-1)
+
 def base_ang_vel_link(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
     """Root angular velocity in the asset's root frame."""
     # extract the used quantities (to enable type-hinting)

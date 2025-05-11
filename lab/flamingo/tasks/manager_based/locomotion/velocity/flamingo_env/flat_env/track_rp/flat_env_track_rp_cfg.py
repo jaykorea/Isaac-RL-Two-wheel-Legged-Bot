@@ -155,8 +155,8 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
         self.observations.none_stack_policy.is_contact = None
         self.observations.none_stack_policy.lift_mask = None
 
-        self.observations.none_stack_policy.back_flip = None
-        self.observations.none_stack_critic.back_flip = None
+        self.observations.none_stack_policy.event = None
+        self.observations.none_stack_critic.event = None
         #! ********************************************************* !#
 
         # reset_robot_joint_zero should be called here
@@ -168,7 +168,7 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
         }
         # add base mass should be called here
         self.events.add_base_mass.params["asset_cfg"].body_names = ["base_link"]
-        self.events.add_base_mass.params["mass_distribution_params"] = (-1.0, 2.5)
+        self.events.add_base_mass.params["mass_distribution_params"] = (-1.5, 2.0)
         # physics material should be called here
         self.events.physics_material.params["asset_cfg"].body_names = [".*_link"]
         self.events.physics_material.params["static_friction_range"] = (0.3, 1.0)
@@ -188,7 +188,7 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
 
         # commands
         self.commands.base_velocity.resampling_time_range = (3.0, 8.0)
-        self.commands.base_velocity.ranges.lin_vel_x = (-0.75, 0.75)
+        self.commands.base_velocity.ranges.lin_vel_x = (-1.5, 1.5)
         self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
         self.commands.base_velocity.ranges.ang_vel_z = (-2.5, 2.5)
         self.commands.base_velocity.ranges.pos_z = (0.0, 0.0)
@@ -201,12 +201,6 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
             ".*_leg_link",
         ]
 
-        # change terrain to flat
-        self.scene.terrain.terrain_type = "plane"
-        self.scene.terrain.terrain_generator = None
-
-        # Terrain curriculum
-        self.curriculum.terrain_levels = None
 
 @configclass
 class FlamingoFlatEnvCfg_PLAY(LocomotionVelocityFlatEnvCfg):
@@ -220,23 +214,6 @@ class FlamingoFlatEnvCfg_PLAY(LocomotionVelocityFlatEnvCfg):
 
         # scene
         self.scene.robot = FLAMINGO_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
-
-        # observations
-        #! ****************** Observations setup - 0 *************** !#
-        self.observations.stack_policy.enable_corruption = False
-        self.observations.none_stack_policy.enable_corruption = False
-        self.observations.none_stack_policy.base_pos_z.params["sensor_cfg"] = None
-        self.observations.none_stack_critic.base_pos_z.params["sensor_cfg"] = None
-
-        self.observations.none_stack_policy.base_lin_vel = None
-        self.observations.none_stack_policy.base_pos_z = None
-        self.observations.none_stack_policy.current_reward = None
-        self.observations.none_stack_policy.is_contact = None
-        self.observations.none_stack_policy.lift_mask = None
-
-        self.observations.none_stack_policy.back_flip = None
-        self.observations.none_stack_critic.back_flip = None
-        #! ********************************************************* !#
 
         # reset_robot_joint_zero should be called here
         self.events.reset_robot_joints.params["position_range"] = (-0.0, 0.0)
@@ -255,7 +232,7 @@ class FlamingoFlatEnvCfg_PLAY(LocomotionVelocityFlatEnvCfg):
         self.events.physics_material.params["asset_cfg"].body_names = [".*_link"]
         self.events.physics_material.params["static_friction_range"] = (0.8, 1.0)
         self.events.physics_material.params["dynamic_friction_range"] = (0.8, 1.0)
-        self.events.base_external_force_torque.params["asset_cfg"].body_names = ["base_link"]
+        # self.events.base_external_force_torque.params["asset_cfg"].body_names = ["base_link"]
         self.events.reset_base.params = {
             "pose_range": {"x": (-0.0, 0.0), "y": (-0.0, 0.0), "yaw": (0.0, 0.0)},
             "velocity_range": {
@@ -267,12 +244,6 @@ class FlamingoFlatEnvCfg_PLAY(LocomotionVelocityFlatEnvCfg):
                 "yaw": (0.0, 0.0),
             },
         }
-        # change terrain to flat
-        self.scene.terrain.terrain_type = "plane"
-        self.scene.terrain.terrain_generator = None
-
-        # Terrain curriculum
-        self.curriculum.terrain_levels = None
 
         # height scan
         # self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/base_link"
