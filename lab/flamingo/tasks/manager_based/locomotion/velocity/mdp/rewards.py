@@ -37,7 +37,6 @@ def track_lin_vel_xy_link_exp(
     )
     return torch.exp(-lin_vel_error / std**2)
 
-
 def track_ang_vel_z_link_exp(
     env: ManagerBasedRLEnv, std: float, command_name: str, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")
 ) -> torch.Tensor:
@@ -50,29 +49,11 @@ def track_ang_vel_z_link_exp(
     )
     return torch.exp(-ang_vel_error / std**2)
 
-def track_lin_vel_xy_link_exp_v2(env: ManagerBasedRLEnv, temperature: float, command_name: str = "base_veloicty", asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")):
-    asset: RigidObject = env.scene[asset_cfg.name]
-    lin_vel_error = torch.sum(torch.abs(env.command_manager.get_command(command_name)[:, :2]  - asset.data.root_link_lin_vel_b[:, :2]), dim=1)
-    return torch.exp(-temperature * lin_vel_error)
-
-def track_ang_vel_z_link_exp_v2(
-    env: ManagerBasedRLEnv, temperature: float, command_name: str, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")
-) -> torch.Tensor:
-    """Reward tracking of angular velocity commands (yaw) using exponential kernel."""
-    # extract the used quantities (to enable type-hinting)
-    asset: RigidObject = env.scene[asset_cfg.name]
-    # compute the error
-    ang_vel_error = torch.abs(
-        env.command_manager.get_command(command_name)[:, 2] - asset.data.root_link_ang_vel_b[:, 2]
-    )
-    return torch.exp(-temperature * ang_vel_error)
-
 def lin_vel_z_link_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
     """Penalize z-axis base linear velocity using L2 squared kernel."""
     # extract the used quantities (to enable type-hinting)
     asset: RigidObject = env.scene[asset_cfg.name]
     return torch.square(asset.data.root_link_lin_vel_b[:, 2])
-
 
 def ang_vel_xy_link_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
     """Penalize xy-axis base angular velocity using L2 squared kernel."""

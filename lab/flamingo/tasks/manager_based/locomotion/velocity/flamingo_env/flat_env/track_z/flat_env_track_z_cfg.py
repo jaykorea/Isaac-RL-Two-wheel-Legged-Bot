@@ -137,9 +137,9 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
         self.observations.none_stack_policy.lift_mask = None
 
         self.observations.none_stack_policy.roll_pitch_commands = None
-        self.observations.none_stack_policy.back_flip = None
+        self.observations.none_stack_policy.event = None
         self.observations.none_stack_critic.roll_pitch_commands = None
-        self.observations.none_stack_critic.back_flip = None
+        self.observations.none_stack_critic.event = None
         #! ********************************************************* !#
 
         # reset_robot_joint_zero should be called here
@@ -184,13 +184,6 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
             ".*_shoulder_link",
             ".*_leg_link",
         ]
-
-        # change terrain to flat
-        self.scene.terrain.terrain_type = "plane"
-        self.scene.terrain.terrain_generator = None
-
-        # Terrain curriculum
-        self.curriculum.terrain_levels = None
 
 
 @configclass
@@ -238,12 +231,6 @@ class FlamingoFlatEnvCfg_PLAY(FlamingoFlatEnvCfg):
                 "yaw": (0.0, 0.0),
             },
         }
-        # change terrain to flat
-        self.scene.terrain.terrain_type = "plane"
-        self.scene.terrain.terrain_generator = None
-
-        # Terrain curriculum
-        self.curriculum.terrain_levels = None
 
         # commands
         self.commands.base_velocity.resampling_time_range = (3.0, 8.0)

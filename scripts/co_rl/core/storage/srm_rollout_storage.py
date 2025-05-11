@@ -48,7 +48,7 @@ class SRMRolloutStorage:
         self.prev_rewards = torch.zeros(num_transitions_per_env, num_envs, 1, device=self.device)
         self.actions = torch.zeros(num_transitions_per_env, num_envs, *actions_shape, device=self.device)
         self.prev_actions = torch.zeros(num_transitions_per_env, num_envs, *actions_shape, device=self.device)
-        self.actions_difference = torch.zeros(num_transitions_per_env, num_envs, *actions_shape, device=self.device)
+
         if "use_constraint_rl" in self.cfg:
             if not self.cfg["use_constraint_rl"]:
                 self.dones = torch.zeros(num_transitions_per_env, num_envs, 1, device=self.device).byte()
@@ -82,9 +82,6 @@ class SRMRolloutStorage:
             self.privileged_observations[self.step].copy_(transition.critic_observations)
         self.actions[self.step].copy_(transition.actions)
         self.prev_actions[self.step].copy_(transition.prev_actions)  # Store previous actions
-        self.actions_difference[self.step].copy_(
-            transition.actions - transition.prev_actions
-        )  # Store actions difference
         self.rewards[self.step].copy_(transition.rewards.view(-1, 1))
         self.prev_rewards[self.step].copy_(transition.prev_rewards.view(-1, 1))  # Store previous rewards
         self.dones[self.step].copy_(transition.dones.view(-1, 1))
@@ -156,7 +153,7 @@ class SRMRolloutStorage:
             critic_observations = observations
 
         actions = self.actions.flatten(0, 1)
-        actions_difference = self.actions_difference.flatten(0, 1)  # Flatten previous actions
+        prev_actions = self.prev_actions.flatten(0, 1)  # Flatten previous actions
         rewards = self.rewards.flatten(0, 1)
         prev_rewards = self.prev_rewards.flatten(0, 1)  # Flatten previous rewards
         values = self.values.flatten(0, 1)
@@ -175,7 +172,7 @@ class SRMRolloutStorage:
                 obs_batch = observations[batch_idx]
                 critic_obs_batch = critic_observations[batch_idx]
                 actions_batch = actions[batch_idx]
-                actions_difference_batch = actions_difference[batch_idx]  # Extract previous actions batch
+                prev_actions_batch = prev_actions[batch_idx]  # Extract previous actions batch
                 rewards_batch = rewards[batch_idx]
                 prev_rewards_batch = prev_rewards[batch_idx]  # Extract previous rewards batch
                 target_values_batch = values[batch_idx]
@@ -189,7 +186,7 @@ class SRMRolloutStorage:
                     obs_batch,
                     critic_obs_batch,
                     actions_batch,
-                    actions_difference_batch,  # Include actions difference
+                    prev_actions_batch,  # Include actions difference
                     rewards_batch,
                     prev_rewards_batch,  # Include previous rewards batch
                     target_values_batch,
@@ -230,7 +227,7 @@ class SRMRolloutStorage:
                 critic_obs_batch = padded_critic_obs_trajectories[:, first_traj:last_traj]
 
                 actions_batch = self.actions[:, start:stop]
-                actions_difference_batch = self.actions_difference[:, start:stop]  # Include actions difference
+                prev_actions_batch = self.prev_actions[:, start:stop]  # Include actions difference
                 rewards_batch = self.rewards[:, start:stop]
                 prev_rewards_batch = padded_prev_rewards_trajectories[
                     :, first_traj:last_traj
@@ -264,7 +261,7 @@ class SRMRolloutStorage:
                     obs_batch,
                     critic_obs_batch,
                     actions_batch,
-                    actions_difference_batch,  # Include actions difference
+                    prev_actions_batch,  # Include actions difference
                     rewards_batch,
                     prev_rewards_batch,  # Include previous rewards batch
                     values_batch,

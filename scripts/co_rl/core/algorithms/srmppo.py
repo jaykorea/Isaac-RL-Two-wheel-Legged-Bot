@@ -197,7 +197,7 @@ class SRMPPO:
             obs_batch,
             critic_obs_batch,
             actions_batch,
-            actions_difference_batch,
+            prev_actions_batch,
             rewards_batch,
             prev_rewards_batch,
             target_values_batch,
@@ -226,18 +226,19 @@ class SRMPPO:
                 alpha_t = (q_values - q_values.min()) / (q_values.max() - q_values.min() + 1e-8)  # Normalize α_t
 
                 # Temporal Smoothness Regularization (L_T)
-                temporal_diff = actions_difference_batch.pow(2).mean(dim=-1)  # Directly use actions_difference_batch
+                temporal_diff = (mu_batch - prev_actions_batch).pow(2).mean()
                 L_t = (alpha_t.squeeze(-1) * temporal_diff).mean()
 
                 # Spatial Smoothness Regularization (L_S)
-                noise_obs_batch = obs_batch + torch.normal(mean=0, std=0.1, size=obs_batch.size()).clamp(-1, 1).to(obs_batch.device)
-                if self.actor_critic.is_recurrent:
-                    # Pass the last observation to act_inference
-                    mu_batch_tilde = self.actor_critic.act_inference_rnn(
-                        noise_obs_batch, masks=masks_batch, hidden_states=hid_states_batch[0]
-                    )
-                else:
-                    mu_batch_tilde = self.actor_critic.act_inference(noise_obs_batch)  # π(s̃)
+                with torch.no_grad():
+                    noise_obs_batch = obs_batch + torch.normal(mean=0, std=0.1, size=obs_batch.size()).clamp(-1, 1).to(obs_batch.device)
+                    if self.actor_critic.is_recurrent:
+                        # Pass the last observation to act_inference
+                        mu_batch_tilde = self.actor_critic.act_inference_rnn(
+                            noise_obs_batch, masks=masks_batch, hidden_states=hid_states_batch[0]
+                        )
+                    else:
+                        mu_batch_tilde = self.actor_critic.act_inference(noise_obs_batch)  # π(s̃)
                 spatial_diff = (mu_batch - mu_batch_tilde).pow(2).mean(dim=-1)  # ||π(s_t) - π(s̃)||^2
                 L_s = (alpha_t.squeeze(-1) * spatial_diff).mean()
 

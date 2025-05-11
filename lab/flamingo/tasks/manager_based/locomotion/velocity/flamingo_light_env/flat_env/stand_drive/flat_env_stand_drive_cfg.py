@@ -40,17 +40,11 @@ class FlamingoEduActionsCfg:
 @configclass
 class FlamingoRewardsCfg():
     # -- task
-    # track_lin_vel_xy_exp = RewTerm(
-    #     func=mdp.track_lin_vel_xy_link_exp, weight=3.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
-    # )
-    # track_ang_vel_z_exp = RewTerm(
-    #     func=mdp.track_ang_vel_z_link_exp, weight=1.5, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
-    # )
     track_lin_vel_xy_exp = RewTerm(
-        func=mdp.track_lin_vel_xy_link_exp_v2, weight=2.5, params={"command_name": "base_velocity", "temperature": 4.0}
+        func=mdp.track_lin_vel_xy_link_exp, weight=3.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
     )
     track_ang_vel_z_exp = RewTerm(
-        func=mdp.track_ang_vel_z_link_exp_v2, weight=2.5, params={"command_name": "base_velocity", "temperature": 4.0}
+        func=mdp.track_ang_vel_z_link_exp, weight=1.5, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
     )
 
     lin_vel_z_l2 = RewTerm(func=mdp.lin_vel_z_link_l2, weight=-1.5)

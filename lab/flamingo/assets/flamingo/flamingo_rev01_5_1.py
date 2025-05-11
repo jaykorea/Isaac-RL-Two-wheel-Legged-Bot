@@ -85,7 +85,7 @@ FLAMINGO_CFG = ArticulationCfg(
             stiffness={
                 ".*_wheel_joint": 0.0,
             },
-            damping={".*_wheel_joint": 0.5},
+            damping={".*_wheel_joint": 0.75},
             friction={
                 ".*_wheel_joint": 0.0,
             },
