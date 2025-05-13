@@ -30,15 +30,15 @@ if TYPE_CHECKING:
     from isaaclab.envs import ManagerBasedEnv
 
 
-class EventCommand(CommandTerm):
+class YKCommand(CommandTerm):
     """Command generator that generates a event flag.
 
     The command comprises of True of False.
 
     """
-    cfg : EventCommandCfg
+    cfg : YKCommandCfg
     
-    def __init__(self, cfg : EventCommandCfg, env : ManagerBasedEnv):
+    def __init__(self, cfg : YKCommandCfg, env : ManagerBasedEnv):
         """Initialize the command generator.
 
         Args:
@@ -50,10 +50,8 @@ class EventCommand(CommandTerm):
         self.env = env
         
         self.robot: Articulation = env.scene[cfg.asset_name]
-        self.time_elapsed = torch.zeros(self.num_envs, device=self.device)
-        self.event_command = torch.zeros(self.num_envs,2, dtype=torch.float32, device=self.device)
         
-        self.event_during_time = cfg.event_during_time
+        self.event_command = torch.zeros(self.num_envs, 3, dtype=torch.float32, device=self.device)
         self.is_standing_env = torch.zeros(self.num_envs, dtype=torch.bool, device=self.device)
 
         
@@ -74,44 +72,72 @@ class EventCommand(CommandTerm):
         max_command_step = max_command_time / self._env.step_dt
 
     def _resample_command(self, env_ids: Sequence[int]):
-        r = torch.zeros(len(env_ids), device=self.device)
-        # command of event
-        current_time = self.env.episode_length_buf * self.env.physics_dt * 4
+        """
+        Resample event commands for specified environments.
 
-        self.event_command[env_ids, 0] = torch.where(
-                                                        current_time[env_ids] >= 2.0,
-                                                        torch.ones_like(self.event_command[env_ids, 0], dtype=torch.float32, device=self.device),
-                                                        torch.zeros_like(self.event_command[env_ids, 0], dtype=torch.float32, device=self.device)
-        )
+        - Samples discrete angular and linear velocities from categorical distributions.
+        - Resets the time_elapsed (event_command[:, 2]) to 0.0.
+        """
+        r = torch.empty(len(env_ids), device=self.device)
 
-        self.time_elapsed[env_ids] = torch.zeros(len(env_ids), dtype=torch.float32, device=self.device)
-        # Enforce standing for standing environments
+        ang_vel_range = self.cfg.ranges.ang_vel_z  # (low, high)
+        lin_vel_range = self.cfg.ranges.lin_vel_z  # (low, high)
+
+        # 카테고리 개수 설정
+        num_categories = 10
+        probabilities = torch.ones(num_categories, device=self.device) / num_categories  # Uniform categorical
+
+        # 각 카테고리 값 생성
+        ang_vel_categories = torch.linspace(ang_vel_range[0], ang_vel_range[1], num_categories, device=self.device)
+        lin_vel_categories = torch.linspace(lin_vel_range[0], lin_vel_range[1], num_categories, device=self.device)
+
+        # 환경 수만큼 샘플링
+        sampled_ang_idx = torch.multinomial(probabilities, len(env_ids), replacement=True)
+        sampled_lin_idx = torch.multinomial(probabilities, len(env_ids), replacement=True)
+
+        # 카테고리 값으로 변환
+        sampled_ang_vals = ang_vel_categories[sampled_ang_idx]
+        sampled_lin_vals = lin_vel_categories[sampled_lin_idx]
+
+        # 결과 저장
+        self.event_command[env_ids, 0] = sampled_ang_vals
+        self.event_command[env_ids, 1] = sampled_lin_vals
+        self.event_command[env_ids, 2] = 0.0  # time_elapsed 초기화
+
         self.is_standing_env[env_ids] = r.uniform_(0.0, 1.0) <= self.cfg.rel_standing_envs
 
     def _update_command(self):
         """
         Update the event command.
 
-        - When command is active (event_command[:, 0] == 1.0), increase time_elapsed by dt.
-        - If time_elapsed > event_during_time, deactivate the command and reset the timer.
-        - If environment is reset, reset both the timer and command values.
+        - If ang_vel_z or lin_vel_z is nonzero, increase time_elapsed (event_command[:, 2]).
+        - Reset all values when time_elapsed exceeds duration.
+        - Reset values on environment reset.
         """
-        
-        self.time_elapsed = torch.where(self.event_command[:,0]==1.0,
-                                        self.time_elapsed + self._env.step_dt,
-                                        0.0)
-        self.event_command[:, 0] = torch.logical_and(self.event_command[:,0]==1.0 , self.time_elapsed <= self.event_during_time).float()
-        self.event_command[:,1] = self.time_elapsed
+
+        is_active = torch.logical_or(
+            torch.abs(self.event_command[:, 0]) > 1e-3,
+            torch.abs(self.event_command[:, 1]) > 1e-3
+        )
+
+        self.event_command[:, 2] = torch.where(
+            is_active,
+            self.event_command[:, 2] + self._env.step_dt,
+            torch.zeros_like(self.event_command[:, 2])
+        )
+
+        event_done = self.event_command[:, 2] > self.cfg.event_during_time
+        self.event_command[event_done] = 0.0
+
 
         reset_env_ids = self._env.reset_buf.nonzero(as_tuple=False).flatten()
         if len(reset_env_ids) > 0:
-            self.time_elapsed[reset_env_ids] = 0.0
             self.event_command[reset_env_ids] = 0.0
 
-        # Enforce standing for standing environments
+       # Enforce standing for standing environments
         standing_env_ids = self.is_standing_env.nonzero(as_tuple=False).flatten()
         self.event_command[standing_env_ids] = 0.0
-
+        
     def _set_debug_vis_impl(self, debug_vis: bool):
             if debug_vis:
             # create markers if necessary for the first tomes
@@ -140,22 +166,11 @@ class EventCommand(CommandTerm):
         inactive_indices = (self.event_command[:, 0] == 0.0).nonzero(as_tuple=True)[0]
 
         # Visualize only for active indices
-        # if active_indices.numel() > 0:
-        #     self.command_active_visualizer.visualize(base_pos_w[active_indices])
-        # if inactive_indices.numel() > 0:
-        #     self.command_inactive_visualizer.visualize(base_pos_w[inactive_indices])
-
         if active_indices.numel() > 0:
-            self.command_active_visualizer.set_visibility(True)
             self.command_active_visualizer.visualize(base_pos_w[active_indices])
-            self.command_inactive_visualizer.set_visibility(False)
-        elif inactive_indices.numel() > 0:
-            self.command_inactive_visualizer.set_visibility(True)
+        if inactive_indices.numel() > 0:
             self.command_inactive_visualizer.visualize(base_pos_w[inactive_indices])
-            self.command_active_visualizer.set_visibility(False)
-        else:
-            self.command_active_visualizer.set_visibility(False)
-            self.command_inactive_visualizer.set_visibility(False)
+
 
 GREEN_CUBOID_MARKER_CFG = VisualizationMarkersCfg(
     prim_path="/Visuals/Command/event_command",
@@ -179,12 +194,25 @@ RED_CUBOID_MARKER_CFG = VisualizationMarkersCfg(
 
 
 @configclass
-class EventCommandCfg(CommandTermCfg):
+class YKCommandCfg(CommandTermCfg):
     
-    class_type : type = EventCommand
+    class_type : type = YKCommand
     
     asset_name : str = MISSING
-    rel_standing_envs: float = MISSING
+    rel_standing_envs: float = 0.1
+    @configclass
+    class Ranges:
+        """Uniform distribution ranges for the pose commands."""
+
+        ang_vel_z: tuple[float, float] = MISSING
+        """Range for angular velocity around z-axis (yaw)."""
+
+        lin_vel_z: tuple[float, float] = MISSING
+        """Range for linear velocity along z-axis (vertical)."""
+
+    ranges: Ranges = MISSING
+    """Ranges for the commands."""
+
     event_during_time: float = 1.0
     
     command_active_visualizer_cfg : VisualizationMarkersCfg = GREEN_CUBOID_MARKER_CFG

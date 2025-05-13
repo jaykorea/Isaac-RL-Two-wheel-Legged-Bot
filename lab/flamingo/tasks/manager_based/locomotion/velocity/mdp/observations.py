@@ -52,7 +52,6 @@ def base_ang_vel_link(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg = SceneEnt
     # extract the used quantities (to enable type-hinting)
     asset: RigidObject = env.scene[asset_cfg.name]
     return asset.data.root_link_ang_vel_b
-
         
 def base_pos_z_rel_link(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"), sensor_cfg: SceneEntityCfg | None = None) -> torch.Tensor:
     """Root height in the simulation world frame."""
@@ -220,4 +219,10 @@ def generated_scaled_commands(env: ManagerBasedRLEnv, command_name: str, scale: 
     """The generated command from command term in the command manager with the given name."""
     scaled_command = env.command_manager.get_command(command_name).clone()
     scaled_command[:, :3] *= torch.tensor(scale, device=env.device)
+    return scaled_command
+
+def generated_scaled_event_commands(env: ManagerBasedRLEnv, command_name: str, scale: tuple) -> torch.Tensor:
+    """The generated command from command term in the command manager with the given name."""
+    scaled_command = env.command_manager.get_command(command_name).clone()
+    scaled_command[:, :2] *= torch.tensor(scale, device=env.device)
     return scaled_command
