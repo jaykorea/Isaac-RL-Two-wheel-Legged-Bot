@@ -9,7 +9,7 @@ from isaaclab.utils import configclass
 
 from isaaclab.managers import CurriculumTermCfg as CurrTerm
 import lab.flamingo.tasks.manager_based.locomotion.velocity.mdp as mdp
-import lab.flamingo.tasks.manager_based.locomotion.velocity.flamingo_env.flat_env.track_yk.yk_rewards as mdp_yk
+import lab.flamingo.tasks.manager_based.locomotion.velocity.flamingo_env.flat_env.track_jump.jump_rewards as mdp_jump
 from lab.flamingo.tasks.manager_based.locomotion.velocity.velocity_env_cfg import (
     LocomotionVelocityFlatEnvCfg,
     CurriculumCfg,
@@ -35,7 +35,7 @@ class FlamingoCurriculumCfg(CurriculumCfg):
         func=mdp.modify_base_velocity_range,
         params={
             "term_name": "base_velocity",
-            "mod_range": {"lin_vel_x": (-2.0, 2.0), "ang_vel_z": (-3.14, 3.14)},
+            "mod_range": {"lin_vel_x": (-1.5, 1.5), "ang_vel_z": (-5.0, 5.0)},
             "num_steps": 50000,
         },
     )
@@ -48,14 +48,13 @@ class FlamingoRewardsCfg():
         func=mdp.track_lin_vel_xy_link_exp, weight=2.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
     )
     track_ang_vel_z_exp = RewTerm(
-        func=mdp_yk.track_ang_vel_z_link_exp_event, weight=1.0, params={"command_name": "base_velocity", "event_command_name": "event", "std": math.sqrt(0.25)}
+        func=mdp.track_ang_vel_z_link_exp, weight=1.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
     )
 
-    ang_vel_z_event = RewTerm(func=mdp_yk.ang_vel_z_event, weight=1.0, params={"event_command_name": "event"})
-    lin_vel_z_event = RewTerm(func=mdp_yk.lin_vel_z_event, weight=5.0, params={"event_command_name": "event"})
+    lin_vel_z_event = RewTerm(func=mdp_jump.lin_vel_z_event, weight=5.0, params={"event_command_name": "event"})
 
     push_ground_event = RewTerm(
-        func = mdp_yk.reward_push_ground_event,
+        func = mdp_jump.reward_push_ground_event,
         weight=0.1,
         params= {
             "event_command_name": "event",
@@ -63,26 +62,6 @@ class FlamingoRewardsCfg():
             "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_wheel_link"),
         }
     )
-
-    # feet_air_time_event = RewTerm(
-    #     func = mdp_yk.feet_air_time_event,
-    #     weight = 10.0,
-    #     params= {
-    #         "event_command_name": "event",
-    #         "threshold": 0.05,
-    #         "sensor_cfg": SceneEntityCfg("contact_forces"),
-    #     }
-    # )
-
-    # reward_complete_event = RewTerm(
-    #     func=mdp_yk.RewardCompleteEvent,
-    #     weight=0.0,
-    #     params={
-    #         "event_command_name": "event",
-    #         "asset_cfg": SceneEntityCfg("robot"),
-    #         "sensor_cfg": SceneEntityCfg("contact_forces", body_names=[".*_wheel_link"]),
-    #     }
-    # )
 
     # -- Penalites
     termination_penalty = RewTerm(func=mdp.is_terminated, weight=-500.0)

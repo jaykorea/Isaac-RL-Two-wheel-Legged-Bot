@@ -99,6 +99,26 @@ gym.register(
 )
 
 gym.register(
+    id="Isaac-TrackJUMP-Flat-Flamingo-v1-ppo",
+    entry_point="isaaclab.envs:ManagerBasedRLEnv",
+    disable_env_checker=True,
+    kwargs={
+        "env_cfg_entry_point": flat_env.flat_env_track_jump_cfg.FlamingoFlatEnvCfg,
+        "co_rl_cfg_entry_point": agents.co_rl_cfg.FlamingoFlatPPORunnerCfg_Track_JUMP,
+    },
+)
+
+gym.register(
+    id="Isaac-TrackJUMP-Flat-Flamingo-Play-v1-ppo",
+    entry_point="isaaclab.envs:ManagerBasedRLEnv",
+    disable_env_checker=True,
+    kwargs={
+        "env_cfg_entry_point": flat_env.flat_env_track_jump_cfg.FlamingoFlatEnvCfg_PLAY,
+        "co_rl_cfg_entry_point": agents.co_rl_cfg.FlamingoFlatPPORunnerCfg_Track_JUMP,
+    },
+)
+
+gym.register(
     id="Isaac-Velocity-Rough-Flamingo-v1-ppo",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
