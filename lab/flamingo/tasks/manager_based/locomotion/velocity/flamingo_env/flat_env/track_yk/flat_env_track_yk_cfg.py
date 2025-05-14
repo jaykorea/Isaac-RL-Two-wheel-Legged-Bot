@@ -51,7 +51,7 @@ class FlamingoRewardsCfg():
         func=mdp_yk.track_ang_vel_z_link_exp_event, weight=1.0, params={"command_name": "base_velocity", "event_command_name": "event", "std": math.sqrt(0.25)}
     )
 
-    ang_vel_z_event = RewTerm(func=mdp_yk.ang_vel_z_event, weight=1.0, params={"event_command_name": "event"})
+    ang_vel_z_event = RewTerm(func=mdp_yk.ang_vel_z_event, weight=1.25, params={"event_command_name": "event"})
     lin_vel_z_event = RewTerm(func=mdp_yk.lin_vel_z_event, weight=5.0, params={"event_command_name": "event"})
 
     push_ground_event = RewTerm(

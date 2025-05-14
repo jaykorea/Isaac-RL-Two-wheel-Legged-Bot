@@ -51,6 +51,8 @@ def base_ang_vel_link(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg = SceneEnt
     """Root angular velocity in the asset's root frame."""
     # extract the used quantities (to enable type-hinting)
     asset: RigidObject = env.scene[asset_cfg.name]
+    # print("ang vel: ", asset.data.root_link_ang_vel_b[0, 2])
+    # print("lin vel z: ", asset.data.root_link_lin_vel_b[0, 2])
     return asset.data.root_link_ang_vel_b
         
 def base_pos_z_rel_link(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"), sensor_cfg: SceneEntityCfg | None = None) -> torch.Tensor:

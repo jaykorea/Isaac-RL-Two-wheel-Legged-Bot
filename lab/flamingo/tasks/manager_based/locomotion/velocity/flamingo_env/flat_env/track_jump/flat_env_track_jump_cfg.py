@@ -51,7 +51,7 @@ class FlamingoRewardsCfg():
         func=mdp.track_ang_vel_z_link_exp, weight=1.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
     )
 
-    lin_vel_z_event = RewTerm(func=mdp_jump.lin_vel_z_event, weight=5.0, params={"event_command_name": "event"})
+    lin_vel_z_event = RewTerm(func=mdp_jump.lin_vel_z_event, weight=20.0, params={"event_command_name": "event"})
 
     push_ground_event = RewTerm(
         func = mdp_jump.reward_push_ground_event,
@@ -112,7 +112,7 @@ class FlamingoRewardsCfg():
         weight=-0.5,  # default: -0.5
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*_leg_joint")},
     )
-    flat_orientation_l2 = RewTerm(func=mdp.flat_euler_angle_l2, weight=-5.0)
+    flat_orientation_l2 = RewTerm(func=mdp.flat_euler_angle_l2, weight=-10.0)
 
     base_height = RewTerm(
         func=mdp.base_height_adaptive_l2,

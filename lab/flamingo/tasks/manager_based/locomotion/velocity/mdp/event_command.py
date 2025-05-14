@@ -133,7 +133,7 @@ class EventCommand(CommandTerm):
 
         # Clone base positions and raise them slightly for visualization
         base_pos_w = self.robot.data.root_pos_w.clone()
-        base_pos_w[:, 2] += 0.65
+        base_pos_w[:, 2] += 0.7
 
         # Get indices where event_command command is active
         active_indices = (self.event_command[:, 0] == 1.0).nonzero(as_tuple=True)[0]
@@ -147,15 +147,12 @@ class EventCommand(CommandTerm):
 
         if active_indices.numel() > 0:
             self.command_active_visualizer.set_visibility(True)
-            self.command_active_visualizer.visualize(base_pos_w[active_indices])
             self.command_inactive_visualizer.set_visibility(False)
+            self.command_active_visualizer.visualize(base_pos_w[active_indices])
         elif inactive_indices.numel() > 0:
             self.command_inactive_visualizer.set_visibility(True)
+            self.command_active_visualizer.set_visibility(False)
             self.command_inactive_visualizer.visualize(base_pos_w[inactive_indices])
-            self.command_active_visualizer.set_visibility(False)
-        else:
-            self.command_active_visualizer.set_visibility(False)
-            self.command_inactive_visualizer.set_visibility(False)
 
 GREEN_CUBOID_MARKER_CFG = VisualizationMarkersCfg(
     prim_path="/Visuals/Command/event_command",
