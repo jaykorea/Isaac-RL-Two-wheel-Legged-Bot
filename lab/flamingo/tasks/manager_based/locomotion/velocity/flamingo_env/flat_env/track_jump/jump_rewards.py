@@ -21,16 +21,28 @@ def lin_vel_z_event(
     event_command_name: str = "event",
     asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
 ) -> torch.Tensor:
-    """Reward for linear z velocity using linear abs value (clipped at 6 m/s)."""
 
     event_command = env.command_manager.get_command(event_command_name)
+    event_time    = event_command[:, 1]
     asset: RigidObject = env.scene[asset_cfg.name]
-    event_time = event_command[:, 1]
     lin_vel = asset.data.root_lin_vel_w[:, 2]
 
-    reward = torch.clamp(torch.abs(lin_vel), max=30.0) # 6.0
+    max_up_vel = 6.0
+    up_vel = torch.clamp(lin_vel, min=0.0, max=max_up_vel)
 
-    return reward * event_command[:, 0] * torch.logical_and(event_time >= 0.3, event_time <= 0.8)
+    pre_jump = (event_time < 0.5).float()
+
+    descent_speed = torch.clamp(-lin_vel, min=0.0)
+
+    penalty_coef = 1.0
+    descent_penalty = torch.clamp(descent_speed - 0.5, min=0.0) * penalty_coef * pre_jump
+
+    jump_phase = torch.logical_and(event_time >= 0.5, event_time <= 1.0).float()
+
+    reward = up_vel * event_command[:, 0] * jump_phase
+    reward = reward - descent_penalty
+
+    return reward
 
 def reward_push_ground_event(
     env: ManagerBasedRLEnv,
@@ -50,7 +62,7 @@ def reward_push_ground_event(
     push_force = (foot_force[:,:, 2].sum(dim=1)).clamp(max=300)
     reward = (push_force) * torch.exp(-foot_force_error/20)
     
-    return reward * event_command[:, 0] * torch.logical_and(event_time >= 0.3, event_time <= 0.5)
+    return reward * event_command[:, 0] * torch.logical_and(event_time >= 0.5, event_time <= 0.7)
 
 def feet_air_time_event(
     env: ManagerBasedRLEnv,
