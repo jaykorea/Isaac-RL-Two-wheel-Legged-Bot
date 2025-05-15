@@ -27,17 +27,17 @@ def lin_vel_z_event(
     asset: RigidObject = env.scene[asset_cfg.name]
     lin_vel = asset.data.root_lin_vel_w[:, 2]
 
-    max_up_vel = 6.0
+    max_up_vel = 4.0
     up_vel = torch.clamp(lin_vel, min=0.0, max=max_up_vel)
 
-    pre_jump = (event_time < 0.5).float()
+    pre_jump = (event_time < 0.4).float()
 
     descent_speed = torch.clamp(-lin_vel, min=0.0)
 
     penalty_coef = 1.0
-    descent_penalty = torch.clamp(descent_speed - 0.5, min=0.0) * penalty_coef * pre_jump
+    descent_penalty = torch.clamp(descent_speed - 0.4, min=0.0) * penalty_coef * pre_jump
 
-    jump_phase = torch.logical_and(event_time >= 0.5, event_time <= 1.0).float()
+    jump_phase = torch.logical_and(event_time >= 0.4, event_time <= 0.8).float()
 
     reward = up_vel * event_command[:, 0] * jump_phase
     reward = reward - descent_penalty
@@ -62,7 +62,7 @@ def reward_push_ground_event(
     push_force = (foot_force[:,:, 2].sum(dim=1)).clamp(max=300)
     reward = (push_force) * torch.exp(-foot_force_error/20)
     
-    return reward * event_command[:, 0] * torch.logical_and(event_time >= 0.5, event_time <= 0.7)
+    return reward * event_command[:, 0] * torch.logical_and(event_time >= 0.4, event_time <= 0.6)
 
 def feet_air_time_event(
     env: ManagerBasedRLEnv,
@@ -188,6 +188,33 @@ class RewardCompleteEvent(ManagerTermBase):
         return reward
 
 def base_height_adaptive_l2_event(
+    env: ManagerBasedRLEnv,
+    target_height: float,
+    event_command_name: str,
+    asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+    sensor_cfg: SceneEntityCfg | None = None,
+) -> torch.Tensor:
+    """Penalize asset height from its target using L2 squared kernel.
+
+    Note:
+        For flat terrain, target height is in the world frame. For rough terrain,
+        sensor readings can adjust the target height to account for the terrain.
+    """
+    # extract the used quantities (to enable type-hinting)
+    asset: RigidObject = env.scene[asset_cfg.name]
+    event_cmd = env.command_manager.get_command(event_command_name)  # shape: (num_envs, 2)
+
+    if sensor_cfg is not None:
+        sensor: RayCaster = env.scene[sensor_cfg.name]
+        # Adjust the target height using the sensor data
+        adjusted_target_height = target_height + torch.mean(sensor.data.ray_hits_w[..., 2], dim=1)
+    else:
+        # Use the provided target height directly for flat terrain
+        adjusted_target_height = target_height
+    # Compute the L2 squared penalty
+    return torch.square(asset.data.root_link_pos_w[:, 2] - adjusted_target_height) * (1 - event_cmd[:,0])
+
+def base_target_height_adaptive_l2_event(
     env: ManagerBasedRLEnv,
     target_height: float,
     event_command_name: str,
