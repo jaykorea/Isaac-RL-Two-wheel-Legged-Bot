@@ -25,22 +25,38 @@ def lin_vel_z_event(
     event_command = env.command_manager.get_command(event_command_name)
     event_time    = event_command[:, 1]
     asset: RigidObject = env.scene[asset_cfg.name]
-    lin_vel = asset.data.root_lin_vel_w[:, 2]
 
-    max_up_vel = 4.0
-    up_vel = torch.clamp(lin_vel, min=0.0, max=max_up_vel)
+    # wheel_action = env.action_manager.prev_action[:, -2:] - env.action_manager.action[:, -2:]
+    # wheel_action_l2 = torch.sum(torch.square(env.action_manager.get_term("wheel_vel").processed_actions), dim=1)
+
+    lin_vel = asset.data.root_lin_vel_w
+    lin_vel_z = lin_vel[:, 2]
+    lin_vel_mag = torch.norm(lin_vel, dim=1) + 1e-6
+
+    z_axis = torch.tensor([0, 0, 1.0], device=lin_vel.device)
+    alignment = torch.sum(lin_vel * z_axis, dim=1) / lin_vel_mag  # = cos(theta)
+
+    alignment_reward = torch.abs(alignment)
+
+    max_up_vel = 6.0
+    up_vel = torch.clamp(lin_vel_z, min=0, max=max_up_vel)
+    down_vel = torch.clamp(-lin_vel_z, min=-max_up_vel, max=max_up_vel)
 
     pre_jump = (event_time < 0.4).float()
 
-    descent_speed = torch.clamp(-lin_vel, min=0.0)
+    descent_vel = torch.clamp(-lin_vel_z, min=0.0)
+    max_descent_vel = 0.5
 
     penalty_coef = 1.0
-    descent_penalty = torch.clamp(descent_speed - 0.4, min=0.0) * penalty_coef * pre_jump
+    descent_penalty = torch.clamp(descent_vel - max_descent_vel, min=0.0) * penalty_coef * pre_jump
 
     jump_phase = torch.logical_and(event_time >= 0.4, event_time <= 0.8).float()
 
-    reward = up_vel * event_command[:, 0] * jump_phase
-    reward = reward - descent_penalty
+    after_jump = torch.logical_and(event_time > 0.8, event_time <= 1.2).float()
+
+    reward = up_vel * event_command[:, 0] * jump_phase * alignment_reward
+    reward += down_vel * event_command[:, 0] * after_jump * alignment_reward
+    reward -= descent_penalty
 
     return reward
 
@@ -62,7 +78,7 @@ def reward_push_ground_event(
     push_force = (foot_force[:,:, 2].sum(dim=1)).clamp(max=300)
     reward = (push_force) * torch.exp(-foot_force_error/20)
     
-    return reward * event_command[:, 0] * torch.logical_and(event_time >= 0.4, event_time <= 0.6)
+    return reward * event_command[:, 0] * torch.logical_and(event_time >= 0.4, event_time <= 0.7)
 
 def feet_air_time_event(
     env: ManagerBasedRLEnv,

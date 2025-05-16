@@ -24,7 +24,7 @@ class FlamingocommandsCfg(CommandsCfg):
         asset_name="robot",
         resampling_time_range=(5.0, 7.0),
         rel_standing_envs=0.1,
-        event_during_time=1.0,
+        event_during_time=1.2,
         debug_vis=True,
     )
 
@@ -51,7 +51,7 @@ class FlamingoRewardsCfg():
         func=mdp.track_ang_vel_z_link_exp, weight=1.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
     )
 
-    lin_vel_z_event = RewTerm(func=mdp_jump.lin_vel_z_event, weight=20.0, params={"event_command_name": "event"})
+    lin_vel_z_event = RewTerm(func=mdp_jump.lin_vel_z_event, weight=15.0, params={"event_command_name": "event"})
 
     push_ground_event = RewTerm(
         func = mdp_jump.reward_push_ground_event,
@@ -116,7 +116,7 @@ class FlamingoRewardsCfg():
 
     base_height = RewTerm(
         func=mdp_jump.base_height_adaptive_l2_event,
-        weight=-40.0,
+        weight=-50.0,
         params={
             "target_height": 0.36288,
             "event_command_name": "event",
@@ -124,7 +124,6 @@ class FlamingoRewardsCfg():
         },
     )
 
-    dof_torques_l2 = RewTerm(func=mdp.joint_torques_l2, weight=-5.0e-5)
     dof_torques_joints_l2 = RewTerm(
         func=mdp.joint_torques_l2,
         weight=-5.0e-5,
