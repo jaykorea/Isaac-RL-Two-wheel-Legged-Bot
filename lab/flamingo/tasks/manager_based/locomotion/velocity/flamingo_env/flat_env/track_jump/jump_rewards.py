@@ -19,15 +19,14 @@ if TYPE_CHECKING:
 def lin_vel_z_event(
     env: ManagerBasedRLEnv,
     event_command_name: str = "event",
+    event_time_range: tuple = (0.3, 0.8),
+    max_up_vel: float = 4.0,
     asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
 ) -> torch.Tensor:
 
     event_command = env.command_manager.get_command(event_command_name)
     event_time    = event_command[:, 1]
     asset: RigidObject = env.scene[asset_cfg.name]
-
-    # wheel_action = env.action_manager.prev_action[:, -2:] - env.action_manager.action[:, -2:]
-    # wheel_action_l2 = torch.sum(torch.square(env.action_manager.get_term("wheel_vel").processed_actions), dim=1)
 
     lin_vel = asset.data.root_lin_vel_w
     lin_vel_z = lin_vel[:, 2]
@@ -38,47 +37,78 @@ def lin_vel_z_event(
 
     alignment_reward = torch.abs(alignment)
 
-    max_up_vel = 6.0
-    up_vel = torch.clamp(lin_vel_z, min=0, max=max_up_vel)
-    down_vel = torch.clamp(-lin_vel_z, min=-max_up_vel, max=max_up_vel)
+    target_up_vel = max_up_vel
+    # up_vel = torch.clamp(lin_vel_z, min=0, max=max_up_vel)
+    # down_vel = torch.clamp(-lin_vel_z, min=-max_up_vel, max=max_up_vel)
 
-    pre_jump = (event_time < 0.4).float()
+    pre_jump = (event_time < event_time_range[0]).float()
 
     descent_vel = torch.clamp(-lin_vel_z, min=0.0)
-    max_descent_vel = 0.5
+    max_descent_vel = 0.6
+    target_down_vel = -max_descent_vel
 
     penalty_coef = 1.0
-    descent_penalty = torch.clamp(descent_vel - max_descent_vel, min=0.0) * penalty_coef * pre_jump
+    descent_penalty = torch.clamp(descent_vel - max_descent_vel, min=0.0) * penalty_coef
 
-    jump_phase = torch.logical_and(event_time >= 0.4, event_time <= 0.8).float()
+    jump_phase = torch.logical_and(event_time >= event_time_range[0], event_time <= event_time_range[1]).float()
 
-    after_jump = torch.logical_and(event_time > 0.8, event_time <= 1.2).float()
+    after_jump = torch.logical_and(event_time > event_time_range[1], event_time <= event_time_range[1] + 0.4).float()
 
-    reward = up_vel * event_command[:, 0] * jump_phase * alignment_reward
-    reward += down_vel * event_command[:, 0] * after_jump * alignment_reward
-    reward -= descent_penalty
+    up_vel_reward   = torch.exp(-torch.abs(target_up_vel - lin_vel_z)*0.8)
+    down_vel_reward = torch.exp(-torch.abs(target_down_vel - lin_vel_z)*0.8)
+
+    reward = up_vel_reward * 12.5  * event_command[:, 0] * jump_phase  * alignment_reward
+    reward += down_vel_reward * 7.5 * event_command[:, 0] * after_jump * alignment_reward
+    reward -= descent_penalty * event_command[:, 0] * pre_jump
 
     return reward
+
+def wheel_action_zero_event(
+    env: ManagerBasedRLEnv,
+    command_name: str = "base_velocity",
+    event_command_name: str = "event",
+    wheel_action_name: str = "wheel_vel",
+    asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+) -> torch.Tensor:
+    
+    cmd = env.command_manager.get_command(command_name)         # [B, D]
+    event_command = env.command_manager.get_command(event_command_name)  # [B, 2]
+    
+    wheel_action = env.action_manager.get_term(wheel_action_name).processed_actions
+    wheel_action_l2 = torch.sum(torch.square(wheel_action), dim=1)  # [B]
+
+    no_cmd_mask = torch.norm(cmd, dim=-1) < 1e-3
+
+    return wheel_action_l2 * no_cmd_mask * event_command[:, 0]
 
 def reward_push_ground_event(
     env: ManagerBasedRLEnv,
     event_command_name: str = "event",
+    event_time_range: tuple = (0.3, 0.8),
     asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
     sensor_cfg: SceneEntityCfg = SceneEntityCfg("contact_forces"),
-):
-    event_command = env.command_manager.get_command(event_command_name)
-    event_time = event_command[:,1]
-    #wheel_link_id = [4, 8]
+) -> torch.Tensor:
 
-    #asset = env.scene[asset_cfg.name]
+    event_command = env.command_manager.get_command(event_command_name)
+    event_time = event_command[:, 1]
+
     contact_sensor = env.scene.sensors[sensor_cfg.name]
     foot_force = contact_sensor.data.net_forces_w[:, sensor_cfg.body_ids]
-    foot_force_error = torch.abs(foot_force[:,0,2]-foot_force[:,1,2])
-    
-    push_force = (foot_force[:,:, 2].sum(dim=1)).clamp(max=300)
-    reward = (push_force) * torch.exp(-foot_force_error/20)
-    
-    return reward * event_command[:, 0] * torch.logical_and(event_time >= 0.4, event_time <= 0.7)
+
+    z_axis = torch.tensor([0, 0, 1.0], device=foot_force.device).view(1, 1, 3)  # shape [1, 1, 3]
+
+    force_mag = torch.norm(foot_force, dim=2) + 1e-6  # [B, N_foot]
+    alignment = torch.sum(foot_force * z_axis, dim=2) / force_mag  # [B, N_foot]
+    alignment = torch.abs(alignment)
+
+    aligned_force = force_mag * alignment  # [B, N_foot]
+
+    force_diff = torch.abs(aligned_force[:, 0] - aligned_force[:, 1])  # [B]
+
+    total_force = aligned_force.sum(dim=1).clamp(max=300)  # [B]
+    reward = total_force * torch.exp(-force_diff / 20)
+
+    return reward * event_command[:, 0] * torch.logical_and(event_time >= event_time_range[0], event_time <= event_time_range[1])
 
 def feet_air_time_event(
     env: ManagerBasedRLEnv,

@@ -133,17 +133,11 @@ class EventCommand(CommandTerm):
 
         # Clone base positions and raise them slightly for visualization
         base_pos_w = self.robot.data.root_pos_w.clone()
-        base_pos_w[:, 2] += 0.7
+        base_pos_w[:, 2] += 0.75
 
         # Get indices where event_command command is active
-        active_indices = (self.event_command[:, 0] == 1.0).nonzero(as_tuple=True)[0]
-        inactive_indices = (self.event_command[:, 0] == 0.0).nonzero(as_tuple=True)[0]
-
-        # Visualize only for active indices
-        # if active_indices.numel() > 0:
-        #     self.command_active_visualizer.visualize(base_pos_w[active_indices])
-        # if inactive_indices.numel() > 0:
-        #     self.command_inactive_visualizer.visualize(base_pos_w[inactive_indices])
+        active_indices = (self.event_command[:, 0] > 0.5).nonzero(as_tuple=True)[0]
+        inactive_indices = (self.event_command[:, 0] < 0.5).nonzero(as_tuple=True)[0]
 
         if active_indices.numel() > 0:
             self.command_active_visualizer.set_visibility(True)

@@ -1,7 +1,7 @@
 [package]
 
 # Semantic Versioning is used: https://semver.org/
-version = "1.0.0"
+version = "1.2.0"
 
 # Description
 category = "lab"
@@ -11,7 +11,7 @@ readme  = "README.md"
 # -----------------------------------------------------------------
 title = "Extension Template"
 author = "Isaac Lab Project Developers"
-maintainer = "Nico Burger"
+maintainer = "jaehyungcho"
 maintainer_email = "jaehyungcho@postech.ac.kr"
 description="Extension Template for Isaaclab"
 repository = "https://github.com/jaykorea/lab.flamingo.git"

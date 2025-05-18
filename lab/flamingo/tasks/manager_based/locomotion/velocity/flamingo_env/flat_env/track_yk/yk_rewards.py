@@ -114,6 +114,7 @@ def track_ang_vel_z_link_event(
 def ang_vel_z_event(
     env: ManagerBasedRLEnv,
     event_command_name: str = "event",
+    event_time_range: tuple = (0.15, 0.8),
     asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
 ) -> torch.Tensor:
     """Reward for yaw angular velocity using linear scaled abs value (clipped at 15 rad/s).
@@ -126,45 +127,80 @@ def ang_vel_z_event(
     event_time = event_command[:, 1]
     ang_vel_b_z = asset.data.root_link_ang_vel_b[:, 2]
 
-    reward = torch.clamp(torch.abs(ang_vel_b_z) / 3.0, max=30.0) # 7.5
+    reward = torch.clamp(torch.abs(ang_vel_b_z) / 3.0, max=5.0)
 
-    return reward * event_command[:, 0] * torch.logical_and(event_time >= 0.15, event_time <= 0.8)
+    return reward * event_command[:, 0] * torch.logical_and(event_time >= event_time_range[0], event_time <= event_time_range[1])
 
 def lin_vel_z_event(
     env: ManagerBasedRLEnv,
     event_command_name: str = "event",
+    event_time_range: tuple = (0.3, 0.8),
     asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
 ) -> torch.Tensor:
-    """Reward for linear z velocity using linear abs value (clipped at 6 m/s)."""
 
     event_command = env.command_manager.get_command(event_command_name)
+    event_time    = event_command[:, 1]
     asset: RigidObject = env.scene[asset_cfg.name]
-    event_time = event_command[:, 1]
-    lin_vel = asset.data.root_lin_vel_w[:, 2]
 
-    reward = torch.clamp(torch.abs(lin_vel), max=30.0) # 6.0
+    lin_vel = asset.data.root_lin_vel_w
+    lin_vel_z = lin_vel[:, 2]
+    lin_vel_mag = torch.norm(lin_vel, dim=1) + 1e-6
 
-    return reward * event_command[:, 0] * torch.logical_and(event_time >= 0.3, event_time <= 0.8)
+    z_axis = torch.tensor([0, 0, 1.0], device=lin_vel.device)
+    alignment = torch.sum(lin_vel * z_axis, dim=1) / lin_vel_mag  # = cos(theta)
+
+    alignment_reward = torch.abs(alignment)
+
+    max_up_vel = 6.0
+    up_vel = torch.clamp(lin_vel_z, min=0, max=max_up_vel)
+    down_vel = torch.clamp(-lin_vel_z, min=-max_up_vel, max=max_up_vel)
+
+    pre_jump = (event_time < event_time_range[0]).float()
+
+    descent_vel = torch.clamp(-lin_vel_z, min=0.0)
+    max_descent_vel = 0.75
+
+    penalty_coef = 1.0
+    descent_penalty = torch.clamp(descent_vel - max_descent_vel, min=0.0) * penalty_coef
+
+    jump_phase = torch.logical_and(event_time >= event_time_range[0], event_time <= event_time_range[1]).float()
+
+    after_jump = torch.logical_and(event_time > event_time_range[1], event_time <= 1.2).float()
+
+    reward = up_vel * 0.8 * event_command[:, 0] * jump_phase * alignment_reward
+    reward += down_vel * 0.2 * event_command[:, 0] * after_jump * alignment_reward
+    reward -= descent_penalty * event_command[:, 0]  * pre_jump
+
+    return reward
 
 def reward_push_ground_event(
     env: ManagerBasedRLEnv,
     event_command_name: str = "event",
+    event_time_range: tuple = (0.3, 0.8),
     asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
     sensor_cfg: SceneEntityCfg = SceneEntityCfg("contact_forces"),
-):
-    event_command = env.command_manager.get_command(event_command_name)
-    event_time = event_command[:,1]
-    #wheel_link_id = [4, 8]
+) -> torch.Tensor:
 
-    #asset = env.scene[asset_cfg.name]
+    event_command = env.command_manager.get_command(event_command_name)
+    event_time = event_command[:, 1]
+
     contact_sensor = env.scene.sensors[sensor_cfg.name]
     foot_force = contact_sensor.data.net_forces_w[:, sensor_cfg.body_ids]
-    foot_force_error = torch.abs(foot_force[:,0,2]-foot_force[:,1,2])
-    
-    push_force = (foot_force[:,:, 2].sum(dim=1)).clamp(max=300)
-    reward = (push_force) * torch.exp(-foot_force_error/20)
-    
-    return reward * event_command[:, 0] * torch.logical_and(event_time >= 0.3, event_time <= 0.5)
+
+    z_axis = torch.tensor([0, 0, 1.0], device=foot_force.device).view(1, 1, 3)  # shape [1, 1, 3]
+
+    force_mag = torch.norm(foot_force, dim=2) + 1e-6  # [B, N_foot]
+    alignment = torch.sum(foot_force * z_axis, dim=2) / force_mag  # [B, N_foot]
+    alignment = torch.abs(alignment)
+
+    aligned_force = force_mag * alignment  # [B, N_foot]
+
+    force_diff = torch.abs(aligned_force[:, 0] - aligned_force[:, 1])  # [B]
+
+    total_force = aligned_force.sum(dim=1).clamp(max=300)  # [B]
+    reward = total_force * torch.exp(-force_diff / 20)
+
+    return reward * event_command[:, 0] * torch.logical_and(event_time >= event_time_range[0], event_time <= event_time_range[1])
 
 def feet_air_time_event(
     env: ManagerBasedRLEnv,
@@ -293,41 +329,28 @@ def base_height_adaptive_l2_event(
     env: ManagerBasedRLEnv,
     target_height: float,
     event_command_name: str,
-    event_target_height: float = 0.56288,
-    active_time_range: tuple = (0.8, 1.2),
     asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
     sensor_cfg: SceneEntityCfg | None = None,
 ) -> torch.Tensor:
+    """Penalize asset height from its target using L2 squared kernel.
+
+    Note:
+        For flat terrain, target height is in the world frame. For rough terrain,
+        sensor readings can adjust the target height to account for the terrain.
     """
-    Penalize deviation from adaptive base height.
-    
-    - Default: penalize from `target_height`
-    - If event is active and time_elapsed is in [0.8, 1.2], penalize from `event_target_height`
-    """
+    # extract the used quantities (to enable type-hinting)
     asset: RigidObject = env.scene[asset_cfg.name]
     event_cmd = env.command_manager.get_command(event_command_name)  # shape: (num_envs, 2)
-    event_active = event_cmd[:, 0] == 1.0
-    time_elapsed = event_cmd[:, 1]
-    in_event_window = (time_elapsed >= active_time_range[0]) & (time_elapsed <= active_time_range[1])
-    use_event_target = event_active & in_event_window
 
-    # Base height target selection
     if sensor_cfg is not None:
         sensor: RayCaster = env.scene[sensor_cfg.name]
-        terrain_adjustment = torch.mean(sensor.data.ray_hits_w[..., 2], dim=1)
-        default_target = target_height + terrain_adjustment
-        event_target = event_target_height + terrain_adjustment
+        # Adjust the target height using the sensor data
+        adjusted_target_height = target_height + torch.mean(sensor.data.ray_hits_w[..., 2], dim=1)
     else:
-        default_target = target_height
-        event_target = event_target_height
-
-    # Select final height target
-    final_target = torch.where(use_event_target, event_target, default_target)
-
-    # Compute L2 penalty on height deviation
-    current_height = asset.data.root_link_pos_w[:, 2]
-    return torch.square(current_height - final_target)
-
+        # Use the provided target height directly for flat terrain
+        adjusted_target_height = target_height
+    # Compute the L2 squared penalty
+    return torch.square(asset.data.root_link_pos_w[:, 2] - adjusted_target_height) * (1 - event_cmd[:,0])
 
 def over_height(
     env: ManagerBasedRLEnv,

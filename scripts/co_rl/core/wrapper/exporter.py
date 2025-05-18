@@ -7,7 +7,289 @@ import copy
 import os
 import torch
 import torch.nn as nn
+import os
+import yaml
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import (
+    SimpleDocTemplate, Paragraph, Table, TableStyle, Spacer
+)
+from reportlab.lib.styles import getSampleStyleSheet
 
+
+import os
+import yaml
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
+
+
+import os
+import yaml
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import inch
+
+
+import os
+import yaml
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import inch
+
+def export_env_as_pdf(yaml_path: str, pdf_path: str = None) -> None:
+
+    def _on_page(canvas, doc):
+        canvas.setFont("Helvetica", 9)
+        abs_page = canvas.getPageNumber()
+        # 2번째 physical 페이지부터 “Page 1”로 시작
+        if abs_page > 1:
+            logical_page = abs_page - 1
+            canvas.drawRightString(
+                letter[0] - 0.5 * inch,
+                0.5 * inch,
+                f"Page {logical_page}"
+            )
+
+    # 출력 파일명 설정
+    if pdf_path is None:
+        base, _ = os.path.splitext(yaml_path)
+        pdf_path = base + '_.pdf'
+
+    # YAML 로드
+    with open(yaml_path, 'r') as f:
+        data = yaml.load(f, Loader=yaml.UnsafeLoader)
+
+    # 스타일 준비
+    styles = getSampleStyleSheet()
+    title_style    = styles['Title']
+    header_style   = styles['Heading1']
+    subhdr_style   = styles['Heading4']
+    body_style     = styles['BodyText']
+    body_style.wordWrap = 'CJK'
+
+    elements = []
+
+    # --- 커버 페이지 ---
+    elements.append(Paragraph('Environment Parameters', title_style))
+    elements.append(Spacer(1, 2 * inch))
+    elements.append(Paragraph(f"Exported from: {os.path.basename(yaml_path)}", body_style))
+    elements.append(PageBreak())
+
+    # --- Actuators Table ---
+    elements.append(Paragraph('[Scene Robot Actuators]', header_style))
+    elements.append(Spacer(1, 0.2 * inch))
+    actuators = data.get('scene', {}).get('robot', {}).get('actuators', {}) or {}
+    act_data = [[Paragraph('actuator', subhdr_style), Paragraph('property', subhdr_style), Paragraph('value', subhdr_style)]]
+    spans = []
+    idx = 1
+    # 행 데이터 채우기...
+    for name, cfg in actuators.items():
+        start = idx
+        first = True
+        if isinstance(cfg, dict):
+            for prop, val in cfg.items():
+                if isinstance(val, dict):
+                    sub_start = idx
+                    for i, (k, v) in enumerate(val.items()):
+                        act_data.append([
+                            Paragraph(name, body_style) if first else Paragraph('', body_style),
+                            Paragraph(prop, body_style) if i == 0 else Paragraph('', body_style),
+                            Paragraph(f"{k}: {v}", body_style)
+                        ])
+                        idx += 1; first = False
+                    sub_end = idx - 1
+                    if sub_end > sub_start:
+                        spans.append(('SPAN', (1, sub_start), (1, sub_end)))
+                else:
+                    act_data.append([
+                        Paragraph(name, body_style) if first else Paragraph('', body_style),
+                        Paragraph(prop, body_style),
+                        Paragraph(str(val), body_style)
+                    ])
+                    idx += 1; first = False
+        else:
+            act_data.append([Paragraph(name, body_style), Paragraph('', body_style), Paragraph(str(cfg), body_style)])
+            idx += 1
+        end = idx - 1
+        if end > start:
+            spans.append(('SPAN', (0, start), (0, end)))
+    table = Table(act_data, colWidths=[120, 140, 220])
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4F81BD')),
+        ('TEXTCOLOR',  (0, 0), (-1, 0), colors.white),
+        ('VALIGN',     (0, 0), (-1, -1), 'TOP'),
+        ('GRID',       (0, 0), (-1, -1), 0.5, colors.black),
+    ] + spans))
+    elements.append(table)
+    elements.append(Spacer(1, 0.5 * inch))
+
+    # --- Actions Table ---
+    elements.append(PageBreak())
+    elements.append(Paragraph('[Actions]', header_style))
+    elements.append(Spacer(1, 0.2 * inch))
+    actions = data.get('actions', {}) or {}
+    act_data, spans = [[Paragraph('action', subhdr_style), Paragraph('property', subhdr_style), Paragraph('value', subhdr_style)]], []
+    idx = 1
+    for name, cfg in actions.items():
+        start = idx; first = True
+        if isinstance(cfg, dict):
+            for prop, val in cfg.items():
+                if isinstance(val, (list, tuple)):
+                    sub_start = idx
+                    for i, item in enumerate(val):
+                        act_data.append([
+                            Paragraph(name, body_style) if first else Paragraph('', body_style),
+                            Paragraph(prop, body_style) if i == 0 else Paragraph('', body_style),
+                            Paragraph(str(item), body_style)
+                        ])
+                        idx += 1; first = False
+                    sub_end = idx - 1
+                    if sub_end > sub_start:
+                        spans.append(('SPAN', (1, sub_start), (1, sub_end)))
+                elif isinstance(val, dict):
+                    sub_start = idx
+                    for i, (k, v) in enumerate(val.items()):
+                        act_data.append([
+                            Paragraph(name, body_style) if first else Paragraph('', body_style),
+                            Paragraph(prop, body_style) if i == 0 else Paragraph('', body_style),
+                            Paragraph(f"{k}: {v}", body_style)
+                        ])
+                        idx += 1; first = False
+                    sub_end = idx - 1
+                    if sub_end > sub_start:
+                        spans.append(('SPAN', (1, sub_start), (1, sub_end)))
+                else:
+                    act_data.append([
+                        Paragraph(name, body_style) if first else Paragraph('', body_style),
+                        Paragraph(prop, body_style),
+                        Paragraph(str(val), body_style)
+                    ])
+                    idx += 1; first = False
+        else:
+            act_data.append([Paragraph(name, body_style), Paragraph('', body_style), Paragraph(str(cfg), body_style)])
+            idx += 1
+        end = idx - 1
+        if end > start:
+            spans.append(('SPAN', (0, start), (0, end)))
+    table = Table(act_data, colWidths=[120, 140, 220])
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4F81BD')),
+        ('TEXTCOLOR',  (0, 0), (-1, 0), colors.white),
+        ('VALIGN',     (0, 0), (-1, -1), 'TOP'),
+        ('GRID',       (0, 0), (-1, -1), 0.5, colors.black),
+    ] + spans))
+    elements.append(table)
+    elements.append(Spacer(1, 0.5 * inch))
+
+    # --- Rewards Table (새 페이지에서 시작) ---
+    elements.append(PageBreak())
+    elements.append(Paragraph('[Rewards]', header_style))
+    elements.append(Spacer(1, 0.2 * inch))
+    rewards = data.get('rewards', {}) or {}
+    rew_data, spans = [[Paragraph('reward', subhdr_style), Paragraph('weight', subhdr_style), Paragraph('param', subhdr_style)]], []
+    idx = 1
+    for name, r in rewards.items():
+        start = idx; first = True
+        for k, v in (r.get('params') or {}).items():
+            rew_data.append([
+                Paragraph(name, body_style) if first else Paragraph('', body_style),
+                Paragraph(str(r.get('weight', '')), body_style) if first else Paragraph('', body_style),
+                Paragraph(f"{k}: {v!r}", body_style)
+            ])
+            idx += 1; first = False
+        end = idx - 1
+        if end > start:
+            spans.extend([('SPAN', (0, start), (0, end)), ('SPAN', (1, start), (1, end))])
+    table = Table(rew_data, colWidths=[120, 60, 320])
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4F81BD')),
+        ('TEXTCOLOR',  (0, 0), (-1, 0), colors.white),
+        ('ALIGN',      (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME',   (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE',   (0, 0), (-1, 0), 12),
+        ('VALIGN',     (0, 0), (-1, -1), 'TOP'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+        ('GRID',       (0, 0), (-1, -1), 0.5, colors.black),
+    ] + spans))
+    elements.append(table)
+    elements.append(Spacer(1, 0.5 * inch))
+
+    # --- Events Table (새 페이지에서 시작) ---
+    elements.append(PageBreak())
+    elements.append(Paragraph('[Events]', header_style))
+    elements.append(Spacer(1, 0.2 * inch))
+    events = data.get('events', {}) or {}
+    evt_data, spans = [[Paragraph('event', subhdr_style), Paragraph('property', subhdr_style), Paragraph('value', subhdr_style)]], []
+    idx = 1
+    for name, cfg in events.items():
+        start = idx; first = True
+        if isinstance(cfg, dict):
+            for prop, val in cfg.items():
+                if isinstance(val, (list, tuple)):
+                    sub_start = idx
+                    for i, item in enumerate(val):
+                        evt_data.append([
+                            Paragraph(name, body_style) if first else Paragraph('', body_style),
+                            Paragraph(prop, body_style) if i == 0 else Paragraph('', body_style),
+                            Paragraph(str(item), body_style)
+                        ])
+                        idx += 1; first = False
+                    sub_end = idx - 1
+                    if sub_end > sub_start:
+                        spans.append(('SPAN', (1, sub_start), (1, sub_end)))
+                elif isinstance(val, dict):
+                    sub_start = idx
+                    for i, (k, v) in enumerate(val.items()):
+                        evt_data.append([
+                            Paragraph(name, body_style) if first else Paragraph('', body_style),
+                            Paragraph(prop, body_style) if i == 0 else Paragraph('', body_style),
+                            Paragraph(f"{k}: {v}", body_style)
+                        ])
+                        idx += 1; first = False
+                    sub_end = idx - 1
+                    if sub_end > sub_start:
+                        spans.append(('SPAN', (1, sub_start), (1, sub_end)))
+                else:
+                    evt_data.append([
+                        Paragraph(name, body_style) if first else Paragraph('', body_style),
+                        Paragraph(prop, body_style), Paragraph(str(val), body_style)
+                    ])
+                    idx += 1; first = False
+        else:
+            evt_data.append([Paragraph(name, body_style), Paragraph('', body_style), Paragraph(str(cfg), body_style)])
+            idx += 1
+        end = idx - 1
+        if end > start:
+            spans.append(('SPAN', (0, start), (0, end)))
+    table = Table(evt_data, colWidths=[120, 140, 220])
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4F81BD')),
+        ('TEXTCOLOR',  (0, 0), (-1, 0), colors.white),
+        ('VALIGN',     (0, 0), (-1, -1), 'TOP'),
+        ('GRID',       (0, 0), (-1, -1), 0.5, colors.black),
+    ] + spans))
+    elements.append(table)
+
+    doc = SimpleDocTemplate(
+        pdf_path,
+        pagesize=letter,
+        title="Track Your Parameters",   # 파일 이름을 PDF 타이틀에
+        author="CoCELO",                     # 여기에 원하시는 author
+        subject="Environment Parameters",    # optional
+        creator="jaehyungcho"          # optional
+    )
+    doc.build(
+        elements,
+        onFirstPage=lambda c, d: None,
+        onLaterPages=_on_page
+    )
+    print(f"env.pdf generated: {pdf_path}")
 
 def export_policy_as_jit(actor_critic: object, normalizer: object | None, path: str, filename="policy.pt"):
     """Export policy into a Torch JIT file.

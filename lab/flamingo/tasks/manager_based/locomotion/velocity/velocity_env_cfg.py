@@ -354,7 +354,7 @@ class EventCfg:
         mode="startup",
         params={
             "asset_cfg": SceneEntityCfg("robot", joint_names=[".*hip_joint", ".*shoulder_joint", ".*leg_joint"]),
-            "stiffness_distribution_params": (0.8, 1.2),
+            "stiffness_distribution_params": (0.7, 1.2),
             "damping_distribution_params": (1.0, 1.5),
             "operation": "scale",
             "distribution": "log_uniform",
@@ -366,8 +366,8 @@ class EventCfg:
         mode="startup",
         params={
             "asset_cfg": SceneEntityCfg("robot", joint_names=".*wheel_joint"),
-            "stiffness_distribution_params": (0.8, 1.3),
-            "damping_distribution_params": (0.8, 1.2),
+            "stiffness_distribution_params": (0.9, 1.3),
+            "damping_distribution_params": (0.9, 1.3),
             "operation": "scale",
             "distribution": "log_uniform",
         },
@@ -378,7 +378,7 @@ class EventCfg:
         mode="startup",
         params={
             "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
-            "com_distribution_params": (-0.025, 0.0),
+            "com_distribution_params": (-0.03, 0.0),
             "operation": "add",
         },
     )
