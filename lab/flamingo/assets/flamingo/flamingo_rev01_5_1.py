@@ -51,7 +51,7 @@ FLAMINGO_CFG = ArticulationCfg(
     actuators={
         "joints": DelayedPDActuatorCfg(
             joint_names_expr=[".*_hip_joint", ".*_shoulder_joint", ".*_leg_joint"],
-            effort_limit=45.0,
+            effort_limit=60.0,
             velocity_limit=20.0,
             min_delay=0,  # physics time steps (min: 5.0 * 0 = 0.0ms)
             max_delay=4,  # physics time steps (max: 5.0 * 4 = 20.0ms)
@@ -78,14 +78,14 @@ FLAMINGO_CFG = ArticulationCfg(
         ),
         "wheels": DelayedPDActuatorCfg(
             joint_names_expr=[".*_wheel_joint"],
-            effort_limit=45.0,
+            effort_limit=60.0,
             velocity_limit=20.0,
             min_delay=0,  # physics time steps (min: 5.0 * 0 = 0.0ms)
             max_delay=4,  # physics time steps (max: 5.0 * 4 = 20.0ms)
             stiffness={
                 ".*_wheel_joint": 0.0,
             },
-            damping={".*_wheel_joint": 0.75},
+            damping={".*_wheel_joint": 0.7},
             friction={
                 ".*_wheel_joint": 0.0,
             },

@@ -64,6 +64,7 @@ from isaaclab.utils.dict import print_dict
 from scripts.co_rl.core.wrapper import (
     CoRlPolicyRunnerCfg,
     CoRlVecEnvWrapper,
+    export_env_as_pdf,
     export_policy_as_jit,
     export_policy_as_onnx,
     export_srm_as_onnx,
@@ -174,11 +175,16 @@ def main():
             export_srm_as_onnx(
                 runner.alg.srm, runner.alg.srm_fc, device=agent_cfg.device, path=export_model_dir, filename="srm.onnx"
             )
+    
+    # export environment to pdf
+    export_env_as_pdf(yaml_path=os.path.join(log_dir, "params", "env.yaml"), pdf_path=os.path.join(export_model_dir, "env.pdf"))
 
     # TODO Should Generalize this using argparser
     if args_cli.plot == True:
-        if "Edu" in args_cli.task:
-            flamingo_edu = True
+        if "Light" in args_cli.task:
+            flamingo_light = True
+        else:
+            flamingo_light = False
         # Initialize lists to store data
         joint_pos_list = []
         target_joint_pos_list = []
@@ -205,7 +211,7 @@ def main():
                 break
         # Extract the relevant slices and convert to numpy
         if args_cli.plot == True:
-            if flamingo_edu:
+            if flamingo_light:
                 joint_pos = obs[0, :2].cpu().numpy()
                 target_joint_pos = (clipped_actions[0, :2] * 1.25).cpu().numpy()
                 joint_velocity_obs = obs[0, 2:4].cpu().numpy()
@@ -225,7 +231,7 @@ def main():
     env.close()
 
     if args_cli.plot == True:
-        if flamingo_edu:
+        if flamingo_light:
             plt.figure(figsize=(14, 16))
             for i in range(2):
                 plt.subplot(2, 2, i + 1)

@@ -5,7 +5,7 @@
 
 """Wrappers and utilities to configure an :class:`ManagerBasedRLEnv` for RSL-RL library."""
 
-from .exporter import export_policy_as_jit, export_policy_as_onnx, export_srm_as_onnx
+from .exporter import export_env_as_pdf, export_policy_as_jit, export_policy_as_onnx, export_srm_as_onnx
 from .rl_cfg import (
     CoRlPolicyRunnerCfg,
     CoRlPpoActorCriticCfg,
