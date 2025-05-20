@@ -22,7 +22,7 @@ from lab.flamingo.assets.flamingo.flamingo_rev01_5_1 import FLAMINGO_CFG  # isor
 class FlamingocommandsCfg(CommandsCfg):
     event = mdp.EventCommandCfg(
         asset_name="robot",
-        resampling_time_range=(5.0, 7.0),
+        resampling_time_range=(3.0, 5.0),
         rel_standing_envs=0.1,
         event_during_time=1.2,
         debug_vis=True,
@@ -56,13 +56,16 @@ class FlamingoRewardsCfg():
         weight=4.0,
         params={"event_command_name": "event",
                 "event_time_range": (0.3, 0.8),
-                "max_up_vel": 6.0,
+                "max_up_vel": 4.0,
+                "up_vel_coef": 20.0,
+                "down_vel_coef": 0.0,
+                "temperature": 0.75,
         }
     )
 
     push_ground_event = RewTerm(
         func = mdp_jump.reward_push_ground_event,
-        weight=0.1,
+        weight=0.05,
         params= {
             "event_command_name": "event",
             "event_time_range": (0.3, 0.8),
@@ -188,7 +191,7 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
         }
         # add base mass should be called here
         self.events.add_base_mass.params["asset_cfg"].body_names = ["base_link"]
-        self.events.add_base_mass.params["mass_distribution_params"] = (-0.75, 3.0)
+        self.events.add_base_mass.params["mass_distribution_params"] = (-0.75, 1.5)
 
         # physics material should be called here
         self.events.physics_material.params["asset_cfg"].body_names = [".*_link"]

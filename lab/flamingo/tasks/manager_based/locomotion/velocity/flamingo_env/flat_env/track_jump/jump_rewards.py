@@ -21,6 +21,9 @@ def lin_vel_z_event(
     event_command_name: str = "event",
     event_time_range: tuple = (0.3, 0.8),
     max_up_vel: float = 4.0,
+    up_vel_coef: float = 20.0,
+    down_vel_coef: float = 1.0,
+    temperature: float = 1.0,
     asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
 ) -> torch.Tensor:
 
@@ -44,8 +47,7 @@ def lin_vel_z_event(
     pre_jump = (event_time < event_time_range[0]).float()
 
     descent_vel = torch.clamp(-lin_vel_z, min=0.0)
-    max_descent_vel = 0.6
-    target_down_vel = -max_descent_vel
+    max_descent_vel = 1.0
 
     penalty_coef = 1.0
     descent_penalty = torch.clamp(descent_vel - max_descent_vel, min=0.0) * penalty_coef
@@ -54,11 +56,11 @@ def lin_vel_z_event(
 
     after_jump = torch.logical_and(event_time > event_time_range[1], event_time <= event_time_range[1] + 0.4).float()
 
-    up_vel_reward   = torch.exp(-torch.abs(target_up_vel - lin_vel_z)*0.8)
-    down_vel_reward = torch.exp(-torch.abs(target_down_vel - lin_vel_z)*0.8)
+    up_vel_reward   = torch.exp(-torch.abs(target_up_vel - lin_vel_z) * temperature)
+    down_vel_reward = torch.exp(-torch.abs(-target_up_vel - lin_vel_z) * temperature)
 
-    reward = up_vel_reward * 12.5  * event_command[:, 0] * jump_phase  * alignment_reward
-    reward += down_vel_reward * 7.5 * event_command[:, 0] * after_jump * alignment_reward
+    reward = up_vel_reward * up_vel_coef  * event_command[:, 0] * jump_phase  * alignment_reward
+    reward += down_vel_reward * down_vel_coef * event_command[:, 0] * after_jump * alignment_reward
     reward -= descent_penalty * event_command[:, 0] * pre_jump
 
     return reward
