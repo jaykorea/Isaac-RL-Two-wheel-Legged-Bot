@@ -53,13 +53,13 @@ class FlamingoRewardsCfg():
 
     lin_vel_z_event = RewTerm(
         func=mdp_jump.lin_vel_z_event,
-        weight=4.0,
+        weight=3.0,
         params={"event_command_name": "event",
                 "event_time_range": (0.3, 0.8),
-                "max_up_vel": 4.0,
+                "max_up_vel": 3.0,
                 "up_vel_coef": 20.0,
                 "down_vel_coef": 0.0,
-                "temperature": 0.75,
+                "temperature": 4.0,
         }
     )
 
@@ -125,7 +125,7 @@ class FlamingoRewardsCfg():
         weight=-1.0,  # default: -0.5
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*_leg_joint")},
     )
-    flat_orientation_l2 = RewTerm(func=mdp.flat_euler_angle_l2, weight=-15.0)
+    flat_orientation_l2 = RewTerm(func=mdp.flat_euler_angle_l2, weight=-30.0)
 
     base_height = RewTerm(
         func=mdp_jump.base_height_adaptive_l2_event,
@@ -137,7 +137,7 @@ class FlamingoRewardsCfg():
         },
     )
 
-    dof_torques_l2 = RewTerm(func=mdp.joint_torques_l2, weight=-5.0e-5)
+    dof_torques_l2 = RewTerm(func=mdp.joint_torques_l2, weight=-5.0e-6)
     dof_acc_l2 = RewTerm(func=mdp.joint_acc_l2, weight=-2.5e-7)  # default: -2.5e-7
     action_rate_l2 = RewTerm(func=mdp.action_rate_l2, weight=-0.01)  # default: -0.01
 
