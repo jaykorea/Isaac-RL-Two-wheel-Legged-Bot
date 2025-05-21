@@ -56,8 +56,8 @@ def lin_vel_z_event(
 
     after_jump = torch.logical_and(event_time > event_time_range[1], event_time <= event_time_range[1] + 0.4).float()
 
-    up_vel_reward   = torch.exp(-torch.abs(target_up_vel - lin_vel_z) * temperature)
-    down_vel_reward = torch.exp(-torch.abs(-target_up_vel - lin_vel_z) * temperature)
+    up_vel_reward   = torch.exp(-torch.abs(target_up_vel - (lin_vel_z/max_up_vel)) * temperature)
+    down_vel_reward = torch.exp(-torch.abs(-target_up_vel - (lin_vel_z/max_up_vel)) * temperature)
 
     reward = up_vel_reward * up_vel_coef  * event_command[:, 0] * jump_phase  * alignment_reward
     reward += down_vel_reward * down_vel_coef * event_command[:, 0] * after_jump * alignment_reward
