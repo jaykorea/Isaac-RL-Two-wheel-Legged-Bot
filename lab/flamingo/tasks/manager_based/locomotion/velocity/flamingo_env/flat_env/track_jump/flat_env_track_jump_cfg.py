@@ -53,13 +53,13 @@ class FlamingoRewardsCfg():
 
     lin_vel_z_event = RewTerm(
         func=mdp_jump.lin_vel_z_event,
-        weight=3.0,
+        weight=2.5,
         params={"event_command_name": "event",
                 "event_time_range": (0.3, 0.8),
-                "max_up_vel": 3.0,
+                "max_up_vel": 4.0,
                 "up_vel_coef": 20.0,
                 "down_vel_coef": 0.0,
-                "temperature": 4.0,
+                "temperature": 2.0,
         }
     )
 
@@ -129,7 +129,7 @@ class FlamingoRewardsCfg():
 
     base_height = RewTerm(
         func=mdp_jump.base_height_adaptive_l2_event,
-        weight=-40.0,
+        weight=-50.0,
         params={
             "target_height": 0.36288,
             "event_command_name": "event",
