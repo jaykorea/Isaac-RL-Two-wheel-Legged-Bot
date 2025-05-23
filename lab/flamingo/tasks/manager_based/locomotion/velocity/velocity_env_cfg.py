@@ -353,9 +353,21 @@ class EventCfg:
         func=mdp.randomize_actuator_gains,
         mode="startup",
         params={
-            "asset_cfg": SceneEntityCfg("robot", joint_names=[".*hip_joint", ".*shoulder_joint", ".*leg_joint"]),
+            "asset_cfg": SceneEntityCfg("robot", joint_names=[".*hip_joint", ".*shoulder_joint"]),
             "stiffness_distribution_params": (0.7, 1.3),
-            "damping_distribution_params": (0.9, 1.3),
+            "damping_distribution_params": (0.7, 1.3),
+            "operation": "scale",
+            "distribution": "log_uniform",
+        },
+    )
+
+    randomize_leg_joint_actuator_gains = EventTerm(
+        func=mdp.randomize_actuator_gains,
+        mode="startup",
+        params={
+            "asset_cfg": SceneEntityCfg("robot", joint_names=".*leg_joint"),
+            "stiffness_distribution_params": (0.8, 1.2),
+            "damping_distribution_params": (0.8, 1.3),
             "operation": "scale",
             "distribution": "log_uniform",
         },
