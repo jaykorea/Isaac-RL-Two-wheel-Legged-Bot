@@ -137,9 +137,9 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
         self.observations.none_stack_policy.lift_mask = None
 
         self.observations.none_stack_policy.roll_pitch_commands = None
-        self.observations.none_stack_policy.event = None
+        self.observations.none_stack_policy.event_commands = None
         self.observations.none_stack_critic.roll_pitch_commands = None
-        self.observations.none_stack_critic.event = None
+        self.observations.none_stack_critic.event_commands = None
         #! ********************************************************* !#
 
         # reset_robot_joint_zero should be called here

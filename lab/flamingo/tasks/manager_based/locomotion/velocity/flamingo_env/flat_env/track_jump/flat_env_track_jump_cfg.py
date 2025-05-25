@@ -129,9 +129,9 @@ class FlamingoRewardsCfg():
 
     base_height = RewTerm(
         func=mdp_jump.base_height_adaptive_l2_event,
-        weight=-50.0,
+        weight=-40.0,
         params={
-            "target_height": 0.36288,
+            "target_height": 0.4,
             "event_command_name": "event",
             "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
         },
