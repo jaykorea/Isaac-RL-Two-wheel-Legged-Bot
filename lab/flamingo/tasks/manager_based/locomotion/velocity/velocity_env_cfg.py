@@ -366,7 +366,7 @@ class EventCfg:
         mode="startup",
         params={
             "asset_cfg": SceneEntityCfg("robot", joint_names=".*leg_joint"),
-            "stiffness_distribution_params": (0.8, 1.2),
+            "stiffness_distribution_params": (0.8, 1.3),
             "damping_distribution_params": (0.8, 1.3),
             "operation": "scale",
             "distribution": "log_uniform",
@@ -390,7 +390,7 @@ class EventCfg:
         mode="startup",
         params={
             "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
-            "com_distribution_params": (-0.05, 0.02),
+            "com_distribution_params": (-0.05, -0.02),
             "operation": "add",
         },
     )
