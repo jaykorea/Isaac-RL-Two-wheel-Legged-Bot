@@ -131,7 +131,7 @@ class FlamingoRewardsCfg():
         func=mdp_jump.base_height_adaptive_l2_event,
         weight=-40.0,
         params={
-            "target_height": 0.4,
+            "target_height": 0.36288,
             "event_command_name": "event",
             "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
         },

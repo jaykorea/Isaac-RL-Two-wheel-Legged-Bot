@@ -218,7 +218,8 @@ class ObservationsCfg:
         base_ang_vel = ObsTerm(func=mdp.base_ang_vel_link, scale=0.15)  # default: -0.15
         # base_euler = ObsTerm(func=mdp.base_euler_angle_link)
         base_projected_gravity = ObsTerm(func=mdp.projected_gravity)  # default: -0.05
-        actions = ObsTerm(func=mdp.last_action)
+        actions_joint = ObsTerm(func=mdp.last_action, params={"action_name": "joint_pos"})
+        actions_wheel = ObsTerm(func=mdp.last_action, params={"action_name": "wheel_vel"})
 
         def __post_init__(self):
             self.enable_corruption = False
@@ -290,7 +291,9 @@ class ObservationsCfg:
         base_ang_vel = ObsTerm(func=mdp.base_ang_vel_link, noise=Unoise(n_min=-0.15, n_max=0.15), scale=0.15)  # default: -0.15
         # base_euler = ObsTerm(func=mdp.base_euler_angle_link, noise=Unoise(n_min=-0.125, n_max=0.125))  # default: -0.125
         base_projected_gravity = ObsTerm(func=mdp.projected_gravity, noise=Unoise(n_min=-0.05, n_max=0.05))  # default: -0.05
-        actions = ObsTerm(func=mdp.last_action)
+        actions_joint = ObsTerm(func=mdp.last_action, params={"action_name": "joint_pos"})
+        actions_wheel = ObsTerm(func=mdp.last_action, params={"action_name": "wheel_vel"})
+
 
         def __post_init__(self):
             self.enable_corruption = True

@@ -9,11 +9,24 @@ import isaaclab.sim as sim_utils
 from isaaclab.actuators import (
     DelayedPDActuatorCfg,
 )
-
+from lab.flamingo.tasks.manager_based.locomotion.velocity.actuators.actuator_cfg import (
+    ActuatorNetKANCfg,
+)
 from isaaclab.assets.articulation import ArticulationCfg
 
 from lab.flamingo.assets.flamingo import FLAMINGO_ASSETS_DATA_DIR
 
+FLAMINGO_WHEEL_ACTUATOR_KAN_CFG = ActuatorNetKANCfg(
+            joint_names_expr=[".*_wheel_joint"],
+            symbolic_formula=f"{FLAMINGO_ASSETS_DATA_DIR}/ActuatorNets/Flamingo/kan/wheel/symbolic_formula.txt",
+            saturation_effort=60.0,
+            velocity_limit=20.0,
+            pos_scale=1.0,
+            vel_scale=1.0,
+            torque_scale=1.0,
+            input_order="vel_pos",
+            input_idx=[0,1,2],
+        )
 
 FLAMINGO_CFG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
