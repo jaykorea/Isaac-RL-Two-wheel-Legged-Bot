@@ -6,6 +6,7 @@ from isaaclab.actuators.actuator_cfg import (
     ActuatorNetLSTMCfg as BaseActuatorNetLSTMCfg,
     ActuatorNetMLPCfg as BaseActuatorNetMLPCfg,
     IdealPDActuatorCfg as BaseIdealPDActuatorCfg,
+    DCMotorCfg,
 )
 from .actuator_net import ActuatorNetLSTM, ActuatorNetMLP, ActuatorNetKAN
 from .actuator_force_zero import ForceZeroActuator
@@ -60,7 +61,7 @@ class ActuatorNetMLPCfg(BaseActuatorNetMLPCfg):
     """Indices of the actuator history buffer passed as inputs to the network."""
 
 @configclass
-class ActuatorNetKANCfg(BaseActuatorNetMLPCfg):
+class ActuatorNetKANCfg(DCMotorCfg):
     """Configuration for MLP-based actuator model."""
 
     class_type: type = ActuatorNetKAN
@@ -68,7 +69,7 @@ class ActuatorNetKANCfg(BaseActuatorNetMLPCfg):
     stiffness = None
     damping = None
 
-    symbolic: str = MISSING
+    symbolic_formula: str = MISSING
     """Path to the file containing network weights."""
 
     pos_scale: float = MISSING

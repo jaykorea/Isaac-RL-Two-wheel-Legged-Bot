@@ -47,7 +47,7 @@ class FlamingoRewardsCfg():
 
     joint_deviation = RewTerm(
         func=mdp.joint_deviation_zero_l1,
-        weight=-5.0,
+        weight=-10.0,
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_joint"])},
     )
 
@@ -81,19 +81,19 @@ class FlamingoRewardsCfg():
     )
     shoulder_align_l1 = RewTerm(
         func=mdp.joint_align_l1,
-        weight=-0.1,  # default: -0.5
+        weight=-0.5,  # default: -0.5
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*_shoulder_joint")},
     )
     leg_align_l1 = RewTerm(
         func=mdp.joint_align_l1,
-        weight=-0.1,  # default: -0.5
+        weight=-0.5,  # default: -0.5
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*_leg_joint")},
     )
     flat_orientation_l2 = RewTerm(func=mdp.flat_euler_angle_l2, weight=-10.0)
 
     track_base_height = RewTerm(
         func=mdp.track_pos_z_exp,
-        weight=3.0,
+        weight=2.5,
         params={
             "temperature": 8.0,
             "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
@@ -101,7 +101,7 @@ class FlamingoRewardsCfg():
     )
     track_base_height_fine_grained = RewTerm(
         func=mdp.track_pos_z_exp,
-        weight=1.5,
+        weight=1.25,
         params={
             "temperature": 32.0,
             "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
@@ -125,6 +125,18 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
         # scene
         self.scene.robot = FLAMINGO_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
 
+        #! ************** scene & observations setup - 0 *********** !#
+        self.scene.base_height_scanner = None
+        self.scene.left_wheel_height_scanner = None
+        self.scene.right_wheel_height_scanner = None
+        self.scene.left_mask_sensor = None
+        self.scene.right_mask_sensor = None
+
+        self.observations.none_stack_critic.base_height_scan = None
+        self.observations.none_stack_critic.left_wheel_height_scan = None
+        self.observations.none_stack_critic.right_wheel_height_scan = None
+        #! ********************************************************* !#
+        
         # observations
         #! ****************** Observations setup - 0 *************** !#
         self.observations.none_stack_policy.base_pos_z.params["sensor_cfg"] = None

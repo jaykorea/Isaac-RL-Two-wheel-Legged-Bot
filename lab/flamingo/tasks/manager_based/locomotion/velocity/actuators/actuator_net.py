@@ -8,6 +8,7 @@ from isaaclab.actuators.actuator_net import (
     ActuatorNetLSTM as BaseActuatorNetLSTM,
     ActuatorNetMLP as BaseActuatorNetMLP,
 )
+from isaaclab.actuators.actuator_pd import DCMotor
 
 
 class ActuatorNetLSTM(BaseActuatorNetLSTM):
@@ -165,7 +166,7 @@ class ActuatorNetMLP(BaseActuatorNetMLP):
         return control_action
     
 
-class ActuatorNetKAN(BaseActuatorNetMLP):
+class ActuatorNetKAN(DCMotor):
     """Extended Actuator model based on multi-layer perceptron and joint history."""
 
     def __init__(self, cfg, *args, **kwargs):
@@ -173,8 +174,12 @@ class ActuatorNetKAN(BaseActuatorNetMLP):
         from .actuator_cfg import ActuatorNetKANCfg
 
         self.cfg: ActuatorNetKANCfg = cfg
-        super().__init__(cfg, *args, **kwargs)
 
+        formula_str = read_file(self.cfg.symbolic_formula).getvalue().decode().strip()
+        self.kan_symbolic_formula, formula_input_dim = self.parse_formula_to_lambda(formula_str)
+
+        super().__init__(cfg, *args, **kwargs)
+        
         history_length = max(self.cfg.input_idx) + 1
 
         if self.cfg.input_order == "pos_vel":
@@ -184,6 +189,7 @@ class ActuatorNetKAN(BaseActuatorNetMLP):
             self._joint_vel_history = torch.zeros(
                 self._num_envs, history_length, self.num_joints, device=self._device
             )
+            input_dim = len(self.cfg.input_idx) * 2
         elif self.cfg.input_order == "vel_pos":
             self._joint_vel_error_history = torch.zeros(
                 self._num_envs, history_length, self.num_joints, device=self._device
@@ -194,10 +200,16 @@ class ActuatorNetKAN(BaseActuatorNetMLP):
             self._joint_cos_history = torch.zeros(
                 self._num_envs, history_length, self.num_joints, device=self._device
             )
+            input_dim = len(self.cfg.input_idx) * 3
         else:
             raise ValueError(
                 f"Invalid input order for MLP actuator net: {self.cfg.input_order}. Must be 'pos_vel' or 'vel_pos'."
             )
+
+        assert input_dim >= formula_input_dim, (
+            f"Symbolic formula requires at least {formula_input_dim} input dimensions, "
+            f"but only {input_dim} are constructed from cfg.input_idx={self.cfg.input_idx}."
+        )
 
     def compute(
         self, control_action: ArticulationActions, joint_pos: torch.Tensor, joint_vel: torch.Tensor
@@ -217,7 +229,7 @@ class ActuatorNetKAN(BaseActuatorNetMLP):
                 dim=2
             ).view(self._num_envs * self.num_joints, -1)
 
-            network_input = torch.cat(
+            x_input = torch.cat(
                 [pos_input * self.cfg.pos_scale, vel_input * self.cfg.vel_scale],
                 dim=1
             )
@@ -243,7 +255,7 @@ class ActuatorNetKAN(BaseActuatorNetMLP):
                 dim=2
             ).view(self._num_envs * self.num_joints, -1)
 
-            network_input = torch.cat(
+            x_input = torch.cat(
                 [vel_error_input * self.cfg.vel_scale, sin_input, cos_input],
                 dim=1
             )
@@ -255,7 +267,7 @@ class ActuatorNetKAN(BaseActuatorNetMLP):
         self._joint_vel[:] = joint_vel
 
         with torch.inference_mode():
-            torques = self.network(network_input).view(self._num_envs, self.num_joints)
+            torques = self.kan_symbolic_formula(x_input).view(self._num_envs, self.num_joints)
         self.computed_effort = torques.view(self._num_envs, self.num_joints) * self.cfg.torque_scale
 
         self.applied_effort = self._clip_effort(self.computed_effort)
@@ -264,3 +276,33 @@ class ActuatorNetKAN(BaseActuatorNetMLP):
         control_action.joint_positions = None
         control_action.joint_velocities = None
         return control_action
+
+    def parse_formula_to_lambda(self, formula_str: str):
+        import re
+        allowed_names = {
+            'torch': torch,
+            'sin': torch.sin,
+            'cos': torch.cos,
+            'tan': torch.tan,
+            'exp': torch.exp,
+            'log': torch.log,
+            'sqrt': torch.sqrt,
+            'abs': torch.abs,
+            'pi': torch.pi,
+        }
+        print("[KAN] Original formula string:")
+        print(formula_str)
+
+        x_indices = [int(i) for i in re.findall(r'x_(\d+)', formula_str)]
+        required_input_dim = max(x_indices) if x_indices else 0  # 그대로 사용
+
+        for i in x_indices:
+            formula_str = formula_str.replace(f'x_{i}', f'x[:, {i - 1}]')
+
+        formula_func = eval(f'lambda x: {formula_str}', allowed_names)
+
+        print(f"[KAN] Required input dim: {required_input_dim}")
+        print("[KAN] Transformed PyTorch-compatible formula:")
+        print(f"lambda x: {formula_str}")
+
+        return formula_func, required_input_dim
