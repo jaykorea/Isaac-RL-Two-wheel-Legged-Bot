@@ -3,7 +3,4 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-"""Locomotion environments for legged robots."""
-
-from .velocity import *  # noqa
-from .position import *
+from . import co_rl_cfg  # noqa: F401, F403
