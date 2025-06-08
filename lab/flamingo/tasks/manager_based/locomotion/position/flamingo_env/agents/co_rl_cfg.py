@@ -44,23 +44,12 @@ class FlamingoPPORunnerCfg(CoRlPolicyRunnerCfg):
         max_grad_norm=1.0,
     )
 
-
-@configclass
-class FlamingoFlatPPORunnerCfg_Stand_Drive(FlamingoPPORunnerCfg):
-    def __post_init__(self):
-        super().__post_init__()
-
-        self.max_iterations = 5000
-        self.experiment_name = "Flamingo_Flat_Stand_Drive"
-        self.policy.actor_hidden_dims = [512, 256, 128]
-        self.policy.critic_hidden_dims = [512, 256, 128]
-
 @configclass
 class FlamingoFlatPPORunnerCfg_Position(FlamingoPPORunnerCfg):
     def __post_init__(self):
         super().__post_init__()
 
-        self.max_iterations = 5000
+        self.max_iterations = 10000
         self.experiment_name = "Flat_Position"
         self.policy.actor_hidden_dims = [512, 256, 128]
         self.policy.critic_hidden_dims = [512, 256, 128]
@@ -71,49 +60,8 @@ class FlamingoRoughPPORunnerCfg_Position(FlamingoPPORunnerCfg):
     def __post_init__(self):
         super().__post_init__()
 
-        self.max_iterations = 5000
-        self.experiment_name = "Rough_Position"
-        self.policy.actor_hidden_dims = [512, 256, 128]
-        self.policy.critic_hidden_dims = [512, 256, 128]
-
-
-@configclass
-class FlamingoFlatPPORunnerCfg_Track_Z(FlamingoPPORunnerCfg):
-    def __post_init__(self):
-        super().__post_init__()
-
-        self.max_iterations = 5000
-        self.experiment_name = "Flamingo_Flat_Track_Z"
-        self.policy.actor_hidden_dims = [512, 256, 128]
-        self.policy.critic_hidden_dims = [512, 256, 128]
-
-@configclass
-class FlamingoFlatPPORunnerCfg_Track_RP(FlamingoPPORunnerCfg):
-    def __post_init__(self):
-        super().__post_init__()
-
-        self.max_iterations = 5000
-        self.experiment_name = "Flamingo_Flat_Track_Roll_Pitch"
-        self.policy.actor_hidden_dims = [512, 256, 128]
-        self.policy.critic_hidden_dims = [512, 256, 128]
-
-@configclass
-class FlamingoFlatPPORunnerCfg_Track_YK(FlamingoPPORunnerCfg):
-    def __post_init__(self):
-        super().__post_init__()
-
-        self.max_iterations = 5000
-        self.experiment_name = "Flamingo_Flat_Yuna_Kim"
-        self.policy.actor_hidden_dims = [512, 256, 128]
-        self.policy.critic_hidden_dims = [512, 256, 128]
-
-@configclass
-class FlamingoRoughPPORunnerCfg_Stand_Drive(FlamingoPPORunnerCfg):
-    def __post_init__(self):
-        super().__post_init__()
-
         self.max_iterations = 10000
-        self.experiment_name = "Flamingo_Rough_Stand_Drive"
+        self.experiment_name = "Flamingo_Rough_Position"
         self.policy.actor_hidden_dims = [512, 256, 128]
         self.policy.critic_hidden_dims = [512, 256, 128]
 
@@ -158,146 +106,3 @@ class FlamingoSRMPPORunnerCfg(CoRlPolicyRunnerCfg):
         acaps_lambda_t_coef=1.0e-1,
         acaps_lambda_s_coef=1.0e-2,
     )
-
-@configclass
-class FlamingoFlatSRMPPORunnerCfg_Track_YK(FlamingoSRMPPORunnerCfg):
-    def __post_init__(self):
-        super().__post_init__()
-
-        self.max_iterations = 5000
-        self.experiment_name = "Flamingo_Flat_Yuna_Kim"
-        self.policy.actor_hidden_dims = [512, 256, 128]
-        self.policy.critic_hidden_dims = [512, 256, 128]
-
-###############################################################################################
-######################################## [ SAC CONFIG] ########################################
-
-
-@configclass
-class FlamingoSACRunnerCfg(CoRlPolicyRunnerCfg):
-    num_steps_per_env = 50
-    max_iterations = 200000
-    save_interval = 200
-    experiment_name = "FlamingoStand-v0"
-    algorithm = {"class_name": "SAC"}
-
-
-@configclass
-class FlamingoFlatSACRunnerCfg_Stand_Drive(FlamingoSACRunnerCfg):
-    def __post_init__(self):
-        super().__post_init__()
-
-        self.max_iterations = 200000
-        self.experiment_name = "Flamingo_Flat_Stand_Drive"
-        self.policy.actor_hidden_dims = [512, 256, 128]
-        self.policy.critic_hidden_dims = [512, 256, 128]
-
-
-@configclass
-class FlamingoFlatSACRunnerCfg_Track_Z(FlamingoSACRunnerCfg):
-    def __post_init__(self):
-        super().__post_init__()
-
-        self.max_iterations = 200000
-        self.experiment_name = "Flamingo_Flat_Track_Z"
-        self.policy.actor_hidden_dims = [512, 256, 128]
-        self.policy.critic_hidden_dims = [512, 256, 128]
-
-
-@configclass
-class FlamingoRoughSACRunnerCfg_Stand_Drive(FlamingoSACRunnerCfg):
-    def __post_init__(self):
-        super().__post_init__()
-
-        self.max_iterations = 200000
-        self.experiment_name = "Flamingo_Rough_Stand_Drive"
-        self.policy.actor_hidden_dims = [512, 256, 128]
-        self.policy.critic_hidden_dims = [512, 256, 128]
-
-
-@configclass
-class FlamingoRoughSACRunnerCfg_Track_Z(FlamingoSACRunnerCfg):
-    def __post_init__(self):
-        super().__post_init__()
-
-        self.max_iterations = 200000
-        self.experiment_name = "Flamingo_Rough_Track_Z"
-        self.policy.actor_hidden_dims = [512, 256, 128]
-        self.policy.critic_hidden_dims = [512, 256, 128]
-
-
-@configclass
-class FlamingoRoughSACRunnerCfg_Stand_Walk(FlamingoSACRunnerCfg):
-    def __post_init__(self):
-        super().__post_init__()
-
-        self.max_iterations = 200000
-        self.experiment_name = "Flamingo_Rough_Stand_Walk"
-        self.policy.actor_hidden_dims = [512, 256, 128]
-        self.policy.critic_hidden_dims = [512, 256, 128]
-
-
-###############################################################################################
-######################################## [ TQC CONFIG] ########################################
-@configclass
-class FlamingoTQCRunnerCfg(CoRlPolicyRunnerCfg):
-    num_steps_per_env = 50
-    max_iterations = 200000
-    save_interval = 200
-    experiment_name = "FlamingoStand-v0"
-    algorithm = {"class_name": "TQC"}
-
-
-@configclass
-class FlamingoFlatTQCRunnerCfg_Stand_Drive(FlamingoTQCRunnerCfg):
-    def __post_init__(self):
-        super().__post_init__()
-
-        self.max_iterations = 200000
-        self.experiment_name = "Flamingo_Flat_Stand_Drive"
-        self.policy.actor_hidden_dims = [512, 512, 512]
-        self.policy.critic_hidden_dims = [512, 256, 128]
-
-
-@configclass
-class FlamingoFlatTQCRunnerCfg_Track_Z(FlamingoTQCRunnerCfg):
-    def __post_init__(self):
-        super().__post_init__()
-
-        self.max_iterations = 200000
-        self.experiment_name = "Flamingo_Flat_Track_Z"
-        self.policy.actor_hidden_dims = [512, 512, 512]
-        self.policy.critic_hidden_dims = [512, 256, 128]
-
-
-@configclass
-class FlamingoRoughTQCRunnerCfg_Stand_Drive(FlamingoTQCRunnerCfg):
-    def __post_init__(self):
-        super().__post_init__()
-
-        self.max_iterations = 200000
-        self.experiment_name = "Flamingo_Rough_Stand_Drive"
-        self.policy.actor_hidden_dims = [512, 512, 512]
-        self.policy.critic_hidden_dims = [512, 256, 128]
-
-
-@configclass
-class FlamingoRoughTQCRunnerCfg_Track_Z(FlamingoTQCRunnerCfg):
-    def __post_init__(self):
-        super().__post_init__()
-
-        self.max_iterations = 200000
-        self.experiment_name = "Flamingo_Rough_Track_Z"
-        self.policy.actor_hidden_dims = [512, 512, 512]
-        self.policy.critic_hidden_dims = [512, 256, 128]
-
-
-@configclass
-class FlamingoRoughTQCRunnerCfg_Stand_Walk(FlamingoTQCRunnerCfg):
-    def __post_init__(self):
-        super().__post_init__()
-
-        self.max_iterations = 200000
-        self.experiment_name = "Flamingo_Rough_Stand_Walk"
-        self.policy.actor_hidden_dims = [512, 512, 512]
-        self.policy.critic_hidden_dims = [512, 256, 128]

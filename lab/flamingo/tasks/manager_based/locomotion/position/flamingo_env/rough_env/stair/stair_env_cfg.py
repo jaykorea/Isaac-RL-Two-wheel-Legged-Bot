@@ -59,37 +59,36 @@ class FlamingoRewardsCfg():
     # )
 
     position_tracking = RewTerm(
-        func=mdp.position_command_error_tanh,
-        weight=2.0,
-        params={"std": 2.0, "command_name": "pose_command"},
+        func=mdp.track_pos_xyz_exp,
+        weight=4.0,
+        params={"temperature": 1.0, "command_name": "pose_command"},
     )
     position_tracking_fine_grained = RewTerm(
-        func=mdp.position_command_error_tanh,
-        weight=1.0,
-        params={"std": 0.2, "command_name": "pose_command"},
+        func=mdp.track_pos_xyz_exp,
+        weight=2.0,
+        params={"temperature": 0.5, "command_name": "pose_command"},
     )
     orientation_tracking = RewTerm(
         func=mdp.heading_command_error_abs,
-        weight=-0.2,
+        weight=-0.1,
         params={"command_name": "pose_command"},
     )
 
-    reward_x_move = RewTerm(
-        func=mdp.reward_x_axis_move,
-        weight = 0.5,
-        params ={"command_name": "pose_command",
-            "temperature" : 4.0}
+    reward_align_target = RewTerm(
+        func=mdp.face_target_alignment,
+        weight = 0.1,
+        params = {"command_name": "pose_command",}
     )
     
-    # # z-각속도가 낮으면 리워드.
-    # reward_smoothing_ang_vel_z_exp = RewTerm(
-    #     func=mdp.reward_smoothing_ang_vel_z_exp, 
-    #     weight=0.1, 
-    #     params={
-    #         "command_name" : "pose_command",
-    #         "temperature": 4,
-    #             "k" : 1.0}
-    # )
+    # z-각속도가 낮으면 리워드.
+    reward_smoothing_ang_vel_z_exp = RewTerm(
+        func=mdp.reward_smoothing_ang_vel_z_exp, 
+        weight=0.1, 
+        params={
+            "command_name" : "pose_command",
+            "temperature": 4,
+                "k" : 1.0}
+    )
 
     # # 목표 위치와의 거리에 따라서 desired 속도 조절.
     # reward_smoothing_lin_vel_forward_x_exp = RewTerm(
@@ -105,9 +104,9 @@ class FlamingoRewardsCfg():
     """
 
     # More exploration
-    termination_penalty = RewTerm(func=mdp.is_terminated, weight=-400.0)
+    termination_penalty = RewTerm(func=mdp.is_terminated, weight=-200.0)
 
-    #lin_vel_z_l2 = RewTerm(func=mdp.lin_vel_z_link_l2, weight=-0.5)
+    lin_vel_z_l2 = RewTerm(func=mdp.lin_vel_z_link_l2, weight=-1.0)
     ang_vel_xy_l2 = RewTerm(func=mdp.ang_vel_xy_link_l2, weight=-0.05)
 
     joint_deviation = RewTerm(
@@ -149,15 +148,15 @@ class FlamingoRewardsCfg():
         weight=-0.5,  # default: -0.5
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*_shoulder_joint")},
     )
-    # base_height = RewTerm(
-    #     func=mdp.base_height_adaptive_l2,
-    #     weight=-25.0,
-    #     params={
-    #         "target_height": 0.36288,  # 0.37073
-    #         "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
-    #         "sensor_cfg": SceneEntityCfg("height_scanner"),
-    #     },
-    # )
+    base_height = RewTerm(
+        func=mdp.base_height_adaptive_l2,
+        weight=-25.0,
+        params={
+            "target_height": 0.36288,  # 0.36288
+            "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
+            "sensor_cfg": SceneEntityCfg("height_scanner"),
+        },
+    )
     flat_orientation_l2 = RewTerm(func=mdp.flat_euler_angle_l2, weight=-10.0)
 
     joint_torques_l2 = RewTerm(func=mdp.joint_torques_l2, weight=-5.0e-6, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_joint", ".*_shoulder_joint", ".*_leg_joint"]),})
