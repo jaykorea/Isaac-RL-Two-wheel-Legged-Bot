@@ -119,6 +119,23 @@ def penalty_COM(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntityC
     penalty = com_offsets- current_com
     return penalty
 
+def face_target_alignment(env: ManagerBasedRLEnv, command_name: str = "pose_command") -> torch.Tensor:
+    """Encourage robot's heading to align with the direction to target position,
+    considering the shortest rotation direction."""
+    command = env.command_manager.get_command(command_name)  # shape: [B, 4]
+    goal_vec_b = command[:, :2]  # target position in base frame
+
+    # Calculate desired heading in base frame
+    desired_heading = torch.atan2(goal_vec_b[:, 1], goal_vec_b[:, 0])  # shape: [B]
+
+    # Heading error: robot's current heading in base frame is 0, so just desired_heading
+    heading_error = desired_heading  # already in base frame
+
+    # Reward: cosine of heading error → max when aligned (cos(0)=1), min when opposite (cos(π)=-1)
+    alignment = torch.cos(heading_error)
+
+    # Optional: sharpen the reward signal using tanh
+    return torch.tanh(alignment)
 
 def reward_x_axis_move(env: ManagerBasedRLEnv, command_name: str, temperature : float = 4.0)-> torch.Tensor:
     # reward for y axis error  
