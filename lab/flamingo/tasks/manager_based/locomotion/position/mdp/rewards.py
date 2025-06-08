@@ -76,6 +76,24 @@ def heading_command_error_abs(env: ManagerBasedRLEnv, command_name: str) -> torc
     heading_b = command[:, 3]
     return heading_b.abs()
 
+def face_target_alignment(env: ManagerBasedRLEnv, command_name: str = "pose_command") -> torch.Tensor:
+    """Encourage robot's heading to align with the direction to target position,
+    considering the shortest rotation direction."""
+    command = env.command_manager.get_command(command_name)  # shape: [B, 4]
+    goal_vec_b = command[:, :2]  # target position in base frame
+
+    # Calculate desired heading in base frame
+    desired_heading = torch.atan2(goal_vec_b[:, 1], goal_vec_b[:, 0])  # shape: [B]
+
+    # Heading error: robot's current heading in base frame is 0, so just desired_heading
+    heading_error = desired_heading  # already in base frame
+
+    # Reward: cosine of heading error → max when aligned (cos(0)=1), min when opposite (cos(π)=-1)
+    alignment = torch.cos(heading_error)
+
+    # Optional: sharpen the reward signal using tanh
+    return torch.tanh(alignment * 3.0)
+
 def penalty_fly_feet(env:ManagerBasedRLEnv,
                         sensor_cfg: SceneEntityCfg,
                         threshold : float = 0.75):

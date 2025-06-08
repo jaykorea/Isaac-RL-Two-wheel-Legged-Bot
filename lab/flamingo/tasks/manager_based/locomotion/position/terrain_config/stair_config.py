@@ -15,7 +15,7 @@ ROUGH_TERRAINS_CFG = TerrainGeneratorCfg(
     size=(10.75, 10.75), # (9.75.9.75)
     border_width=10.0,
     num_rows=20,
-    num_cols=20,
+    num_cols=10,
     color_scheme="random",
     horizontal_scale=0.1,
     vertical_scale=0.005,
@@ -44,7 +44,7 @@ ROUGH_TERRAINS_CFG = TerrainGeneratorCfg(
                     patch_radius=0.3,
                     x_range=(-7.5, 7.5),
                     y_range=(-7.5, 7.5),
-                    z_range=(-1.0, 1.0),  # 전체 지형에 따라 유동적으로 맞춰야 함
+                    z_range=(-1.0, 1.0),
                     max_height_diff=0.1,
                 ),
             },
