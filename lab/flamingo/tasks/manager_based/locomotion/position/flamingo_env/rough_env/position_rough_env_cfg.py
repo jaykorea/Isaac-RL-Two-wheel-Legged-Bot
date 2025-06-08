@@ -104,7 +104,7 @@ class CommandsCfg:
     # TODO : TerrainBasedPose2dCommandCfg
     pose_command = cmd.TerrainBasedPose2dCommandCfg(
         asset_name="robot",
-        simple_heading=False,
+        simple_heading=True,
         resampling_time_range=(10.0, 20.0),
         debug_vis=True,
         ranges=cmd.TerrainBasedPose2dCommandCfg.Ranges(heading=(-math.pi, math.pi)),

@@ -59,14 +59,19 @@ class FlamingoRewardsCfg():
     # )
 
     position_tracking = RewTerm(
-        func=mdp.position_command_error_tanh,
-        weight=2.0,
-        params={"std": 2.0, "command_name": "pose_command"},
+        func=mdp.track_pos_xyz_exp,
+        weight=5.0,
+        params={"temperature": 2.0, "command_name": "pose_command"},
     )
     position_tracking_fine_grained = RewTerm(
-        func=mdp.position_command_error_tanh,
-        weight=1.0,
-        params={"std": 0.2, "command_name": "pose_command"},
+        func=mdp.track_pos_xyz_exp,
+        weight=2.5,
+        params={"temperature": 1.0, "command_name": "pose_command"},
+    )
+    position_tracking_fine_grained2 = RewTerm(
+        func=mdp.track_pos_xyz_exp,
+        weight=1.25,
+        params={"temperature": 0.5, "command_name": "pose_command"},
     )
     orientation_tracking = RewTerm(
         func=mdp.heading_command_error_abs,
@@ -74,11 +79,17 @@ class FlamingoRewardsCfg():
         params={"command_name": "pose_command"},
     )
 
-    reward_x_move = RewTerm(
-        func=mdp.reward_x_axis_move,
+    # reward_x_move = RewTerm(
+    #     func=mdp.reward_x_axis_move,
+    #     weight = 0.5,
+    #     params = {"command_name": "pose_command",
+    #         "temperature" : 4.0}
+    # )
+
+    reward_align_target = RewTerm(
+        func=mdp.face_target_alignment,
         weight = 0.5,
-        params ={"command_name": "pose_command",
-            "temperature" : 4.0}
+        params = {"command_name": "pose_command",}
     )
     
     # # z-각속도가 낮으면 리워드.
@@ -149,15 +160,15 @@ class FlamingoRewardsCfg():
         weight=-0.5,  # default: -0.5
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*_shoulder_joint")},
     )
-    # base_height = RewTerm(
-    #     func=mdp.base_height_adaptive_l2,
-    #     weight=-25.0,
-    #     params={
-    #         "target_height": 0.36288,  # 0.37073
-    #         "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
-    #         "sensor_cfg": SceneEntityCfg("height_scanner"),
-    #     },
-    # )
+    base_height = RewTerm(
+        func=mdp.base_height_adaptive_l2,
+        weight=-40.0,
+        params={
+            "target_height": 0.42,  # 0.37073
+            "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
+            "sensor_cfg": SceneEntityCfg("height_scanner"),
+        },
+    )
     flat_orientation_l2 = RewTerm(func=mdp.flat_euler_angle_l2, weight=-10.0)
 
     joint_torques_l2 = RewTerm(func=mdp.joint_torques_l2, weight=-5.0e-6, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_joint", ".*_shoulder_joint", ".*_leg_joint"]),})
