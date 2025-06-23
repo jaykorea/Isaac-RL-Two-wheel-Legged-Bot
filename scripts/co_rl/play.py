@@ -28,7 +28,7 @@ parser.add_argument("--algo", type=str, default="ppo", help="Name of the task.")
 parser.add_argument("--stack_frames", type=int, default=None, help="Number of frames to stack.")
 parser.add_argument("--plot", type=str2bool, default="False", help="Plot the data.")
 parser.add_argument("--task", type=str, default=None, help="Name of the task.")
-parser.add_argument("--seed", type=int, default=None, help="Seed used for the environment")
+parser.add_argument("--seed", type=int, default=42, help="Seed used for the environment")
 parser.add_argument(
     "--use_pretrained_checkpoint",
     action="store_true",

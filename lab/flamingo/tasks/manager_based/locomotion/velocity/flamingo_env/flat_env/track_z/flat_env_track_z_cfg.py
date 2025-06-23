@@ -126,6 +126,7 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
         self.scene.robot = FLAMINGO_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
 
         #! ************** scene & observations setup - 0 *********** !#
+        self.scene.height_scanner = None
         self.scene.base_height_scanner = None
         self.scene.left_wheel_height_scanner = None
         self.scene.right_wheel_height_scanner = None
@@ -142,6 +143,7 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
         self.observations.none_stack_policy.base_pos_z.params["sensor_cfg"] = None
         self.observations.none_stack_critic.base_pos_z.params["sensor_cfg"] = None
 
+        self.observations.none_stack_policy.height_scan = None
         self.observations.none_stack_policy.base_lin_vel = None
         self.observations.none_stack_policy.base_pos_z = None
         self.observations.none_stack_policy.current_reward = None

@@ -49,14 +49,11 @@ class UniformVelocityWithZCommand(UniformVelocityCommand):
         self.time_elapsed = torch.zeros(self.num_envs, device=self.device)  # Time tracker for each environment
         self.initial_choice = None
         self.track_z_flag = (cfg.ranges.pos_z[0] != 0.0 or cfg.ranges.pos_z[1] != 0.0)
-        self.initial_phase_sampled = torch.zeros(self.num_envs, dtype=torch.bool, device=self.device)
-
 
     def __str__(self) -> str:
         """Return a string representation of the command generator with position z."""
         msg = super().__str__()
         msg += f"\n\tPosition z range: {self.cfg.ranges.pos_z}"
-        msg += f"\n\tInitial phase time: {self.cfg.initiali_phase_time}"
         return msg
 
     @property
@@ -108,32 +105,21 @@ class UniformVelocityWithZCommand(UniformVelocityCommand):
                 self.standing_choice = torch.zeros_like(standing_env_ids, dtype=torch.float32, device=self.device)
 
     def _update_command(self):
-        super()._update_command()
-        self.time_elapsed += self._env.step_dt  # Increment time elapsed by time step
+        self.time_elapsed += self._env.step_dt
 
-        #* Determine environments still within the initial 2.0 seconds
-        initial_phase_env_ids = (self.time_elapsed <= self.cfg.initiali_phase_time).nonzero(as_tuple=False).flatten()
-        
-        # Identify environments that haven't been sampled yet
-        unsampled_env_ids = initial_phase_env_ids[~self.initial_phase_sampled[initial_phase_env_ids]]
+        initial_phase_env_ids = (self.time_elapsed <= self.cfg.initial_phase_time).nonzero(as_tuple=False).flatten()
 
-        # Perform sampling only for unsampled environments
-        if len(unsampled_env_ids) > 0:
-            self.vel_command_b[unsampled_env_ids, :3] = 0.0  # Set velocities to zero
+        if len(initial_phase_env_ids) > 0:
+            self.vel_command_b[initial_phase_env_ids, :3] = 0.0
             if self.track_z_flag:
-                self.vel_command_b[unsampled_env_ids, 3] = self.gcd(unsampled_env_ids, 5)
+                self.vel_command_b[initial_phase_env_ids, 3] = self.gcd(initial_phase_env_ids, 5)
             else:
-                self.vel_command_b[unsampled_env_ids, 3] = 0.0
-            # Mark these environments as sampled
-            self.initial_phase_sampled[unsampled_env_ids] = True
+                self.vel_command_b[initial_phase_env_ids, 3] = 0.0
 
-        #* Reset time_elapsed and initial_phase_sampled for reset environments
         reset_env_ids = self._env.reset_buf.nonzero(as_tuple=False).flatten()
         if len(reset_env_ids) > 0:
             self.time_elapsed[reset_env_ids] = 0.0
-            self.initial_phase_sampled[reset_env_ids] = False  # Reset sampling flag
 
-        # Enforce standing for standing environments
         standing_env_ids = self.is_standing_env.nonzero(as_tuple=False).flatten()
         self.vel_command_b[standing_env_ids, :3] = 0.0
         if len(standing_env_ids) > 0:
@@ -189,5 +175,5 @@ class UniformVelocityWithZCommandCfg(UniformVelocityCommandCfg):
     ranges: Ranges = MISSING
     """Distribution ranges for the velocity and position commands."""
 
-    initiali_phase_time: float = 2.0
+    initial_phase_time: float = 2.0
     """Time for which the initial phase lasts."""

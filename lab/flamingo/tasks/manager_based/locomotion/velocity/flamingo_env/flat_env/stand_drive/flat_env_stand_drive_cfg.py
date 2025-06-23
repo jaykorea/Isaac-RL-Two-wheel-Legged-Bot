@@ -138,11 +138,24 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
         self.scene.robot = FLAMINGO_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
         self.sim.physx.gpu_max_rigid_patch_count = 10 * 2**15
 
+       #! ************** scene & observations setup - 0 *********** !#
+        self.scene.height_scanner = None
+        self.scene.base_height_scanner = None
+        self.scene.left_wheel_height_scanner = None
+        self.scene.right_wheel_height_scanner = None
+        self.scene.left_mask_sensor = None
+        self.scene.right_mask_sensor = None
+
+        self.observations.none_stack_critic.base_height_scan = None
+        self.observations.none_stack_critic.left_wheel_height_scan = None
+        self.observations.none_stack_critic.right_wheel_height_scan = None
+        #! ********************************************************* !#
 
         #! ****************** Observations setup ****************** !#
         self.observations.none_stack_policy.base_pos_z.params["sensor_cfg"] = None
         self.observations.none_stack_critic.base_pos_z.params["sensor_cfg"] = None
 
+        self.observations.none_stack_policy.height_scan = None
         self.observations.none_stack_policy.base_lin_vel = None
         self.observations.none_stack_policy.base_pos_z = None
         self.observations.none_stack_policy.current_reward = None
@@ -150,9 +163,9 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
         self.observations.none_stack_policy.lift_mask = None
 
         self.observations.none_stack_policy.roll_pitch_commands = None
-        self.observations.none_stack_policy.event = None
+        self.observations.none_stack_policy.event_commands = None
         self.observations.none_stack_critic.roll_pitch_commands = None
-        self.observations.none_stack_critic.event = None
+        self.observations.none_stack_critic.event_commands = None
         #! ********************************************************* !#
 
         # reset_robot_joint_zero should be called here

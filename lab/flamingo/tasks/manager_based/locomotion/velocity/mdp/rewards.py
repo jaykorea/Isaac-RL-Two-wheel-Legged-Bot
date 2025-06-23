@@ -175,7 +175,6 @@ def flat_euler_angle_exp(env: ManagerBasedRLEnv, temperature: float, asset_cfg: 
     rp = torch.stack((roll, pitch), dim=-1)
     return torch.exp(-temperature * torch.sum(torch.abs(rp), dim=1))
 
-
 def feet_air_time(
     env: ManagerBasedRLEnv, command_name: str, sensor_cfg: SceneEntityCfg, threshold: float
 ) -> torch.Tensor:
@@ -235,7 +234,6 @@ def feet_air_time_positive_biped(env: ManagerBasedRLEnv, command_name: str, thre
     reward *= torch.norm(env.command_manager.get_command(command_name)[:, :2], dim=1) > 0.1
     return reward
 
-
 def feet_air_time_lift_mask(env: ManagerBasedRLEnv,
                             sensor_cfg: SceneEntityCfg,
                             mask_sensor_cfg_left: SceneEntityCfg,
@@ -275,7 +273,6 @@ def feet_air_time_lift_mask(env: ManagerBasedRLEnv,
     reward *= torch.norm(env.command_manager.get_command("base_velocity")[:, :2], dim=1) > 0.1
 
     return reward
-
 
 def foot_clearance_lift_mask(
     env: ManagerBasedRLEnv,
