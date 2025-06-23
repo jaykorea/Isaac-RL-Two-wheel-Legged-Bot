@@ -114,13 +114,20 @@ class CommandsCfg:
 class ActionsCfg:
     """Action specifications for the MDP."""
 
-    joint_pos = mdp.JointPositionActionCfg(
+    hip_joint_pos = mdp.JointPositionActionCfg(
         asset_name="robot",
         joint_names=["left_hip_joint", "right_hip_joint", 
-                     "left_shoulder_joint", "right_shoulder_joint", 
+                     ],
+        scale=0.6,
+        use_default_offset=False,
+        preserve_order=True,
+    )
+    shoudler_leg_joint_pos = mdp.JointPositionActionCfg(
+        asset_name="robot",
+        joint_names=["left_shoulder_joint", "right_shoulder_joint", 
                      "left_leg_joint", "right_leg_joint"
                      ],
-        scale=2.0,
+        scale=1.0,
         use_default_offset=False,
         preserve_order=True,
     )
@@ -150,13 +157,13 @@ class ObservationsCfg:
             },
         )
         joint_vel = ObsTerm(func=mdp.joint_vel, scale=0.15)  # default: -1.5
-        base_ang_vel = ObsTerm(func=mdp.base_ang_vel_link, scale=0.15)  # default: -0.15
+        base_ang_vel = ObsTerm(func=mdp.base_ang_vel_link, scale=0.25)  # default: -0.15
         base_projected_gravity = ObsTerm(func=mdp.projected_gravity)  # default: -0.05
         actions = ObsTerm(func=mdp.last_action)
         # estimation 
-        base_lin_vel_x = ObsTerm(func=mdp.base_lin_vel_x_link, scale=2.0)
+        base_lin_vel_x = ObsTerm(func=mdp.base_lin_vel_x_link)
         base_lin_vel_y = ObsTerm(func=mdp.base_lin_vel_y_link)
-        base_lin_vel_z = ObsTerm(func=mdp.base_lin_vel_z_link, scale=0.25)
+        base_lin_vel_z = ObsTerm(func=mdp.base_lin_vel_z_link)
 
         def __post_init__(self):
             self.enable_corruption = False
@@ -202,14 +209,14 @@ class ObservationsCfg:
             },
         )
         joint_vel = ObsTerm(func=mdp.joint_vel, noise=Unoise(n_min=-1.5, n_max=1.5), scale=0.15)  # default: -1.5
-        base_ang_vel = ObsTerm(func=mdp.base_ang_vel_link, noise=Unoise(n_min=-0.15, n_max=0.15), scale=0.15)  # default: -0.15
+        base_ang_vel = ObsTerm(func=mdp.base_ang_vel_link, noise=Unoise(n_min=-0.15, n_max=0.15), scale=0.25)  # default: -0.15
         base_projected_gravity = ObsTerm(func=mdp.projected_gravity, noise=Unoise(n_min=-0.05, n_max=0.05))  # default: -0.05
         actions = ObsTerm(func=mdp.last_action)
         
         # TODO : 10 Hz 로 상태 update 구현.
-        base_lin_vel_x = ObsTerm(func=mdp.base_lin_vel_x_link, noise=Unoise(n_min=-0.05, n_max=0.05), scale=2.0)
+        base_lin_vel_x = ObsTerm(func=mdp.base_lin_vel_x_link, noise=Unoise(n_min=-0.05, n_max=0.05))
         base_lin_vel_y = ObsTerm(func=mdp.base_lin_vel_y_link, noise=Unoise(n_min=-0.05, n_max=0.05))
-        base_lin_vel_z = ObsTerm(func=mdp.base_lin_vel_z_link, noise=Unoise(n_min=-0.05, n_max=0.05), scale=0.25)
+        base_lin_vel_z = ObsTerm(func=mdp.base_lin_vel_z_link, noise=Unoise(n_min=-0.05, n_max=0.05))
  
         def __post_init__(self):
             self.enable_corruption = True
@@ -228,13 +235,6 @@ class ObservationsCfg:
             clip=(-1.0, 1.0),
             noise=Unoise(n_min=-0.03, n_max=0.03)
         )
-        
-        # feet_height_scan = ObsTerm(
-        #     func=mdp.feet_height_scan,
-        #     params={"sensor_cfg": SceneEntityCfg("height_scanner"), 'offset': 0.0, "asset_cfg": SceneEntityCfg("robot", body_names=".*wheel_link")},
-        #     clip=(-1.0, 1.0),
-        #     noise=Unoise(n_min=-0.03, n_max=0.03)
-        # )
 
         def __post_init__(self):
             self.enable_corruption = True
@@ -422,7 +422,7 @@ class LocomotionPositionRoughEnvCfg(ManagerBasedRLEnvCfg):
         # we tick all the sensors based on the smallest update period (physics update period)
         if self.scene.height_scanner is not None:
             # 10 Hz
-            self.scene.height_scanner.update_period = self.decimation * self.sim.dt * 5
+            self.scene.height_scanner.update_period = self.decimation * self.sim.dt * 5.0
         if self.scene.contact_forces is not None:
             self.scene.contact_forces.update_period = self.sim.dt
 

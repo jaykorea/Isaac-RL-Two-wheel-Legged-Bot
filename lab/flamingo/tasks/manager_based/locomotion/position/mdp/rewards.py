@@ -24,31 +24,51 @@ if TYPE_CHECKING:
 Position-tracking rewards
 """
 
-def track_pos_xy_exp(env: ManagerBasedRLEnv, command_name: str, temperature : float = 1.0, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")
-) -> torch.Tensor:
-    asset: RigidObject = env.scene[asset_cfg.name]
-    diff =torch.sqrt(torch.sum(torch.square(env.command_manager.get_command(command_name)[:, :2]), dim=1))
-    reward = torch.exp(-temperature * (diff))
-    return reward
 
-def track_pos_xyz_exp(env: ManagerBasedRLEnv, command_name: str, temperature : float = 1.0, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")
+def track_pos_xy_exp(env: ManagerBasedRLEnv, command_name: str, temperature : float = 1.0, scaler: float = 1.0, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")
 ) -> torch.Tensor:
     asset: RigidObject = env.scene[asset_cfg.name]
     command = env.command_manager.get_command(command_name)
-    des_pos_b = command[:, :3]
-    distance = torch.norm(des_pos_b, dim=1)
+    des_pos_b = command[:, :2]
+    distance = torch.norm(des_pos_b / scaler, dim=1)
     reward = torch.exp(-temperature * distance)
 
     return reward
 
-# changed 
-def reward_smoothing_ang_vel_z_exp(env: ManagerBasedRLEnv, command_name: str, temperature : float = 4.0, k : float = 1.0, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"))-> torch.Tensor:
+def track_pos_xyz_exp(env: ManagerBasedRLEnv, command_name: str, temperature : float = 1.0, scaler : float = 1.0, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")
+) -> torch.Tensor:
     asset: RigidObject = env.scene[asset_cfg.name]
-    pos_diff = env.command_manager.get_command(command_name)[:, :2]
-    dist = torch.norm(pos_diff, dim=1)
-    diff = torch.square(asset.data.root_ang_vel_b[:, 2])
-    weight = 1.0 / (1.0 + k * diff) # weight
-    reward = weight * torch.exp(-temperature * diff)
+    command = env.command_manager.get_command(command_name)
+    des_pos_b = command[:, :3]
+    distance = torch.norm(des_pos_b / scaler, dim=1)
+    reward = torch.exp(-temperature * distance)
+
+    return reward
+
+def reward_smoothing_ang_vel_z_exp(
+    env: ManagerBasedRLEnv,
+    command_name: str = "pose_command",
+    temperature: float = 4.0,
+    stiffness: float = 1.0,
+    asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")
+) -> torch.Tensor:
+    """
+    Encourage smooth yaw rotation only when needed (i.e., heading error is non-zero).
+    Penalizes over-rotation while allowing necessary rotation for alignment.
+    """
+    asset: RigidObject = env.scene[asset_cfg.name]
+
+    command = env.command_manager.get_command(command_name)  # shape: [B, 4]
+    goal_vec_b = command[:, :2]
+    target_heading = torch.atan2(goal_vec_b[:, 1], goal_vec_b[:, 0])  # [B]
+    
+    ang_vel_z = asset.data.root_ang_vel_b[:, 2]
+
+    desired_ang_vel = stiffness * target_heading
+    diff = torch.square(ang_vel_z - desired_ang_vel)
+
+    reward = torch.exp(-temperature * diff)
+
     return reward
 
 def reward_smoothing_lin_vel_xy_exp(env: ManagerBasedRLEnv, command_name: str, max_distance : float = 6.0 ,max_vel : float=0.75, tau:float = 0.5, temperature : float = 4.0, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")):
@@ -464,7 +484,7 @@ def safe_landing_motion(env: ManagerBasedRLEnv, sensor_cfg: SceneEntityCfg) -> t
 
     return force_minimization_reward
 
-def feet_air_time_positive_biped(env: ManagerBasedRLEnv, command_name: str, threshold: float, sensor_cfg: SceneEntityCfg) -> torch.Tensor:
+def feet_air_time_positive_biped(env: ManagerBasedRLEnv, sensor_cfg: SceneEntityCfg, command_name: str, threshold: float) -> torch.Tensor:
     """Reward long steps taken by the feet for bipeds.
 
     This function rewards the agent for taking steps up to a specified threshold and also keep one foot at
@@ -484,9 +504,6 @@ def feet_air_time_positive_biped(env: ManagerBasedRLEnv, command_name: str, thre
     # no reward for zero command
     reward *= torch.norm(env.command_manager.get_command(command_name)[:, :2], dim=1) > 0.1
     return reward
-
-
-
 
 def foot_clearance_lift_mask(
     env: ManagerBasedRLEnv,

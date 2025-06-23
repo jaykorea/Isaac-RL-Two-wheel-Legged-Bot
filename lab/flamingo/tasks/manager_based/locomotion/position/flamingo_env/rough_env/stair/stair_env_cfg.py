@@ -40,55 +40,47 @@ class FlamingoRewardsCfg():
     """
     Track Reward Set
     """
-    # # pos command 에 가까울수록 보상.
-    # reward_track_pos_xy_exp = RewTerm(
-    #     func=mdp.track_pos_xy_exp, weight=3.0, params={
-    #                                                 "command_name": "pose_command",
-    #                                                 "temperature": 1.0}
-    # )
-    # reward_track_pos_xy_exp_fine_grained = RewTerm(
-    #     func=mdp.track_pos_xy_exp, weight=1.0, params={
-    #                                                 "command_name": "pose_command",
-    #                                                 "temperature": 2.0}
-    # )
-    
-    # reward_track_pos_xy_exp_fine_grained = RewTerm(
-    #     func=mdp.track_pos_xy_exp, weight=1.5, params={
-    #                                                 "command_name": "pose_command",
-    #                                                 "temperature": 2.0}
-    # )
 
     position_tracking = RewTerm(
-        func=mdp.track_pos_xyz_exp,
-        weight=4.0,
-        params={"temperature": 1.0, "command_name": "pose_command"},
+        func=mdp.track_pos_xy_exp,
+        weight=3.0,
+        params={"temperature": 4.0, "command_name": "pose_command", "scaler": 2.5},
     )
     position_tracking_fine_grained = RewTerm(
-        func=mdp.track_pos_xyz_exp,
-        weight=2.0,
-        params={"temperature": 0.5, "command_name": "pose_command"},
+        func=mdp.track_pos_xy_exp,
+        weight=1.5,
+        params={"temperature": 2.0, "command_name": "pose_command", "scaler": 2.5},
     )
-    orientation_tracking = RewTerm(
-        func=mdp.heading_command_error_abs,
-        weight=-0.1,
-        params={"command_name": "pose_command"},
-    )
-
+    # orientation_tracking = RewTerm(
+    #     func=mdp.heading_command_error_abs,
+    #     weight=-0.1,
+    #     params={"command_name": "pose_command"},
+    # )
     reward_align_target = RewTerm(
         func=mdp.face_target_alignment,
-        weight = 0.1,
+        weight = 0.5,
         params = {"command_name": "pose_command",}
     )
-    
-    # z-각속도가 낮으면 리워드.
+
     reward_smoothing_ang_vel_z_exp = RewTerm(
         func=mdp.reward_smoothing_ang_vel_z_exp, 
-        weight=0.1, 
+        weight=1.5, 
         params={
             "command_name" : "pose_command",
-            "temperature": 4,
-                "k" : 1.0}
+            "temperature": 2,
+            "stiffness" : 0.5
+        }
     )
+
+    # feet_air_time_positive_biped = RewTerm(
+    #     func=mdp.feet_air_time_positive_biped,
+    #     weight=2.5,
+    #     params={
+    #         "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_wheel_link"),
+    #         "command_name": "pose_command",
+    #         "threshold": 0.2,
+    #     },
+    # )
 
     # # 목표 위치와의 거리에 따라서 desired 속도 조절.
     # reward_smoothing_lin_vel_forward_x_exp = RewTerm(
@@ -104,14 +96,14 @@ class FlamingoRewardsCfg():
     """
 
     # More exploration
-    termination_penalty = RewTerm(func=mdp.is_terminated, weight=-200.0)
+    termination_penalty = RewTerm(func=mdp.is_terminated, weight=-50.0)
 
-    lin_vel_z_l2 = RewTerm(func=mdp.lin_vel_z_link_l2, weight=-1.0)
+    lin_vel_z_l2 = RewTerm(func=mdp.lin_vel_z_link_l2, weight=-0.25)
     ang_vel_xy_l2 = RewTerm(func=mdp.ang_vel_xy_link_l2, weight=-0.05)
 
     joint_deviation = RewTerm(
         func=mdp.joint_deviation_zero_l1,
-        weight=-5.0,
+        weight=-1.0,
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_joint"])},
     )
 
@@ -140,12 +132,12 @@ class FlamingoRewardsCfg():
     )
     joint_applied_torque_limits = RewTerm(
         func=mdp.applied_torque_limits,
-        weight=-0.1,  # default: -0.1
+        weight=-0.025,  # default: -0.1
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*_joint")},
     )
     shoulder_align_l1 = RewTerm(
         func=mdp.joint_align_l1,
-        weight=-0.5,  # default: -0.5
+        weight=-0.1,  # default: -0.5
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*_shoulder_joint")},
     )
     base_height = RewTerm(
@@ -157,10 +149,10 @@ class FlamingoRewardsCfg():
             "sensor_cfg": SceneEntityCfg("height_scanner"),
         },
     )
-    flat_orientation_l2 = RewTerm(func=mdp.flat_euler_angle_l2, weight=-10.0)
+    flat_orientation_l2 = RewTerm(func=mdp.flat_euler_angle_l2, weight=-5.0)
 
-    joint_torques_l2 = RewTerm(func=mdp.joint_torques_l2, weight=-5.0e-6, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_joint", ".*_shoulder_joint", ".*_leg_joint"]),})
-    wheel_torques_l2 = RewTerm(func=mdp.joint_torques_l2, weight=-5.0e-6, params={"asset_cfg" : SceneEntityCfg("robot", joint_names=[".*_wheel_joint"])})
+    joint_torques_l2 = RewTerm(func=mdp.joint_torques_l2, weight=-5.0e-8, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_joint", ".*_shoulder_joint", ".*_leg_joint"]),})
+    wheel_torques_l2 = RewTerm(func=mdp.joint_torques_l2, weight=-5.0e-7, params={"asset_cfg" : SceneEntityCfg("robot", joint_names=[".*_wheel_joint"])})
     dof_acc_l2 = RewTerm(func=mdp.joint_acc_l2, weight=-2.5e-7)  # default: -2.5e-7
     action_rate_l2 = RewTerm(func=mdp.action_rate_l2, weight=-0.01)  # default: -0.01
 
@@ -191,7 +183,7 @@ class FlamingoRoughEnvCfg(LocomotionPositionRoughEnvCfg):
         # self.events.push_robot = True
         self.events.push_robot.interval_range_s = (10.0, 15.0)
         self.events.push_robot.params = {
-            "velocity_range": {"x": (1.0, 2.0), "y": (0.0, 0.0), "z": (1.0, 2.0)},
+            "velocity_range": {"x": (1.0, 2.0), "y": (1.0, 2.0), "z": (1.0, 2.0)},
         }
         # add base mass should be called here
         self.events.add_base_mass.params["asset_cfg"].body_names = ["base_link"]
@@ -202,7 +194,7 @@ class FlamingoRoughEnvCfg(LocomotionPositionRoughEnvCfg):
         self.events.physics_material.params["static_friction_range"] = (0.3, 1.0)
         self.events.physics_material.params["dynamic_friction_range"] = (0.3, 0.8)
         self.events.reset_base.params = {
-            "pose_range": {"x": (-0.5, 0.5), "y": (-0.5, 0.5), "yaw": (-3.14, 3.14)},
+            "pose_range": {"x": (-0.25, 0.25), "y": (-0.25, 0.25), "yaw": (-3.14, 3.14)},
             "velocity_range": {
                 "x": (0.0, 0.0),
                 "y": (0.0, 0.0),
@@ -234,13 +226,13 @@ class FlamingoRoughEnvCfg_PLAY(FlamingoRoughEnvCfg):
         self.scene.num_envs = 100
         self.scene.env_spacing = 0.5
         # spawn the robot randomly in the grid (instead of their terrain levels)
-        self.scene.terrain.max_init_terrain_level = None
+        # self.scene.terrain.max_init_terrain_level = None
         # reduce the number of terrains to save memory
         self.sim.render_interval = self.decimation
         if self.scene.terrain.terrain_generator is not None:
             self.scene.terrain.terrain_generator.num_rows = 10
             self.scene.terrain.terrain_generator.num_cols = 10
-            self.scene.terrain.terrain_generator.curriculum = False
+            self.scene.terrain.terrain_generator.curriculum = True
 
         #! ****************** Observations setup ******************* !#
         self.observations.stack_policy.enable_corruption = False
@@ -256,8 +248,8 @@ class FlamingoRoughEnvCfg_PLAY(FlamingoRoughEnvCfg):
 
         # physics material should be called here
         self.events.physics_material.params["asset_cfg"].body_names = [".*_link"]
-        self.events.physics_material.params["static_friction_range"] = (0.3, 1.0)
-        self.events.physics_material.params["dynamic_friction_range"] = (0.3, 0.8)
+        self.events.physics_material.params["static_friction_range"] = (0.6, 1.0)
+        self.events.physics_material.params["dynamic_friction_range"] = (0.6, 0.8)
 
         self.events.reset_robot_joints.params["position_range"] = (-0.15, 0.15)
         # self.events.base_external_force_torque.params["asset_cfg"].body_names = ["base_link"]

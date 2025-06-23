@@ -21,13 +21,14 @@ ROUGH_TERRAINS_CFG = TerrainGeneratorCfg(
     horizontal_scale=0.1,
     vertical_scale=0.005,
     slope_threshold=0.5,
-    difficulty_range=(0.01, 0.7),
+    difficulty_range=(0.05, 0.9),
     use_cache=True,
-    sub_terrains={
-        "hf_pyramid_stair_inv": terrain_gen.HfPyramidStairsTerrainCfg(
-            inverted=True,
+    sub_terrains={ #  HfPyramidStairsTerrainCfg
+        "hf_pyramid_stair_inv": terrain_gen.MeshInvertedPyramidStairsTerrainCfg(
+            # inverted=True,
+            holes=False,
             proportion=0.9,
-            step_height_range=(0.01, 0.18),
+            step_height_range=(0.02, 0.13),
             step_width=0.4, #0.5
             platform_width=2.5,
             border_width=1.0,
