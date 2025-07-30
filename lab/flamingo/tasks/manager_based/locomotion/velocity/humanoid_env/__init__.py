@@ -29,7 +29,7 @@ gym.register(
 )
 
 gym.register(
-    id="Isaac-Velocity-Flat-Humanoid-Play-v1-ppo",
+    id="Isaac-Velocity-Flat-Humanoid-v1-ppo-Play",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
@@ -49,7 +49,7 @@ gym.register(
 )
 
 gym.register(
-    id="Isaac-Velocity-Rough-Humanoid-Play-v1-ppo",
+    id="Isaac-Velocity-Rough-Humanoid-v1-ppo-Play",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
