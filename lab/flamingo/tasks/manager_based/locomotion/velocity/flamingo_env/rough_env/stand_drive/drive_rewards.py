@@ -16,6 +16,17 @@ if TYPE_CHECKING:
     from isaaclab.envs import ManagerBasedRLEnv
 
 
+def reward_ang_vel_z_link_exp(
+    env: ManagerBasedRLEnv, command_name: str, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")
+) -> torch.Tensor:
+    """Reward tracking of angular velocity commands (yaw) using exponential kernel."""
+    # extract the used quantities (to enable type-hinting)
+    asset: RigidObject = env.scene[asset_cfg.name]
+    lin_vel_y = torch.abs(env.command_manager.get_command(command_name)[:, 1])
+    # compute the error
+    ang_vel = torch.square(asset.data.root_link_ang_vel_b[:, 2]) * lin_vel_y
+    return ang_vel
+
 def reward_feet_distance(
     env: ManagerBasedRLEnv,
     asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
