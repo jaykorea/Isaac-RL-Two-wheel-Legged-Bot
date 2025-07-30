@@ -46,7 +46,7 @@ HUMANOID_CFG = ArticulationCfg(
         ),
     ),
     init_state=ArticulationCfg.InitialStateCfg(
-        pos=(0.0, 0.0, 1.15),
+        pos=(0.0, 0.0, 1.13),
         joint_pos={
             ".*_hip_yaw_joint": 0.0,
             ".*_hip_roll_joint": 0.0,
@@ -109,11 +109,11 @@ HUMANOID_CFG = ArticulationCfg(
                 ".*_elbow_pitch_joint": 40.0,
             },
             damping={
-                ".*_shoulder_pitch_joint": 10.0,
-                ".*_shoulder_roll_joint": 10.0,
-                ".*_shoulder_yaw_joint": 10.0,
-                ".*_elbow_yaw_joint": 10.0,
-                ".*_elbow_pitch_joint": 10.0,
+                ".*_shoulder_pitch_joint": 4.0,
+                ".*_shoulder_roll_joint": 4.0,
+                ".*_shoulder_yaw_joint": 4.0,
+                ".*_elbow_yaw_joint": 4.0,
+                ".*_elbow_pitch_joint": 4.0,
             },
         ),
     },
