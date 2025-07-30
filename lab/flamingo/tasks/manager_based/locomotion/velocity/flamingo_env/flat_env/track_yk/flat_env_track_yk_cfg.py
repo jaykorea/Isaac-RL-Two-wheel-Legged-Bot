@@ -10,7 +10,7 @@ from isaaclab.utils import configclass
 from isaaclab.managers import CurriculumTermCfg as CurrTerm
 import lab.flamingo.tasks.manager_based.locomotion.velocity.mdp as mdp
 import lab.flamingo.tasks.manager_based.locomotion.velocity.flamingo_env.flat_env.track_yk.yk_rewards as mdp_yk
-from lab.flamingo.tasks.manager_based.locomotion.velocity.velocity_env_cfg import (
+from lab.flamingo.tasks.manager_based.locomotion.velocity.flamingo_env.velocity_env_cfg import (
     LocomotionVelocityFlatEnvCfg,
     CurriculumCfg,
     CommandsCfg,

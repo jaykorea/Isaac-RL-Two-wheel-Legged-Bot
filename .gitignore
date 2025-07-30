@@ -6,6 +6,7 @@ logs/
 outputs/
 build/
 *.usd
+urdf/
 *.thumbs
 .thumbs/
 *.asset_hash
