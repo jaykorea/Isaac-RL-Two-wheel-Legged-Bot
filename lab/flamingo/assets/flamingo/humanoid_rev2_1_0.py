@@ -82,7 +82,7 @@ HUMANOID_CFG = ArticulationCfg(
                 ".*_hip_roll_joint": 5.0,
                 ".*_hip_pitch_joint": 5.0,
                 ".*_knee_joint": 5.0,
-                "torso_joint": 5.0,
+                "torso_joint": 2.0,
             },
         ),
         "feet": ImplicitActuatorCfg(
@@ -105,8 +105,8 @@ HUMANOID_CFG = ArticulationCfg(
             stiffness={
                 ".*_shoulder_pitch_joint": 30.0,
                 ".*_shoulder_roll_joint": 30.0,
-                ".*_shoulder_yaw_joint": 5.0,
-                ".*_elbow_yaw_joint": 5.0,
+                ".*_shoulder_yaw_joint": 10.0,
+                ".*_elbow_yaw_joint": 10.0,
                 ".*_elbow_pitch_joint": 20.0,
             },
             damping={

@@ -23,7 +23,7 @@ class HumanoidRewardsCfg():
     # -- task
     track_lin_vel_xy_exp = RewTerm(
         func=mdp_walk.track_lin_vel_xy_yaw_frame_exp,
-        weight=1.0,
+        weight=2.0,
         params={"command_name": "base_velocity", "std": 0.5},
     )
     track_ang_vel_z_exp = RewTerm(
@@ -31,7 +31,7 @@ class HumanoidRewardsCfg():
     )
     feet_slide = RewTerm(
         func=mdp.feet_slide,
-        weight=-0.1,
+        weight=-0.2,
         params={
             "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link"),
             "asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link"),
@@ -39,7 +39,7 @@ class HumanoidRewardsCfg():
     )
     feet_air_time = RewTerm(
         func=mdp.feet_air_time_positive_biped,
-        weight=0.25,
+        weight=0.5,
         params={
             "command_name": "base_velocity",
             "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link"),
@@ -74,16 +74,6 @@ class HumanoidRewardsCfg():
                     ".*_shoulder_pitch_joint",
                     ".*_shoulder_roll_joint",
                     ".*_elbow_pitch_joint",
-                ],
-            )
-        },
-    )
-    joint_deviation_yaw = RewTerm(
-        func=mdp.joint_deviation_l1,
-        weight=-0.2,
-        params={
-            "asset_cfg": SceneEntityCfg("robot",
-                joint_names=[
                     ".*_shoulder_yaw_joint",
                     ".*_elbow_yaw_joint",
                 ],
@@ -98,13 +88,13 @@ class HumanoidRewardsCfg():
 
     joint_applied_torque_limits = RewTerm(
         func=mdp.applied_torque_limits,
-        weight=-0.005,  # default: -0.1
+        weight=-0.0,  # default: -0.1
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*_joint")},
     )
 
-    flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-1.0)
+    flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-5.0)
     # joint_vel_l2 = RewTerm(func=mdp.joint_vel_l2, weight=-5.0e-5, params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*_joint")})
-    joint_torques_l2 = RewTerm(func=mdp.joint_torques_l2, weight=-5.0e-7, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_.*", ".*_knee_joint", ".*_ankle_.*"])})
+    joint_torques_l2 = RewTerm(func=mdp.joint_torques_l2, weight=0.0, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_.*", ".*_knee_joint", ".*_ankle_.*"])})
     dof_acc_l2 = RewTerm(func=mdp.joint_acc_l2, weight=-1.25e-7, params={"asset_cfg": SceneEntityCfg("robot", [".*_hip_.*", ".*_knee_joint"])})  # default: -2.5e-7
     action_rate_l2 = RewTerm(func=mdp.action_rate_l2, weight=-0.005)  # default: -0.01
 
@@ -122,14 +112,14 @@ class HumanoidRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
 
         # reset_robot_joint_zero should be called here
         self.events.reset_robot_joints.params["position_range"] = (-0.1, 0.1)
-        # self.events.push_robot = True
+        # self.events.push_robot = None
         self.events.push_robot.interval_range_s = (10.0, 15.0)
         self.events.push_robot.params = {
             "velocity_range": {"x": (-1.0, 1.0), "y": (-1.0, 1.0), "z": (-1.0, 1.0)},
         }
         # add base mass should be called here
         self.events.add_base_mass.params["asset_cfg"].body_names = ["torso_link"]
-        self.events.add_base_mass.params["mass_distribution_params"] = (-0.75, 3.0)
+        self.events.add_base_mass.params["mass_distribution_params"] = (-0.75, 2.0)
 
         # physics material should be called here
         self.events.physics_material.params["asset_cfg"].body_names = [".*_link"]
@@ -148,7 +138,7 @@ class HumanoidRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         }
 
         # commands
-        self.commands.base_velocity.resampling_time_range = (5.0, 6.0)
+        self.commands.base_velocity.resampling_time_range = (5.0, 10.0)
         self.commands.base_velocity.ranges.lin_vel_x = (0.0, 1.0)
         self.commands.base_velocity.ranges.lin_vel_y = (-0.0, 0.0)
         self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
@@ -195,6 +185,9 @@ class HumanoidRoughEnvCfg_PLAY(HumanoidRoughEnvCfg):
         self.events.physics_material.params["asset_cfg"].body_names = [".*_link"]
         self.events.physics_material.params["static_friction_range"] = (0.3, 1.0)
         self.events.physics_material.params["dynamic_friction_range"] = (0.3, 0.8)
+
+        # randomize actuator gains
+        self.events.randomize_joint_actuator_gains = None
 
         self.events.reset_robot_joints.params["position_range"] = (-0.15, 0.15)
         # self.events.push_robot = True
