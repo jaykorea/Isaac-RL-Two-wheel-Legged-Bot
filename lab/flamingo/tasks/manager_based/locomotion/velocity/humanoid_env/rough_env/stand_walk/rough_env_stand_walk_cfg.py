@@ -55,18 +55,18 @@ class HumanoidRewardsCfg():
     dof_pos_limits = RewTerm(
         func=mdp.joint_pos_limits,
         weight=-1.0,
-        params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_ankle_pitch_joint", ".*_ankle_roll_joint"])},
+        params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_yaw_joint", ".*_hip_roll_joint", ".*_ankle_pitch_joint", ".*_ankle_roll_joint"])},
     )
 
     # Penalize deviation from default of the joints that are not essential for locomotion
-    joint_deviation_hip = RewTerm(
-        func=mdp.joint_deviation_l1,
-        weight=-0.25,
-        params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_yaw_joint", ".*_hip_roll_joint"])},
-    )
+    # joint_deviation_hip = RewTerm(
+    #     func=mdp.joint_deviation_l1,
+    #     weight=-0.15,
+    #     params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_yaw_joint", ".*_hip_roll_joint"])},
+    # )
     joint_deviation_arms = RewTerm(
         func=mdp.joint_deviation_l1,
-        weight=-0.25,
+        weight=-0.15,
         params={
             "asset_cfg": SceneEntityCfg(
                 "robot",
@@ -80,10 +80,9 @@ class HumanoidRewardsCfg():
     )
     joint_deviation_yaw = RewTerm(
         func=mdp.joint_deviation_l1,
-        weight=-0.5,
+        weight=-0.2,
         params={
-            "asset_cfg": SceneEntityCfg(
-                "robot",
+            "asset_cfg": SceneEntityCfg("robot",
                 joint_names=[
                     ".*_shoulder_yaw_joint",
                     ".*_elbow_yaw_joint",
@@ -99,14 +98,14 @@ class HumanoidRewardsCfg():
 
     joint_applied_torque_limits = RewTerm(
         func=mdp.applied_torque_limits,
-        weight=-0.025,  # default: -0.1
+        weight=-0.005,  # default: -0.1
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*_joint")},
     )
 
     flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-1.0)
     # joint_vel_l2 = RewTerm(func=mdp.joint_vel_l2, weight=-5.0e-5, params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*_joint")})
-    joint_torques_l2 = RewTerm(func=mdp.joint_torques_l2, weight=-5.0e-6, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_.*", ".*_knee_joint", ".*_ankle_.*", ".*_shoulder_.*", ".*_elbow_.*"])})
-    dof_acc_l2 = RewTerm(func=mdp.joint_acc_l2, weight=-2.5e-7, params={"asset_cfg": SceneEntityCfg("robot", [".*_hip_.*", ".*_knee_joint", ".*_shoulder_.*", ".*_elbow_.*"])})  # default: -2.5e-7
+    joint_torques_l2 = RewTerm(func=mdp.joint_torques_l2, weight=-5.0e-7, params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_.*", ".*_knee_joint", ".*_ankle_.*"])})
+    dof_acc_l2 = RewTerm(func=mdp.joint_acc_l2, weight=-1.25e-7, params={"asset_cfg": SceneEntityCfg("robot", [".*_hip_.*", ".*_knee_joint"])})  # default: -2.5e-7
     action_rate_l2 = RewTerm(func=mdp.action_rate_l2, weight=-0.005)  # default: -0.01
 
 
@@ -149,10 +148,10 @@ class HumanoidRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         }
 
         # commands
-        self.commands.base_velocity.ranges.lin_vel_x = (-1.0, 1.0)
+        self.commands.base_velocity.resampling_time_range = (5.0, 6.0)
+        self.commands.base_velocity.ranges.lin_vel_x = (0.0, 1.0)
         self.commands.base_velocity.ranges.lin_vel_y = (-0.0, 0.0)
         self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
-        # self.commands.base_velocity.ranges.heading = (-math.pi, math.pi)
         self.commands.base_velocity.ranges.pos_z = (0.0, 0.0)
 
         # terminations
@@ -222,7 +221,7 @@ class HumanoidRoughEnvCfg_PLAY(HumanoidRoughEnvCfg):
         ]
 
         self.commands.base_velocity.resampling_time_range = (2.0, 3.0)
-        self.commands.base_velocity.ranges.lin_vel_x = (-1.0, 1.0)
+        self.commands.base_velocity.ranges.lin_vel_x = (0.0, 1.0)
         self.commands.base_velocity.ranges.lin_vel_y = (-0.0, 0.0)
         self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
         self.commands.base_velocity.ranges.heading = (0.0, 0.0)

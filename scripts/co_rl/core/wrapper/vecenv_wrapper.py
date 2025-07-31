@@ -12,6 +12,14 @@ from lab.flamingo.isaaclab.isaaclab.envs.manager_based_constraint_rl_env import 
 from scripts.co_rl.core.wrapper import CoRlPolicyRunnerCfg
 from scripts.co_rl.core.utils.state_handler import StateHandler
 
+import os
+import csv
+import numpy as np
+from datetime import datetime
+
+
+import numpy as np
+import matplotlib.pyplot as plt
 
 class CoRlVecEnvWrapper(VecEnv):
     def __init__(self, env: ManagerBasedRLEnv, agent_cfg: CoRlPolicyRunnerCfg):
@@ -32,6 +40,9 @@ class CoRlVecEnvWrapper(VecEnv):
 
         # initialize the wrapper
         self.env = env
+        self.csv_path = os.path.join("logs", f"torque_vel_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv")
+        self.torque_log = []
+        self.vel_log = []
 
         # store information required by wrapper
         self.num_envs = self.unwrapped.num_envs
@@ -210,12 +221,13 @@ class CoRlVecEnvWrapper(VecEnv):
 
     def step(self, actions: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, dict]:
         obs_dict, rew, terminated, truncated, extras = self.env.step(actions)
+
         if not self.use_constraint_rl:
             dones = (terminated | truncated).to(dtype=torch.long)
         else:
             dones = torch.max(terminated, truncated).to(dtype=torch.float32)
+
         # Update policy observations via state handler
-        
         if hasattr(self, "policy_state_handler"):
             policy_obs = self.policy_state_handler.update(
                 obs_dict["stack_policy"], obs_dict["none_stack_policy"]
@@ -233,8 +245,9 @@ class CoRlVecEnvWrapper(VecEnv):
 
         if not self.unwrapped.cfg.is_finite_horizon:
             extras["time_outs"] = truncated
-        
+
         return policy_obs, rew, dones, extras
+
 
     def close(self):  # noqa: D102
         return self.env.close()

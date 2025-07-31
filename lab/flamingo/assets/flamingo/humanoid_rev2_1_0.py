@@ -8,6 +8,7 @@ from __future__ import annotations
 import isaaclab.sim as sim_utils
 from isaaclab.actuators import (
     DelayedPDActuatorCfg,
+    ImplicitActuatorCfg
 )
 from lab.flamingo.tasks.manager_based.locomotion.velocity.actuators.actuator_cfg import (
     ActuatorNetKANCfg,
@@ -65,7 +66,7 @@ HUMANOID_CFG = ArticulationCfg(
     ),
     soft_joint_pos_limit_factor=0.9,
     actuators={
-        "legs": DelayedPDActuatorCfg(
+        "legs": ImplicitActuatorCfg(
             joint_names_expr=[".*_hip_yaw_joint", ".*_hip_roll_joint", ".*_hip_pitch_joint", ".*_knee_joint", "torso_joint"],
             effort_limit=300,
             velocity_limit=100.0,
@@ -84,36 +85,36 @@ HUMANOID_CFG = ArticulationCfg(
                 "torso_joint": 5.0,
             },
         ),
-        "feet": DelayedPDActuatorCfg(
+        "feet": ImplicitActuatorCfg(
             joint_names_expr=[".*_ankle_roll_joint", ".*_ankle_pitch_joint"],
             effort_limit=200,
             velocity_limit=100.0,
             stiffness={
-                ".*_ankle_roll_joint": 50.0,
-                ".*_ankle_pitch_joint": 50.0,
+                ".*_ankle_roll_joint": 40.0,
+                ".*_ankle_pitch_joint": 40.0,
             },
             damping={
                 ".*_ankle_roll_joint": 4.0,
                 ".*_ankle_pitch_joint": 4.0,
             },
         ),
-        "arms": DelayedPDActuatorCfg(
+        "arms": ImplicitActuatorCfg(
             joint_names_expr=[".*_shoulder_pitch_joint", ".*_shoulder_roll_joint", ".*_shoulder_yaw_joint", ".*_elbow_yaw_joint", ".*_elbow_pitch_joint"],
             effort_limit=150,
             velocity_limit=100.0,
             stiffness={
-                ".*_shoulder_pitch_joint": 40.0,
-                ".*_shoulder_roll_joint": 40.0,
-                ".*_shoulder_yaw_joint": 40.0,
-                ".*_elbow_yaw_joint": 40.0,
-                ".*_elbow_pitch_joint": 40.0,
+                ".*_shoulder_pitch_joint": 30.0,
+                ".*_shoulder_roll_joint": 30.0,
+                ".*_shoulder_yaw_joint": 5.0,
+                ".*_elbow_yaw_joint": 5.0,
+                ".*_elbow_pitch_joint": 20.0,
             },
             damping={
-                ".*_shoulder_pitch_joint": 4.0,
-                ".*_shoulder_roll_joint": 4.0,
-                ".*_shoulder_yaw_joint": 4.0,
-                ".*_elbow_yaw_joint": 4.0,
-                ".*_elbow_pitch_joint": 4.0,
+                ".*_shoulder_pitch_joint": 3.0,
+                ".*_shoulder_roll_joint": 3.0,
+                ".*_shoulder_yaw_joint": 1.0,
+                ".*_elbow_yaw_joint": 1.0,
+                ".*_elbow_pitch_joint": 2.0,
             },
         ),
     },
