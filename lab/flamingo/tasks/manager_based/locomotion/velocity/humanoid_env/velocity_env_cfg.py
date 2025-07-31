@@ -100,7 +100,7 @@ class MySceneCfg(InteractiveSceneCfg):
     robot: ArticulationCfg = MISSING
     # sensors
     height_scanner = RayCasterCfg(
-        prim_path="{ENV_REGEX_NS}/Robot/pelvis_link",
+        prim_path="{ENV_REGEX_NS}/Robot/torso_link",
         offset=RayCasterCfg.OffsetCfg(pos=(0.0, 0.0, 20.0)),
         attach_yaw_only=True,
         pattern_cfg=patterns.GridPatternCfg(resolution=0.07, size=[0.8, 0.8]),
@@ -245,23 +245,12 @@ class ObservationsCfg:
             self.enable_corruption = True
             self.concatenate_terms = True
 
-
-    # @configclass
-    # class InfoObsCfg(ObsGroup):
-    #     """Observations for None-Stack policy group."""
-    #     joint_torque = ObsTerm(func=mdp.joint_torques)
-    #     joint_vel = ObsTerm(func=mdp.joint_vel)
-
-    #     def __post_init__(self):
-    #         self.enable_corruption = False
-    #         self.concatenate_terms = True
-    
     # observation groups
     stack_policy: StackPolicyCfg = StackPolicyCfg()
     none_stack_policy: NoneStackPolicyCfg = NoneStackPolicyCfg()
     stack_critic: StackCriticCfg = StackCriticCfg()
     none_stack_critic: NoneStackCriticCfg = NoneStackCriticCfg()
-    # info_obs: InfoObsCfg = InfoObsCfg()
+
 
 @configclass
 class EventCfg:
@@ -402,12 +391,12 @@ class LocomotionVelocityRoughEnvCfg(ManagerBasedRLEnvCfg):
         self.sim.disable_contact_processing = True
         self.sim.physics_material = self.scene.terrain.physics_material
 
-        # # change terrain to flat
-        # self.scene.terrain.terrain_type = "plane"
-        # self.scene.terrain.terrain_generator = None
+        # change terrain to flat
+        self.scene.terrain.terrain_type = "plane"
+        self.scene.terrain.terrain_generator = None
 
-        # # Terrain curriculum
-        # self.curriculum.terrain_levels = None
+        # Terrain curriculum
+        self.curriculum.terrain_levels = None
 
         # update sensor update periods
         # we tick all the sensors based on the smallest update period (physics update period)
