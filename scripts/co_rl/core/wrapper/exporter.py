@@ -195,17 +195,24 @@ def export_env_as_pdf(yaml_path: str, pdf_path: str = None) -> None:
     rew_data, spans = [[Paragraph('reward', subhdr_style), Paragraph('weight', subhdr_style), Paragraph('param', subhdr_style)]], []
     idx = 1
     for name, r in rewards.items():
-        start = idx; first = True
+        if not isinstance(r, dict):
+            continue  # 또는 경고 출력 후 continue
+        start = idx
+        first = True
         for k, v in (r.get('params') or {}).items():
             rew_data.append([
                 Paragraph(name, body_style) if first else Paragraph('', body_style),
                 Paragraph(str(r.get('weight', '')), body_style) if first else Paragraph('', body_style),
                 Paragraph(f"{k}: {v!r}", body_style)
             ])
-            idx += 1; first = False
+            idx += 1
+            first = False
         end = idx - 1
         if end > start:
-            spans.extend([('SPAN', (0, start), (0, end)), ('SPAN', (1, start), (1, end))])
+            spans.extend([
+                ('SPAN', (0, start), (0, end)),
+                ('SPAN', (1, start), (1, end))
+            ])
     table = Table(rew_data, colWidths=[120, 60, 320])
     table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4F81BD')),

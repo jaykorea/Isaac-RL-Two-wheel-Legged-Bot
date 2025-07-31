@@ -38,6 +38,40 @@ from lab.flamingo.tasks.manager_based.locomotion.velocity.terrain_config.stair_c
 # Scene definition
 ##
 
+joint_names = [
+    # left leg (6)
+    "left_hip_yaw_joint",
+    "left_hip_roll_joint",
+    "left_hip_pitch_joint",
+    "left_knee_joint",
+    "left_ankle_pitch_joint",
+    "left_ankle_roll_joint",
+
+    # right leg (6)
+    "right_hip_yaw_joint",
+    "right_hip_roll_joint",
+    "right_hip_pitch_joint",
+    "right_knee_joint",
+    "right_ankle_pitch_joint",
+    "right_ankle_roll_joint",
+
+    # torso (1)
+    "torso_joint",
+
+    # left arm (5)
+    "left_shoulder_pitch_joint",
+    "left_shoulder_roll_joint",
+    "left_shoulder_yaw_joint",
+    "left_elbow_pitch_joint",
+    "left_elbow_yaw_joint",
+
+    # right arm (5)
+    "right_shoulder_pitch_joint",
+    "right_shoulder_roll_joint",
+    "right_shoulder_yaw_joint",
+    "right_elbow_pitch_joint",
+    "right_elbow_yaw_joint",
+]
 
 @configclass
 class MySceneCfg(InteractiveSceneCfg):
@@ -117,7 +151,7 @@ class CommandsCfg:
 class ActionsCfg:
     """Action specifications for the MDP."""
 
-    joint_pos = mdp.JointPositionActionCfg(asset_name="robot", joint_names=[".*"], scale=0.5, use_default_offset=True)
+    joint_pos = mdp.JointPositionActionCfg(asset_name="robot", joint_names=[".*"], scale=1.0, use_default_offset=True)
 
 
 @configclass
@@ -194,11 +228,40 @@ class ObservationsCfg:
             self.enable_corruption = True
             self.concatenate_terms = True
 
+    @configclass
+    class StackPolicyCfg(ObsGroup):
+        """Observations for Stack policy group."""
+        joint_pos = ObsTerm(
+            func=mdp.joint_pos,
+            noise=Unoise(n_min=-0.05, n_max=0.05),  # default: -0.04
+        )
+        joint_vel = ObsTerm(func=mdp.joint_vel, noise=Unoise(n_min=-1.5, n_max=1.5), scale=0.15)  # default: -1.5
+        base_ang_vel = ObsTerm(func=mdp.base_ang_vel_link, noise=Unoise(n_min=-0.15, n_max=0.15), scale=0.25)  # default: -0.15
+        # base_euler = ObsTerm(func=mdp.base_euler_angle_link, noise=Unoise(n_min=-0.125, n_max=0.125))  # default: -0.125
+        base_projected_gravity = ObsTerm(func=mdp.projected_gravity, noise=Unoise(n_min=-0.05, n_max=0.05))  # default: -0.05
+        actions = ObsTerm(func=mdp.last_action)
+
+        def __post_init__(self):
+            self.enable_corruption = True
+            self.concatenate_terms = True
+
+
+    # @configclass
+    # class InfoObsCfg(ObsGroup):
+    #     """Observations for None-Stack policy group."""
+    #     joint_torque = ObsTerm(func=mdp.joint_torques)
+    #     joint_vel = ObsTerm(func=mdp.joint_vel)
+
+    #     def __post_init__(self):
+    #         self.enable_corruption = False
+    #         self.concatenate_terms = True
+    
     # observation groups
     stack_policy: StackPolicyCfg = StackPolicyCfg()
     none_stack_policy: NoneStackPolicyCfg = NoneStackPolicyCfg()
     stack_critic: StackCriticCfg = StackCriticCfg()
     none_stack_critic: NoneStackCriticCfg = NoneStackCriticCfg()
+    # info_obs: InfoObsCfg = InfoObsCfg()
 
 @configclass
 class EventCfg:
