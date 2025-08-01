@@ -86,6 +86,7 @@ class HumanoidRewardsCfg():
         params={"asset_cfg": SceneEntityCfg("robot", joint_names="torso_joint")},
     )
 
+
     joint_applied_torque_limits = RewTerm(
         func=mdp.applied_torque_limits,
         weight=-0.0,  # default: -0.1
