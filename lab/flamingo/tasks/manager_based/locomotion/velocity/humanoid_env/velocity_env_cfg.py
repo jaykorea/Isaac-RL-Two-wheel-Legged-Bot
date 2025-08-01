@@ -151,7 +151,7 @@ class CommandsCfg:
 class ActionsCfg:
     """Action specifications for the MDP."""
 
-    joint_pos = mdp.JointPositionActionCfg(asset_name="robot", joint_names=[".*"], scale=1.0, use_default_offset=True)
+    joint_pos = mdp.JointPositionActionCfg(asset_name="robot", joint_names=[".*"], scale=0.5, use_default_offset=True)
 
 
 @configclass
@@ -440,7 +440,8 @@ class LocomotionVelocityFlatEnvCfg(ManagerBasedRLEnvCfg):
         self.sim.dt = 0.005
         self.sim.disable_contact_processing = True
         self.sim.physics_material = self.scene.terrain.physics_material
-        
+        self.sim.physx.gpu_max_rigid_patch_count = 10 * 2**15
+
         # change terrain to flat
         self.scene.terrain.terrain_type = "plane"
         self.scene.terrain.terrain_generator = None

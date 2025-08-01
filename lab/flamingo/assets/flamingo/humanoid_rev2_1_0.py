@@ -75,7 +75,7 @@ HUMANOID_CFG = ArticulationCfg(
                 ".*_hip_roll_joint": 150.0,
                 ".*_hip_pitch_joint": 200.0,
                 ".*_knee_joint": 200.0,
-                "torso_joint": 200.0,
+                "torso_joint": 100.0,
             },
             damping={
                 ".*_hip_yaw_joint": 5.0,
