@@ -141,10 +141,10 @@ def main():
         print_dict(video_kwargs, nesting=4)
         env = gym.wrappers.RecordVideo(env, **video_kwargs)
     # wrap around environment for co-rl
-    joint_names = env.unwrapped.scene["robot"].joint_names
+
     if args_cli.analyze is not None:
         analyze_items = args_cli.analyze[0].split()
-        analyzer = Analyzer(env=env, analyze_items=analyze_items, joint_names=joint_names, log_dir=log_dir)
+        analyzer = Analyzer(env=env, analyze_items=analyze_items, log_dir=log_dir)
 
     env = CoRlVecEnvWrapper(env, agent_cfg)
 
