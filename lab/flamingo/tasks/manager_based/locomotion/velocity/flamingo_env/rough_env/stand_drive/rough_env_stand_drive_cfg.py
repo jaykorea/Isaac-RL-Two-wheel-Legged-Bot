@@ -15,7 +15,7 @@ from lab.flamingo.tasks.manager_based.locomotion.velocity.flamingo_env.velocity_
     CurriculumCfg,
 )
 
-from lab.flamingo.assets.flamingo.flamingo_rev01_5_1 import FLAMINGO_CFG  # isort: skip
+from lab.flamingo.assets.flamingo.flamingo_rev01_5_2 import FLAMINGO_CFG  # isort: skip
 
 
 @configclass
