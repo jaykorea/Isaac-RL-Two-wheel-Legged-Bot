@@ -15,6 +15,7 @@ import cli_args  # isort: skip
 from scripts.co_rl.core.runners import OffPolicyRunner
 
 from scripts.co_rl.core.utils.str2bool import str2bool
+from scripts.co_rl.core.utils.analyzer import Analyzer
 
 # add argparse arguments
 parser = argparse.ArgumentParser(description="Train an RL agent with CO-RL.")
@@ -27,6 +28,13 @@ parser.add_argument("--num_envs", type=int, default=64, help="Number of environm
 parser.add_argument("--algo", type=str, default="ppo", help="Name of the task.")
 parser.add_argument("--stack_frames", type=int, default=None, help="Number of frames to stack.")
 parser.add_argument("--plot", type=str2bool, default="False", help="Plot the data.")
+parser.add_argument(
+    "--analyze",
+    type=str,
+    nargs="+",  
+    default=None,
+    help="Specify which data to analyze (e.g., cmd_vel joint_vel torque)."
+)
 parser.add_argument("--task", type=str, default=None, help="Name of the task.")
 parser.add_argument("--seed", type=int, default=42, help="Seed used for the environment")
 parser.add_argument(
@@ -133,6 +141,11 @@ def main():
         print_dict(video_kwargs, nesting=4)
         env = gym.wrappers.RecordVideo(env, **video_kwargs)
     # wrap around environment for co-rl
+    joint_names = env.unwrapped.scene["robot"].joint_names
+    if args_cli.analyze is not None:
+        analyze_items = args_cli.analyze[0].split()
+        analyzer = Analyzer(env=env, analyze_items=analyze_items, joint_names=joint_names, log_dir=log_dir)
+
     env = CoRlVecEnvWrapper(env, agent_cfg)
 
     print(f"[INFO]: Loading model checkpoint from: {resume_path}")
@@ -179,20 +192,10 @@ def main():
     # export environment to pdf
     export_env_as_pdf(yaml_path=os.path.join(log_dir, "params", "env.yaml"), pdf_path=os.path.join(export_model_dir, "env.pdf"))
 
-    # TODO Should Generalize this using argparser
-    if args_cli.plot == True:
-        if "Light" in args_cli.task:
-            flamingo_light = True
-        else:
-            flamingo_light = False
-        # Initialize lists to store data
-        joint_pos_list = []
-        target_joint_pos_list = []
-        joint_velocity_obs_list = []
-        target_joint_velocity_list = []
 
     # reset environment
     obs, _ = env.get_observations()
+    
     timestep = 0
     # Simulate environment and collect data
     while simulation_app.is_running():
@@ -203,74 +206,22 @@ def main():
             else:
                 actions = policy(obs)
             clipped_actions = torch.clamp(actions, -1.0, 1.0)
-            obs, _, _, _ = env.step(clipped_actions)
+            obs, _, _, extras = env.step(clipped_actions)
         if args_cli.video:
             timestep += 1
             # Exit the play loop after recording one video
             if timestep == args_cli.video_length:
                 break
+                
         # Extract the relevant slices and convert to numpy
-        if args_cli.plot == True:
-            if flamingo_light:
-                joint_pos = obs[0, :2].cpu().numpy()
-                target_joint_pos = (clipped_actions[0, :2] * 1.25).cpu().numpy()
-                joint_velocity_obs = obs[0, 2:4].cpu().numpy()
-                target_joint_velocity = (clipped_actions[0, 2:4] * 30.0).cpu().numpy()
-            else:
-                joint_pos = obs[0, :6].cpu().numpy()
-                target_joint_pos = (clipped_actions[0, :6] * 2.0).cpu().numpy()
-                joint_velocity_obs = obs[0, 12:14].cpu().numpy()
-                target_joint_velocity = (clipped_actions[0, 6:8] * 20.0).cpu().numpy()
-
-            # Store the data
-            joint_pos_list.append(joint_pos)
-            target_joint_pos_list.append(target_joint_pos)
-            joint_velocity_obs_list.append(joint_velocity_obs)
-            target_joint_velocity_list.append(target_joint_velocity)
-
+        if args_cli.analyze is not None:
+            analyzer.append(extras['observations']['obs_info'])
+    
     env.close()
 
-    if args_cli.plot == True:
-        if flamingo_light:
-            plt.figure(figsize=(14, 16))
-            for i in range(2):
-                plt.subplot(2, 2, i + 1)
-                plt.plot([step[i] for step in joint_pos_list], label=f"Joint Position {i+1}")
-                plt.plot([step[i] for step in target_joint_pos_list], label=f"Target Joint Position {i+1}", linestyle="--")
-                plt.title(f"Joint Position {i+1} and Target Joint Position", fontsize=10, pad=10)
-                plt.legend()
-
-            for i in range(2):
-                plt.subplot(2, 2, i + 3)
-                plt.plot([step[i] for step in joint_velocity_obs_list], label=f"Observed Joint Velocity {i+1}")
-                plt.plot(
-                    [step[i] for step in target_joint_velocity_list], label=f"Target Joint Velocity {i+1}", linestyle="--"
-                )
-                plt.title(f"Observed and Target Joint Velocity {i+1}", fontsize=10, pad=10)
-                plt.legend()
-        else:
-            plt.figure(figsize=(14, 16))
-
-            for i in range(6):
-                plt.subplot(4, 2, i + 1)
-                plt.plot([step[i] for step in joint_pos_list], label=f"Joint Position {i+1}")
-                plt.plot([step[i] for step in target_joint_pos_list], label=f"Target Joint Position {i+1}", linestyle="--")
-                plt.title(f"Joint Position {i+1} and Target Joint Position", fontsize=10, pad=10)
-                plt.legend()
-
-            for i in range(2):
-                plt.subplot(4, 2, i + 7)
-                plt.plot([step[i] for step in joint_velocity_obs_list], label=f"Observed Joint Velocity {i+1}")
-                plt.plot(
-                    [step[i] for step in target_joint_velocity_list], label=f"Target Joint Velocity {i+1}", linestyle="--"
-                )
-                plt.title(f"Observed and Target Joint Velocity {i+1}", fontsize=10, pad=10)
-                plt.legend()
-
-        plt.tight_layout()
-        plt.show()
-
-
+    if args_cli.analyze is not None:
+        analyzer.export()
+        
 if __name__ == "__main__":
     # run the main function
     main()

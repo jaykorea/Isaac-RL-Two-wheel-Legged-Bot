@@ -37,42 +37,6 @@ from lab.flamingo.tasks.manager_based.locomotion.velocity.terrain_config.stair_c
 ##
 # Scene definition
 ##
-
-joint_names = [
-    # left leg (6)
-    "left_hip_yaw_joint",
-    "left_hip_roll_joint",
-    "left_hip_pitch_joint",
-    "left_knee_joint",
-    "left_ankle_pitch_joint",
-    "left_ankle_roll_joint",
-
-    # right leg (6)
-    "right_hip_yaw_joint",
-    "right_hip_roll_joint",
-    "right_hip_pitch_joint",
-    "right_knee_joint",
-    "right_ankle_pitch_joint",
-    "right_ankle_roll_joint",
-
-    # torso (1)
-    "torso_joint",
-
-    # left arm (5)
-    "left_shoulder_pitch_joint",
-    "left_shoulder_roll_joint",
-    "left_shoulder_yaw_joint",
-    "left_elbow_pitch_joint",
-    "left_elbow_yaw_joint",
-
-    # right arm (5)
-    "right_shoulder_pitch_joint",
-    "right_shoulder_roll_joint",
-    "right_shoulder_yaw_joint",
-    "right_elbow_pitch_joint",
-    "right_elbow_yaw_joint",
-]
-
 @configclass
 class MySceneCfg(InteractiveSceneCfg):
     """Configuration for the terrain scene with a legged robot."""
@@ -245,11 +209,43 @@ class ObservationsCfg:
             self.enable_corruption = True
             self.concatenate_terms = True
 
+    @configclass
+    class InfoCfg(ObsGroup):
+        """Observations for Stack policy group."""
+        joint_pos = ObsTerm(
+            func=mdp.joint_pos,
+            noise=Unoise(n_min=-0.0, n_max=0.0),
+            scale=1.0,
+        )
+        joint_vel = ObsTerm(
+            func=mdp.joint_vel, 
+            noise=Unoise(n_min=-0.0, n_max=0.0), 
+            scale=1.0, 
+        )  # default: -1.5
+        joint_torque = ObsTerm(
+            func=mdp.joint_torques, 
+            noise=Unoise(n_min=-0.0, n_max=0.0), 
+            scale=1.0, 
+            params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_joint"])},
+        )  # default: -1.5
+        
+        base_ang_vel = ObsTerm(func=mdp.base_ang_vel_link, scale=1.0)
+        actions = ObsTerm(func=mdp.last_action)
+        velocity_commands = ObsTerm(func=mdp.generated_scaled_commands, params={"command_name": "base_velocity", "scale": (1.0, 1.0, 1.0)})
+        base_lin_vel_z = ObsTerm(func=mdp.base_lin_vel_z_link, scale=1.0)
+        base_lin_vel_y = ObsTerm(func=mdp.base_lin_vel_y_link, scale=1.0)
+        base_lin_vel_x = ObsTerm(func=mdp.base_lin_vel_x_link, scale=1.0)
+
+        def __post_init__(self):
+            self.enable_corruption = False
+            self.concatenate_terms = True
+
     # observation groups
     stack_policy: StackPolicyCfg = StackPolicyCfg()
     none_stack_policy: NoneStackPolicyCfg = NoneStackPolicyCfg()
     stack_critic: StackCriticCfg = StackCriticCfg()
     none_stack_critic: NoneStackCriticCfg = NoneStackCriticCfg()
+    obs_info: InfoCfg = InfoCfg()
 
 
 @configclass

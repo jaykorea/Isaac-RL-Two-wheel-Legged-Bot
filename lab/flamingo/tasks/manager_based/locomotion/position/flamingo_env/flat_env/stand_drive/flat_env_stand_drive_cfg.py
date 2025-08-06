@@ -14,7 +14,7 @@ from lab.flamingo.tasks.manager_based.locomotion.position.flamingo_env.flat_env.
     CurriculumCfg,
 )
 
-from lab.flamingo.assets.flamingo.flamingo_rev01_5_1 import FLAMINGO_CFG  # isort: skip
+from lab.flamingo.assets.flamingo.flamingo_rev01_5_2 import FLAMINGO_CFG  # isort: skip
 from lab.flamingo.tasks.manager_based.locomotion.position.terrain_config.rough_config import ROUGH_TERRAINS_CFG
 
 # @configclass

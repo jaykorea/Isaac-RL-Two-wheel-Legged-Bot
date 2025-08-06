@@ -14,7 +14,7 @@ from lab.flamingo.tasks.manager_based.locomotion.velocity.flamingo_env.velocity_
     CurriculumCfg,
 )
 
-from lab.flamingo.assets.flamingo.flamingo_rev01_5_1 import FLAMINGO_CFG  # isort: skip
+from lab.flamingo.assets.flamingo.flamingo_rev01_5_2 import FLAMINGO_CFG  # isort: skip
 
 
 @configclass
@@ -113,7 +113,7 @@ class FlamingoRewardsCfg():
         func=mdp.base_height_adaptive_l2,
         weight=-25.0,
         params={
-            "target_height": 0.36288,
+            "target_height": 0.4535,
             "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
             # "sensor_cfg": SceneEntityCfg("base_height_scanner"),
         },
@@ -138,6 +138,13 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
         self.scene.robot = FLAMINGO_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
         self.sim.physx.gpu_max_rigid_patch_count = 10 * 2**15
 
+        # change terrain to flat
+        self.scene.terrain.terrain_type = "plane"
+        self.scene.terrain.terrain_generator = None
+
+        # Terrain curriculum
+        self.curriculum.terrain_levels = None
+
        #! ************** scene & observations setup - 0 *********** !#
         self.scene.height_scanner = None
         self.scene.base_height_scanner = None
@@ -146,9 +153,11 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
         self.scene.left_mask_sensor = None
         self.scene.right_mask_sensor = None
 
+        self.observations.none_stack_critic.height_scan = None
         self.observations.none_stack_critic.base_height_scan = None
         self.observations.none_stack_critic.left_wheel_height_scan = None
         self.observations.none_stack_critic.right_wheel_height_scan = None
+        self.observations.none_stack_critic.lift_mask = None
         #! ********************************************************* !#
 
         #! ****************** Observations setup ****************** !#
