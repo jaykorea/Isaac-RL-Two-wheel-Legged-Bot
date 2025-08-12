@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class Analyzer:
-    def __init__(self, env, analyze_items, log_dir, max_episode_length=10): 
+    def __init__(self, env, analyze_items, log_dir, max_episode_length=999): 
         """
         Initialize the Analyzer with environment and configuration.
         """
@@ -139,37 +139,38 @@ class Analyzer:
             data_dict[key] = data
 
         # Set up the plot
-        D = ref_dim
-        cols, rows = 4, (D + 3) // 4
+        if ref_dim is not None:
+            D = ref_dim
+            cols, rows = 4, (D + 3) // 4
 
-        fig, axes = plt.subplots(rows, cols, figsize=(5 * cols, 3 * rows), constrained_layout=True)
-        axes = axes.flat if isinstance(axes, np.ndarray) else [axes]
+            fig, axes = plt.subplots(rows, cols, figsize=(5 * cols, 3 * rows), constrained_layout=True)
+            axes = axes.flat if isinstance(axes, np.ndarray) else [axes]
 
-        # If the items are joint torque and velocity, plot them as scatter
-        is_scatter = set(self.analyze_items) == {'joint_vel', 'joint_torque'}
+            # If the items are joint torque and velocity, plot them as scatter
+            is_scatter = set(self.analyze_items) == {'joint_vel', 'joint_torque'}
 
-        for i in range(D):
-            ax = axes[i]
-            # Plot the data for each item
-            if is_scatter:
-                x = data_dict['joint_torque'][:, i]
-                y = data_dict['joint_vel'][:, i]
-                ax.scatter(x, y, s=1, alpha=0.6)
-                ax.set_xlabel("Torque")
-                ax.set_ylabel("Velocity")
-            else:
-                for key, data in data_dict.items():
-                    ax.plot(np.arange(data.shape[0]), data[:, i], label=key, linewidth=1)
-                ax.set_xlabel("Time step")
-                ax.set_ylabel("Value")
-                ax.legend(fontsize=7)
+            for i in range(D):
+                ax = axes[i]
+                # Plot the data for each item
+                if is_scatter:
+                    x = data_dict['joint_torque'][:, i]
+                    y = data_dict['joint_vel'][:, i]
+                    ax.scatter(x, y, s=1, alpha=0.6)
+                    ax.set_xlabel("Torque")
+                    ax.set_ylabel("Velocity")
+                else:
+                    for key, data in data_dict.items():
+                        ax.plot(np.arange(data.shape[0]), data[:, i], label=key, linewidth=1)
+                    ax.set_xlabel("Time step")
+                    ax.set_ylabel("Value")
+                    ax.legend(fontsize=7)
 
-            title = self.joint_names[i] if i < len(self.joint_names) else f"Joint[{i}]"
-            ax.set_title(title, fontsize=9)
+                title = self.joint_names[i] if i < len(self.joint_names) else f"Joint[{i}]"
+                ax.set_title(title, fontsize=9)
 
-        for i in range(D, len(axes)):
-            axes[i].axis('off')
+            for i in range(D, len(axes)):
+                axes[i].axis('off')
 
-        title_text = "Torque-Velocity Scatter" if is_scatter else "Joint-wise Comparison of Observations Over Time"
-        fig.suptitle(title_text, fontsize=14)
-        plt.show()
+            title_text = "Torque-Velocity Scatter" if is_scatter else "Joint-wise Comparison of Observations Over Time"
+            fig.suptitle(title_text, fontsize=14)
+            plt.show()

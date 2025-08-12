@@ -85,6 +85,7 @@ class FlamingoRewardsCfg():
         weight=-1.0,
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*_leg_joint")},
     )
+    
     undesired_contacts = RewTerm(
         func=mdp.undesired_contacts,
         weight=-0.5,
@@ -109,6 +110,7 @@ class FlamingoRewardsCfg():
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*_leg_joint")},
     )
     flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-5.0)
+    
     base_height = RewTerm(
         func=mdp.base_height_adaptive_l2,
         weight=-25.0,
