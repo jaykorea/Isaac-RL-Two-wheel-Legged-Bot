@@ -88,7 +88,11 @@ class Flamingo4w4lRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
 
         # reset_robot_joint_zero should be called here
         self.events.reset_robot_joints.params["position_range"] = (-0.1, 0.1)
-        self.events.push_robot = None
+        # self.events.push_robot = True
+        self.events.push_robot.interval_range_s = (10.0, 15.0)
+        self.events.push_robot.params = {
+            "velocity_range": {"x": (-1.0, 1.0), "y": (-1.0, 1.0), "z": (-1.0, 1.0)},
+        }
 
         # add base mass should be called here
         self.events.add_base_mass.params["asset_cfg"].body_names = ["base_link"]
@@ -137,6 +141,13 @@ class Flamingo4w4lRoughEnvCfg_PLAY(Flamingo4w4lRoughEnvCfg):
         self.scene.env_spacing = 2.5
         # spawn the robot randomly in the grid (instead of their terrain levels)
         self.scene.terrain.max_init_terrain_level = None
+        
+        # # change terrain to flat
+        # self.scene.terrain.terrain_type = "plane"
+        # self.scene.terrain.terrain_generator = None
+
+        # # Terrain curriculum
+        # self.curriculum.terrain_levels = None
         
         self.scene.sky_light = AssetBaseCfg(
             prim_path="/World/SkyDome",
@@ -187,7 +198,7 @@ class Flamingo4w4lRoughEnvCfg_PLAY(Flamingo4w4lRoughEnvCfg):
                 "yaw": (0.0, 0.0),
             },
         }
-
+        
         # commands
         self.commands.base_velocity.ranges.lin_vel_x = (-1.5, 1.5)
         self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
