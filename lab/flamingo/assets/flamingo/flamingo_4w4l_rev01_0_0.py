@@ -17,7 +17,7 @@ from isaaclab.assets.articulation import ArticulationCfg
 from lab.flamingo.assets.flamingo import FLAMINGO_ASSETS_DATA_DIR
 
 
-FLAMINGO_CFG = ArticulationCfg(
+FLAMINGO4W4L_CFG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
         usd_path=f"{FLAMINGO_ASSETS_DATA_DIR}/Robots/Flamingo/flamingo_4w4l_rev_01_0_0/flamingo_4w4l_rev_01_0_0_merge_joints.usd",
         activate_contact_sensors=True,
@@ -36,16 +36,24 @@ FLAMINGO_CFG = ArticulationCfg(
     ),
 
     init_state=ArticulationCfg.InitialStateCfg(
-        pos=(0.0, 0.0, 0.4535),  # default: 0.4535
+        pos=(0.0, 0.0, 0.6),  # default: 0.4535
         joint_pos={
-            "left_hip_joint": 0.0,
-            "left_shoulder_joint": 0.0,
-            "left_leg_joint": -0.0,
-            "left_wheel_joint": 0.0,
-            "right_hip_joint": 0.0,
-            "right_shoulder_joint": 0.0,
-            "right_leg_joint": -0.0,
-            "right_wheel_joint": 0.0,
+            "FL_hip_joint": 0.0,
+            "FR_hip_joint": 0.0,
+            "RL_hip_joint": 0.0,
+            "RR_hip_joint": 0.0,
+            "FL_shoulder_joint": 0.0,
+            "FR_shoulder_joint": 0.0,
+            "RL_shoulder_joint": 0.0,
+            "RR_shoulder_joint": 0.0,
+            "FL_leg_joint": 0.0,
+            "FR_leg_joint": 0.0,
+            "RL_leg_joint": 0.0,
+            "RR_leg_joint": 0.0,
+            "FL_wheel_joint": 0.0,
+            "FR_wheel_joint": 0.0,
+            "RL_wheel_joint": 0.0,
+            "RR_wheel_joint": 0.0,
         },
         joint_vel={".*": 0.0},
     ),
