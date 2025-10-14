@@ -162,19 +162,9 @@ class CommandsCfg:
 class ActionsCfg:
     """Action specifications for the MDP."""
 
-    hip_joint_pos = mdp.JointPositionActionCfg(
+    joint_pos = mdp.JointPositionActionCfg(
         asset_name="robot",
-        joint_names=["left_hip_joint", "right_hip_joint", 
-                     ],
-        scale=1.0,
-        use_default_offset=False,
-        preserve_order=True,
-    )
-    shoudler_leg_joint_pos = mdp.JointPositionActionCfg(
-        asset_name="robot",
-        joint_names=["left_shoulder_joint", "right_shoulder_joint", 
-                     "left_leg_joint", "right_leg_joint"
-                     ],
+        joint_names=["left_shoulder_joint", "right_shoulder_joint"],
         scale=1.0,
         use_default_offset=False,
         preserve_order=True,
@@ -249,7 +239,7 @@ class ObservationsCfg:
         is_contact = ObsTerm(
             func=mdp.is_contact,
             params={
-                "sensor_cfg": SceneEntityCfg("contact_forces", body_names=[".*_wheel_link"]),
+                "sensor_cfg": SceneEntityCfg("contact_forces", body_names=[".*_wheel_Link"]),
                 "threshold": 1.0,
             },
         )
@@ -309,7 +299,7 @@ class ObservationsCfg:
         is_contact = ObsTerm(
             func=mdp.is_contact,
             params={
-                "sensor_cfg": SceneEntityCfg("contact_forces", body_names=[".*_wheel_link"]),
+                "sensor_cfg": SceneEntityCfg("contact_forces", body_names=[".*_wheel_Link"]),
                 "threshold": 1.0,
             },
         )
@@ -352,7 +342,7 @@ class EventCfg:
         func=mdp.randomize_actuator_gains,
         mode="startup",
         params={
-            "asset_cfg": SceneEntityCfg("robot", joint_names=[".*hip_joint", ".*shoulder_joint"]),
+            "asset_cfg": SceneEntityCfg("robot", joint_names=[".*shoulder_joint"]),
             "stiffness_distribution_params": (0.7, 1.3),
             "damping_distribution_params": (0.7, 1.3),
             "operation": "scale",
