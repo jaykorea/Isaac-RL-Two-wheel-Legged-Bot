@@ -11,6 +11,7 @@ from isaaclab.actuators import (
 )
 from lab.flamingo.tasks.manager_based.locomotion.velocity.actuators.actuator_cfg import (
     ActuatorNetKANCfg,
+    GearDelayedPDActuatorCfg,
 )
 from isaaclab.assets.articulation import ArticulationCfg
 
@@ -85,17 +86,19 @@ FLAMINGO_CFG = ArticulationCfg(
                 ".*_shoulder_joint": 0.01,
             },
         ),
-        "joints_l": DelayedPDActuatorCfg(
+        "joints_l": GearDelayedPDActuatorCfg(
             joint_names_expr=[".*_leg_joint"],
-            effort_limit=90.0,
-            velocity_limit=13.0,
+            effort_limit=60.0,
+            velocity_limit=20.0,
+            gear_ratio=-1.5,
+            gamma=1.0,
             min_delay=0,  # physics time steps (min: 5.0 * 0 = 0.0ms)
             max_delay=4,  # physics time steps (max: 5.0 * 4 = 20.0ms)
             stiffness={
-                ".*_leg_joint": 150.0,
+                ".*_leg_joint": 120.0,
             },
             damping={
-                ".*_leg_joint": 2.5,
+                ".*_leg_joint": 1.5,
             },
             friction={
                 ".*_leg_joint": 0.0,
@@ -106,8 +109,8 @@ FLAMINGO_CFG = ArticulationCfg(
         ),
         "wheels": DelayedPDActuatorCfg(
             joint_names_expr=[".*_wheel_joint"],
-            effort_limit=60.0,
-            velocity_limit=20.0,
+            effort_limit=36.0,
+            velocity_limit=50.0,
             min_delay=0,  # physics time steps (min: 5.0 * 0 = 0.0ms)
             max_delay=4,  # physics time steps (max: 5.0 * 4 = 20.0ms)
             stiffness={

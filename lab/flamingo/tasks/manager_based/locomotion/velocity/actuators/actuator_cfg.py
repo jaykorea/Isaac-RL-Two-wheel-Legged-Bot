@@ -6,11 +6,11 @@ from isaaclab.actuators.actuator_cfg import (
     ActuatorNetLSTMCfg as BaseActuatorNetLSTMCfg,
     ActuatorNetMLPCfg as BaseActuatorNetMLPCfg,
     IdealPDActuatorCfg as BaseIdealPDActuatorCfg,
-    DCMotorCfg,
+    DCMotorCfg, DelayedPDActuatorCfg
 )
 from .actuator_net import ActuatorNetLSTM, ActuatorNetMLP, ActuatorNetKAN
 from .actuator_force_zero import ForceZeroActuator
-
+from .gear_actuator import GearDelayedPDActuator
 
 @configclass
 class ForceZeroActuatorCfg(BaseIdealPDActuatorCfg):
@@ -84,3 +84,13 @@ class ActuatorNetKANCfg(DCMotorCfg):
 
     input_idx: Iterable[int] = MISSING
     """Indices of the actuator history buffer passed as inputs to the network."""
+    
+@configclass
+class GearDelayedPDActuatorCfg(DelayedPDActuatorCfg):
+    """Configuration for GearDelayedPDActuator."""
+
+    class_type: type = GearDelayedPDActuator
+
+    gear_ratio: float = MISSING
+    
+    gamma: float = MISSING
