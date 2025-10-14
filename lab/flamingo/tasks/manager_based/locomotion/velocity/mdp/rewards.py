@@ -1308,3 +1308,20 @@ def foot_clearance_reward(
         foot_clearance = torch.exp(-torch.sum(foot_z_target_error * foot_velocity_tanh, dim=1) / std)
 
     return foot_clearance
+
+def reward_same_foot_x_position(
+    env: ManagerBasedRLEnv,
+    asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+) -> torch.Tensor:
+    """
+    Penalize X-axis displacement difference of two feet in base frame.
+    """
+    asset: RigidObject = env.scene[asset_cfg.name]
+    base_pos = asset.data.root_link_pos_w
+    base_quat = asset.data.root_link_quat_w
+    foot_world = asset.data.body_link_pos_w[:, asset_cfg.body_ids, :]
+    foot_base = foot_world - base_pos.unsqueeze(1)
+    for i in range(len(asset_cfg.body_ids)):
+        foot_base[:,i,:] = quat_rotate_inverse(base_quat, foot_base[:,i,:])
+    dx = foot_base[:,0,0] - foot_base[:,1,0]
+    return torch.abs(dx)  # penalize both feet being too far apart and too close together
