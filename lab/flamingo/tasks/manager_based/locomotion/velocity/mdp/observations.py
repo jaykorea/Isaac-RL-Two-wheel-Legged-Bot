@@ -234,53 +234,17 @@ def joint_pos_leg_gear(
     gear_ratio: float,
     asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
 ) -> torch.Tensor:
-    """Return joint positions for the configured joints, applying `gear_ratio`
-    only to right_leg_joint and left_leg_joint.
-
-    Note:
-        - Only joints in `asset_cfg.joint_ids` are returned.
-        - Among them, entries whose names are exactly 'right_leg_joint' or
-          'left_leg_joint' are multiplied by `gear_ratio`. Others are unchanged.
-    """
+    """Return joint positions for the configured (leg) joints, scaled by `gear_ratio`."""
     asset: Articulation = env.scene[asset_cfg.name]
-    
     pos = asset.data.joint_pos[:, asset_cfg.joint_ids]
-    selected_joint_names: Sequence[str] = [asset.data.joint_names[jid] for jid in asset_cfg.joint_ids]
-    targets = {"right_leg_joint", "left_leg_joint"}
-
-    scale_1d = torch.ones(len(selected_joint_names), dtype=pos.dtype, device=pos.device)
-    for i, name in enumerate(selected_joint_names):
-        if name in targets:
-            scale_1d[i] = gear_ratio
-
-    # Broadcast scale over the batch dimension
-    pos = pos * scale_1d.unsqueeze(0)
-    return pos
+    return pos * gear_ratio
 
 def joint_vel_leg_gear(
     env: ManagerBasedEnv,
     gear_ratio: float,
     asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
 ) -> torch.Tensor:
-    """Return joint velocities for the configured joints, applying `gear_ratio`
-    only to right_leg_joint and left_leg_joint.
-
-    Note:
-        - Only joints in `asset_cfg.joint_ids` are returned.
-        - Among them, entries whose names are exactly 'right_leg_joint' or
-          'left_leg_joint' are multiplied by `gear_ratio`. Others are unchanged.
-    """
+    """Return joint velocities for the configured (leg) joints, scaled by `gear_ratio`."""
     asset: Articulation = env.scene[asset_cfg.name]
-
     vel = asset.data.joint_vel[:, asset_cfg.joint_ids]
-    selected_joint_names: Sequence[str] = [asset.data.joint_names[jid] for jid in asset_cfg.joint_ids]
-    targets = {"right_leg_joint", "left_leg_joint"}
-
-    scale_1d = torch.ones(len(selected_joint_names), dtype=vel.dtype, device=vel.device)
-    for i, name in enumerate(selected_joint_names):
-        if name in targets:
-            scale_1d[i] = gear_ratio
-
-    # Broadcast scale over the batch dimension
-    vel = vel * scale_1d.unsqueeze(0)
-    return vel
+    return vel * gear_ratio
