@@ -239,7 +239,7 @@ class ObservationsCfg:
         is_contact = ObsTerm(
             func=mdp.is_contact,
             params={
-                "sensor_cfg": SceneEntityCfg("contact_forces", body_names=[".*_wheel_Link"]),
+                "sensor_cfg": SceneEntityCfg("contact_forces", body_names=[".*_wheel_link"]),
                 "threshold": 1.0,
             },
         )
@@ -299,7 +299,7 @@ class ObservationsCfg:
         is_contact = ObsTerm(
             func=mdp.is_contact,
             params={
-                "sensor_cfg": SceneEntityCfg("contact_forces", body_names=[".*_wheel_Link"]),
+                "sensor_cfg": SceneEntityCfg("contact_forces", body_names=[".*_wheel_link"]),
                 "threshold": 1.0,
             },
         )

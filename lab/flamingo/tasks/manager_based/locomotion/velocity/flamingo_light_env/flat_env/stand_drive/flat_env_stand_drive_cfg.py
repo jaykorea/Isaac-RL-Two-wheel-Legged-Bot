@@ -60,13 +60,13 @@ class FlamingoRewardsCfg():
         func=mdp.undesired_contacts,
         weight=-0.5,
         params={
-            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=[".*_shoulder_Link", ".*_leg_Link"]),
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=[".*_shoulder_link", ".*_leg_link"]),
             "threshold": 1.0,
         },
     )
     joint_applied_torque_limits = RewTerm(
         func=mdp.applied_torque_limits,
-        weight=-0.1,  # default: -0.1
+        weight=-0.05,  # default: -0.1
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*_joint")},
     )
     shoulder_align_l1 = RewTerm(
@@ -75,12 +75,12 @@ class FlamingoRewardsCfg():
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*_shoulder_joint")},
     )
 
-    flat_orientation = RewTerm(func=mdp.flat_euler_angle_l2, weight=-0.25)
+    flat_orientation = RewTerm(func=mdp.flat_euler_angle_l2, weight=-10.0)
     base_height = RewTerm(
         func=mdp.base_height_adaptive_l2,
         weight=-500.0,
         params={
-            "target_height": 0.2675, # default" 0.37452
+            "target_height": 0.310, # default" 0.310
             "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
         },
     )
@@ -114,7 +114,7 @@ class FlamingoRewardsCfg():
     same_foot_x_position = RewTerm(
         func=mdp.reward_same_foot_x_position,
         weight=-5.0,
-        params={"asset_cfg": SceneEntityCfg("robot", body_names=[".*_wheel_Link"])},
+        params={"asset_cfg": SceneEntityCfg("robot", body_names=[".*_wheel_link"])},
     )
     
 @configclass
@@ -178,7 +178,7 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
         self.events.add_base_mass.params["mass_distribution_params"] = (-1.0, 2.0)
 
         # physics material should be called here
-        self.events.physics_material.params["asset_cfg"].body_names = [".*_link", ".*_Link"]
+        self.events.physics_material.params["asset_cfg"].body_names = [".*_link"]
         self.events.physics_material.params["static_friction_range"] = (0.3, 1.0)
         self.events.physics_material.params["dynamic_friction_range"] = (0.3, 0.8)
         # self.events.base_external_force_torque.params["asset_cfg"].body_names = ["base_link"]
@@ -202,7 +202,7 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
         self.curriculum.terrain_levels = None
 
         # commands
-        self.commands.base_velocity.ranges.lin_vel_x = (-0.75, 0.75)
+        self.commands.base_velocity.ranges.lin_vel_x = (-1.0, 1.0)
         self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
         self.commands.base_velocity.ranges.ang_vel_z = (-2.5, 2.5)
         # self.commands.base_velocity.ranges.heading = (-math.pi, math.pi)
@@ -210,8 +210,8 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
 
         # terminations
         self.terminations.base_contact.params["sensor_cfg"].body_names = [
-            "left_leg_Link",
-            "right_leg_Link",
+            "left_leg_link",
+            "right_leg_link",
         ]
 
 @configclass
@@ -247,7 +247,7 @@ class FlamingoFlatEnvCfg_PLAY(FlamingoFlatEnvCfg):
         self.events.add_base_mass.params["mass_distribution_params"] = (-0.5, 1.0)
 
         # physics material should be called here
-        self.events.physics_material.params["asset_cfg"].body_names = [".*_link", ".*_Link"]
+        self.events.physics_material.params["asset_cfg"].body_names = [".*_link"]
         self.events.physics_material.params["static_friction_range"] = (0.8, 1.0)
         self.events.physics_material.params["dynamic_friction_range"] = (0.8, 1.0)
         # self.events.base_external_force_torque.params["asset_cfg"].body_names = ["base_link"]
@@ -270,7 +270,7 @@ class FlamingoFlatEnvCfg_PLAY(FlamingoFlatEnvCfg):
         self.curriculum.terrain_levels = None
 
         # commands
-        self.commands.base_velocity.ranges.lin_vel_x = (-0.75, 0.75)
+        self.commands.base_velocity.ranges.lin_vel_x = (-1.0, 1.0)
         self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
         self.commands.base_velocity.ranges.ang_vel_z = (-2.5, 2.5)
         self.commands.base_velocity.ranges.heading = (-0.0, 0.0)
@@ -278,6 +278,6 @@ class FlamingoFlatEnvCfg_PLAY(FlamingoFlatEnvCfg):
         
         # terminations
         self.terminations.base_contact.params["sensor_cfg"].body_names = [
-            "left_leg_Link",
-            "right_leg_Link",
+            "left_leg_link",
+            "right_leg_link",
         ]

@@ -16,7 +16,7 @@ from lab.flamingo.tasks.manager_based.locomotion.velocity.flamingo_4w4l_env.velo
     CurriculumCfg,
 )
 
-from lab.flamingo.assets.flamingo.flamingo_4w4l_rev01_0_0 import FLAMINGO4W4L_CFG  # isort: skip
+from lab.flamingo.assets.flamingo.flamingo_4w4l_rev02_0_0 import FLAMINGO4W4L_CFG  # isort: skip
 
 
 @configclass
