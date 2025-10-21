@@ -189,10 +189,16 @@ class ObservationsCfg:
         # observation terms (order preserved)  
         joint_pos = ObsTerm(
             func=mdp.joint_pos,
+            params={
+                "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_shoulder_joint"])
+            },
         )
         joint_vel = ObsTerm(
             func=mdp.joint_vel,
             scale=0.15,
+            params={
+                "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_shoulder_joint", ".*_wheel_joint"])
+            },
         )
         base_ang_vel = ObsTerm(func=mdp.base_ang_vel_link, scale=0.25)  # default: -0.15
         # base_euler = ObsTerm(func=mdp.base_euler_angle_link)

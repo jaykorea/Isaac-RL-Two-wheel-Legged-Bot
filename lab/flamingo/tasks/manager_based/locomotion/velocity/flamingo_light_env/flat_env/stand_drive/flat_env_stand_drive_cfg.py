@@ -32,7 +32,7 @@ class FlamingoEduActionsCfg:
     wheel_vel = mdp.JointVelocityActionCfg(
         asset_name="robot",
         joint_names=["left_wheel_joint", "right_wheel_joint"],
-        scale=20.0,
+        scale=10.0,
         use_default_offset=False,
         preserve_order=True
     )
@@ -41,14 +41,26 @@ class FlamingoEduActionsCfg:
 class FlamingoRewardsCfg():
     # -- task
     track_lin_vel_xy_exp = RewTerm(
-        func=mdp.track_lin_vel_xy_link_exp, weight=3.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
+        func=mdp.track_lin_vel_xy_link_exp, weight=1.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
     )
     track_ang_vel_z_exp = RewTerm(
-        func=mdp.track_ang_vel_z_link_exp, weight=2.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
+        func=mdp.track_ang_vel_z_link_exp, weight=0.5, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
     )
 
-    lin_vel_z_l2 = RewTerm(func=mdp.lin_vel_z_link_l2, weight=-1.5)
-    ang_vel_xy_l2 = RewTerm(func=mdp.ang_vel_xy_link_l2, weight=-0.1)
+    lin_vel_z_l2 = RewTerm(func=mdp.lin_vel_z_link_l2, weight=-0.5)
+    ang_vel_xy_l2 = RewTerm(func=mdp.ang_vel_xy_link_l2, weight=-0.05)
+
+    # joint_target_deviation_range = RewTerm(
+    #     func=mdp.joint_target_deviation_range_l1_inv,
+    #     weight=1.0,
+    #     params={
+    #         "min_angle": -0.7,
+    #         "max_angle": -0.55,
+    #         "in_range_reward": 1.0,
+    #         "cmd_threshold": 0.0,
+    #         "asset_cfg": SceneEntityCfg("robot", joint_names=".*_shoulder_joint"),
+    #     },
+    # )
 
     dof_pos_limits_shoulder = RewTerm(
         func=mdp.joint_pos_limits,
@@ -66,7 +78,7 @@ class FlamingoRewardsCfg():
     )
     joint_applied_torque_limits = RewTerm(
         func=mdp.applied_torque_limits,
-        weight=-0.05,  # default: -0.1
+        weight=-0.025,  # default: -0.1
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*_joint")},
     )
     shoulder_align_l1 = RewTerm(
@@ -75,10 +87,10 @@ class FlamingoRewardsCfg():
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*_shoulder_joint")},
     )
 
-    flat_orientation = RewTerm(func=mdp.flat_euler_angle_l2, weight=-10.0)
+    flat_orientation = RewTerm(func=mdp.flat_euler_angle_l2, weight=-1.0)
     base_height = RewTerm(
         func=mdp.base_height_adaptive_l2,
-        weight=-250.0,
+        weight=-25.0,
         params={
             "target_height": 0.310, # default" 0.310
             "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
@@ -87,12 +99,12 @@ class FlamingoRewardsCfg():
 
     dof_torques_joints_l2 = RewTerm(
         func=mdp.joint_torques_l2,
-        weight=-5.0e-4,
+        weight=-5.0e-5,
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_shoulder_joint"])},
     )
     dof_torques_wheels_l2 = RewTerm(
         func=mdp.joint_torques_l2,
-        weight=-5.0e-4,
+        weight=-5.0e-5,
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_wheel_joint"])},
     )
 
@@ -110,13 +122,9 @@ class FlamingoRewardsCfg():
     action_rate_l2 = RewTerm(func=mdp.action_rate_l2, weight=-0.01)  # default: -0.01
 
     termination_penalty = RewTerm(func=mdp.is_terminated, weight=-200.0)
+    is_alive = RewTerm(mdp.is_alive, weight=0.1) 
 
-    same_foot_x_position = RewTerm(
-        func=mdp.reward_same_foot_x_position,
-        weight=-5.0,
-        params={"asset_cfg": SceneEntityCfg("robot", body_names=[".*_wheel_link"])},
-    )
-    
+
 @configclass
 class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
 
@@ -139,10 +147,6 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
         
         #! ****************** Observations setup - 0 *************** !#
         # observations
-        self.observations.stack_policy.joint_pos.params["asset_cfg"] = SceneEntityCfg("robot", joint_names=".*_shoulder_joint")
-        self.observations.stack_policy.joint_vel.params["asset_cfg"] = SceneEntityCfg("robot", joint_names=[".*_shoulder_joint", ".*_wheel_joint"])
-        self.observations.stack_critic.joint_pos.params["asset_cfg"] = SceneEntityCfg("robot", joint_names=".*_shoulder_joint")
-        self.observations.stack_critic.joint_vel.params["asset_cfg"] = SceneEntityCfg("robot", joint_names=[".*_shoulder_joint", ".*_wheel_joint"])
         self.observations.none_stack_policy.base_lin_vel = None
         self.observations.none_stack_policy.base_pos_z = None
         self.observations.none_stack_policy.current_reward = None
@@ -210,6 +214,7 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
 
         # terminations
         self.terminations.base_contact.params["sensor_cfg"].body_names = [
+            "base_link",
             "left_leg_link",
             "right_leg_link",
         ]

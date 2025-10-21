@@ -29,7 +29,7 @@ FLAMINGO_CFG = ArticulationCfg(
             max_depenetration_velocity=1.0,
         ),
         articulation_props=sim_utils.ArticulationRootPropertiesCfg(
-            enabled_self_collisions=False, solver_position_iteration_count=4, solver_velocity_iteration_count=1
+            enabled_self_collisions=False, solver_position_iteration_count=4, solver_velocity_iteration_count=0
         ),
     ),
     
@@ -52,10 +52,10 @@ FLAMINGO_CFG = ArticulationCfg(
             min_delay=0,  # physics time steps (min: 5.0 * 0 = 0.0ms)
             max_delay=4,  # physics time steps (max: 5.0 * 4 = 20.0ms)
             stiffness={
-                ".*_shoulder_joint": 65.0,
+                ".*_shoulder_joint": 45.0,
             },
             damping={
-                ".*_shoulder_joint": 1.0,
+                ".*_shoulder_joint": 0.5,
             },
             friction={
                 ".*_shoulder_joint": 0.0,
@@ -73,7 +73,7 @@ FLAMINGO_CFG = ArticulationCfg(
             stiffness={
                 ".*_wheel_joint": 0.0,
             },
-            damping={".*_wheel_joint": 0.5},
+            damping={".*_wheel_joint": 0.65},
             friction={
                 ".*_wheel_joint": 0.0,
             },
