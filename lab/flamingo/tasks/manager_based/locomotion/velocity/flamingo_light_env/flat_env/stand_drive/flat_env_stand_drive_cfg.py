@@ -78,7 +78,7 @@ class FlamingoRewardsCfg():
     flat_orientation = RewTerm(func=mdp.flat_euler_angle_l2, weight=-10.0)
     base_height = RewTerm(
         func=mdp.base_height_adaptive_l2,
-        weight=-500.0,
+        weight=-250.0,
         params={
             "target_height": 0.310, # default" 0.310
             "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
