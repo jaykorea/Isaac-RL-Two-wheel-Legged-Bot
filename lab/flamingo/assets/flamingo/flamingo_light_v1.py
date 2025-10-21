@@ -17,7 +17,7 @@ from lab.flamingo.assets.flamingo import FLAMINGO_ASSETS_DATA_DIR
 
 FLAMINGO_CFG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
-        usd_path=f"{FLAMINGO_ASSETS_DATA_DIR}/Robots/Flamingo/flamingo_light_v1_1/flamingo_light_v1.usd",
+        usd_path=f"{FLAMINGO_ASSETS_DATA_DIR}/Robots/Flamingo/flamingo_light_v01_2_1/flamingo_light_v01_2_1_merge_joints.usd",
         activate_contact_sensors=True,
         rigid_props=sim_utils.RigidBodyPropertiesCfg(
             disable_gravity=False,
@@ -50,9 +50,9 @@ FLAMINGO_CFG = ArticulationCfg(
             effort_limit=17.0,
             velocity_limit=40.0,
             min_delay=0,  # physics time steps (min: 5.0 * 0 = 0.0ms)
-            max_delay=0,  # physics time steps (max: 5.0 * 4 = 20.0ms)
+            max_delay=4,  # physics time steps (max: 5.0 * 4 = 20.0ms)
             stiffness={
-                ".*_shoulder_joint": 100.0,
+                ".*_shoulder_joint": 65.0,
             },
             damping={
                 ".*_shoulder_joint": 1.0,
@@ -69,7 +69,7 @@ FLAMINGO_CFG = ArticulationCfg(
             effort_limit=17.0,
             velocity_limit=40.0,
             min_delay=0,  # physics time steps (min: 5.0 * 0 = 0.0ms)
-            max_delay=0,  # physics time steps (max: 5.0 * 4 = 20.0ms)
+            max_delay=4,  # physics time steps (max: 5.0 * 4 = 20.0ms)
             stiffness={
                 ".*_wheel_joint": 0.0,
             },
