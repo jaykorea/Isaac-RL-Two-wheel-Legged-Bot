@@ -41,13 +41,13 @@ class FlamingoEduActionsCfg:
 class FlamingoRewardsCfg():
     # -- task
     track_lin_vel_xy_exp = RewTerm(
-        func=mdp.track_lin_vel_xy_link_exp, weight=1.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
+        func=mdp.track_lin_vel_xy_link_exp, weight=2.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
     )
     track_ang_vel_z_exp = RewTerm(
-        func=mdp.track_ang_vel_z_link_exp, weight=0.5, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
+        func=mdp.track_ang_vel_z_link_exp, weight=1.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
     )
 
-    lin_vel_z_l2 = RewTerm(func=mdp.lin_vel_z_link_l2, weight=-0.5)
+    lin_vel_z_l2 = RewTerm(func=mdp.lin_vel_z_link_l2, weight=-1.0)
     ang_vel_xy_l2 = RewTerm(func=mdp.ang_vel_xy_link_l2, weight=-0.05)
 
     # joint_target_deviation_range = RewTerm(
@@ -83,7 +83,7 @@ class FlamingoRewardsCfg():
     )
     shoulder_align_l1 = RewTerm(
         func=mdp.joint_align_l1,
-        weight=-0.25,  # default: -0.5
+        weight=-0.15,  # default: -0.5
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*_shoulder_joint")},
     )
 
@@ -122,7 +122,12 @@ class FlamingoRewardsCfg():
     action_rate_l2 = RewTerm(func=mdp.action_rate_l2, weight=-0.01)  # default: -0.01
 
     termination_penalty = RewTerm(func=mdp.is_terminated, weight=-200.0)
-    is_alive = RewTerm(mdp.is_alive, weight=0.1) 
+    # time_conditioned_penalty = RewTerm(
+    #     func=mdp.is_terminated_term,
+    #     weight=-1000.0,
+    #     params={"term_keys": "time_illegal_contact"},
+    # )
+    is_alive = RewTerm(mdp.is_alive, weight=1.0) 
 
 
 @configclass

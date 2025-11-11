@@ -19,7 +19,7 @@ from isaaclab.managers import SceneEntityCfg
 
 if TYPE_CHECKING:
     from isaaclab.envs import ManagerBasedRLEnv
-
+from isaaclab.sensors import ContactSensor
 
 def terrain_out_of_bounds(
     env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"), distance_buffer: float = 3.0
@@ -50,3 +50,17 @@ def terrain_out_of_bounds(
         return torch.logical_or(x_out_of_bounds, y_out_of_bounds)
     else:
         raise ValueError("Received unsupported terrain type, must be either 'plane' or 'generator'.")
+
+
+def time_illegal_contact(
+    env: ManagerBasedRLEnv,
+    sensor_cfg: SceneEntityCfg,
+    time_threshold: float,
+) -> torch.Tensor:
+    """선택한 body들 중 하나라도 연속 접촉 시간이 임계치를 넘으면 종료(True)."""
+    contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
+    # [N_env, len(body_ids)]
+    contact_time = contact_sensor.data.current_contact_time[:, sensor_cfg.body_ids]
+
+    return torch.any(contact_time >= time_threshold, dim=1)
+

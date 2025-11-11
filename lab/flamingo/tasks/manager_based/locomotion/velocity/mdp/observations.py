@@ -103,6 +103,13 @@ def is_contact(env: ManagerBasedRLEnv, threshold: float, sensor_cfg: SceneEntity
     is_contact = torch.max(torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1), dim=1)[0] > threshold
     return is_contact.float()
 
+def is_contact_time(env: ManagerBasedRLEnv, sensor_cfg: SceneEntityCfg) -> torch.Tensor:
+    # extract the used quantities (to enable type-hinting)
+    contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
+
+    contact_time = contact_sensor.data.current_contact_time[:, sensor_cfg.body_ids]
+
+    return contact_time
 
 def lift_mask_by_height_scan(
     env: ManagerBasedRLEnv,

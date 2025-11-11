@@ -249,6 +249,12 @@ class ObservationsCfg:
                 "threshold": 1.0,
             },
         )
+        is_contact_time = ObsTerm(
+            func=mdp.is_contact_time,
+            params={
+                "sensor_cfg": SceneEntityCfg("contact_forces", body_names=[".*_caster_link"]),
+            },
+        )
         lift_mask = ObsTerm(
             func=mdp.lift_mask_by_height_scan,
             params={
@@ -356,36 +362,36 @@ class EventCfg:
         },
     )
 
-    randomize_leg_joint_actuator_gains = EventTerm(
-        func=mdp.randomize_actuator_gains,
-        mode="startup",
-        params={
-            "asset_cfg": SceneEntityCfg("robot", joint_names=".*leg_joint"),
-            "stiffness_distribution_params": (0.8, 1.3),
-            "damping_distribution_params": (0.8, 1.3),
-            "operation": "scale",
-            "distribution": "log_uniform",
-        },
-    )
+    # randomize_leg_joint_actuator_gains = EventTerm(
+    #     func=mdp.randomize_actuator_gains,
+    #     mode="startup",
+    #     params={
+    #         "asset_cfg": SceneEntityCfg("robot", joint_names=".*leg_joint"),
+    #         "stiffness_distribution_params": (0.8, 1.3),
+    #         "damping_distribution_params": (0.8, 1.3),
+    #         "operation": "scale",
+    #         "distribution": "log_uniform",
+    #     },
+    # )
 
-    randomize_wheel_actuator_gains = EventTerm(
-        func=mdp.randomize_actuator_gains,
-        mode="startup",
-        params={
-            "asset_cfg": SceneEntityCfg("robot", joint_names=".*wheel_joint"),
-            "stiffness_distribution_params": (0.7, 1.3),
-            "damping_distribution_params": (0.7, 1.3),
-            "operation": "scale",
-            "distribution": "log_uniform",
-        },
-    )
+    # randomize_wheel_actuator_gains = EventTerm(
+    #     func=mdp.randomize_actuator_gains,
+    #     mode="startup",
+    #     params={
+    #         "asset_cfg": SceneEntityCfg("robot", joint_names=".*wheel_joint"),
+    #         "stiffness_distribution_params": (0.7, 1.3),
+    #         "damping_distribution_params": (0.7, 1.3),
+    #         "operation": "scale",
+    #         "distribution": "log_uniform",
+    #     },
+    # )
 
     randomize_com_positions = EventTerm(
         func=mdp.randomize_com_positions,
         mode="startup",
         params={
             "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
-            "com_distribution_params": (-0.05, -0.02),
+            "com_distribution_params": (-0.01, -0.01),
             "operation": "add",
         },
     )
@@ -454,6 +460,14 @@ class TerminationsCfg:
         func=mdp.illegal_contact,
         params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names="base"), "threshold": 1.0},
     )
+    time_illegal_contact = DoneTerm(
+        func=mdp.time_illegal_contact,
+        params={
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=["FL_caster_link", "FR_caster_link", "RL_caster_link", "RR_caster_link"]),
+            "time_threshold": 1.0
+            },
+    )
+
     terrain_out_of_bounds = DoneTerm(
         func=mdp.terrain_out_of_bounds,
         params={"asset_cfg": SceneEntityCfg("robot"), "distance_buffer": 3.0},
