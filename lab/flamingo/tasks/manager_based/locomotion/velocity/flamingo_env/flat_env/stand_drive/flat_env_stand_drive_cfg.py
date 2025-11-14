@@ -113,7 +113,7 @@ class FlamingoRewardsCfg():
         func=mdp.base_height_adaptive_l2,
         weight=-25.0,
         params={
-            "target_height": 0.4535,
+            "target_height": 0.65,
             "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
             # "sensor_cfg": SceneEntityCfg("base_height_scanner"),
         },

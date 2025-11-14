@@ -152,7 +152,7 @@ class CommandsCfg:
         heading_command=False,
         debug_vis=True,
         ranges=mdp.UniformVelocityWithZCommandCfg.Ranges(
-            lin_vel_x=(-1.0, 1.0), lin_vel_y=(-0.0, 0.0), ang_vel_z=(-2.0, 2.0), pos_z=(0.1931942, 0.3531942)
+            lin_vel_x=(-1.0, 1.0), lin_vel_y=(-0.0, 0.0), ang_vel_z=(-2.0, 2.0), pos_z=(0.35, 0.65)
         ),
         initial_phase_time=2.0,
     )
@@ -182,7 +182,7 @@ class ActionsCfg:
     wheel_vel = mdp.JointVelocityActionCfg(
         asset_name="robot",
         joint_names=["left_wheel_joint", "right_wheel_joint"],
-        scale=20.0,
+        scale=40.0,
         use_default_offset=False,
         preserve_order=True
     )
@@ -198,33 +198,33 @@ class ObservationsCfg:
 
         # observation terms (order preserved)
         
-        hip_shoulder_joint_pos = ObsTerm(
+        joint_pos_hip_shoulder= ObsTerm(
             func=mdp.joint_pos,
             params={
                 "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_joint", ".*_shoulder_joint"]),
             },
         )
-        leg_joint_pos = ObsTerm(
+        joint_pos_leg = ObsTerm(
             func=mdp.joint_pos_leg_gear,
             params={
                 "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_leg_joint"]),
                 "gear_ratio": -1.5,
             },
         )
-        hip_shoulder_joint_vel = ObsTerm(
+        joint_vel_hip_shoulder = ObsTerm(
             func=mdp.joint_vel,
             params={
                 "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_joint", ".*_shoulder_joint"]),
             },            
             scale=0.15)  # default: -1.5  
-        joint_vel = ObsTerm(
+        joint_vel_leg = ObsTerm(
             func=mdp.joint_vel_leg_gear, 
             params={
                 "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_leg_joint"]),
                 "gear_ratio": -1.5,
             },            
             scale=0.15)  # default: -1.5 
-        wheel_joint_vel = ObsTerm(
+        joint_vel_wheel = ObsTerm(
             func=mdp.joint_vel,
             params={
                 "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_wheel_joint"]),
@@ -266,9 +266,10 @@ class ObservationsCfg:
             params={"sensor_cfg": SceneEntityCfg("right_wheel_height_scanner"), 'offset': 0.0},
             clip=(-1.0, 1.0),
         )
-        base_lin_vel_z = ObsTerm(func=mdp.base_lin_vel_z_link, scale=0.25)
-        base_lin_vel_y = ObsTerm(func=mdp.base_lin_vel_y_link)
+
         base_lin_vel_x = ObsTerm(func=mdp.base_lin_vel_x_link, scale=2.0)
+        base_lin_vel_y = ObsTerm(func=mdp.base_lin_vel_y_link)
+        base_lin_vel_z = ObsTerm(func=mdp.base_lin_vel_z_link, scale=0.25)
         base_pos_z = ObsTerm(func=mdp.base_pos_z_rel_link, params={"sensor_cfg": SceneEntityCfg("base_height_scanner")})
         current_reward = ObsTerm(func=mdp.current_reward)
 
@@ -294,34 +295,39 @@ class ObservationsCfg:
     @configclass
     class StackPolicyCfg(ObsGroup):
         """Observations for Stack policy group."""
-        hip_shoulder_joint_pos = ObsTerm(
+        joint_pos_hip_shoulder = ObsTerm(
             func=mdp.joint_pos,
+            noise=Unoise(n_min=-0.1, n_max=0.1),  # default: -0.05
             params={
                 "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_joint", ".*_shoulder_joint"]),
             },
         )
-        leg_joint_pos = ObsTerm(
+        joint_pos_leg = ObsTerm(
             func=mdp.joint_pos_leg_gear,
+            noise=Unoise(n_min=-0.1, n_max=0.1), # default: 0.05
             params={
                 "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_leg_joint"]),
                 "gear_ratio": -1.5,
             },
         )
-        hip_shoulder_joint_vel = ObsTerm(
+        joint_vel_hip_shoulder = ObsTerm(
             func=mdp.joint_vel,
+            noise=Unoise(n_min=-1.5, n_max=1.5),
             params={
                 "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_joint", ".*_shoulder_joint"]),
             },            
             scale=0.15)  # default: -1.5  
-        joint_vel = ObsTerm(
-            func=mdp.joint_vel_leg_gear, 
+        joint_vel_leg = ObsTerm(
+            func=mdp.joint_vel_leg_gear,
+            noise=Unoise(n_min=-2.5, n_max=2.5), # default: 1.5
             params={
                 "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_leg_joint"]),
                 "gear_ratio": -1.5,
             },            
             scale=0.15)  # default: -1.5 
-        wheel_joint_vel = ObsTerm(
+        joint_vel_wheel = ObsTerm(
             func=mdp.joint_vel,
+            noise=Unoise(n_min=-1.5, n_max=1.5),
             params={
                 "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_wheel_joint"]),
             },            
@@ -393,41 +399,42 @@ class EventCfg:
         },
     )
 
-    # randomize_joint_actuator_gains = EventTerm(
-    #     func=mdp.randomize_actuator_gains,
-    #     mode="startup",
-    #     params={
-    #         "asset_cfg": SceneEntityCfg("robot", joint_names=[".*hip_joint", ".*shoulder_joint"]),
-    #         "stiffness_distribution_params": (0.7, 1.3),
-    #         "damping_distribution_params": (0.7, 1.3),
-    #         "operation": "scale",
-    #         "distribution": "log_uniform",
-    #     },
-    # )
+    randomize_joint_actuator_gains = EventTerm(
+        func=mdp.randomize_actuator_gains,
+        mode="startup",
+        params={
+            "asset_cfg": SceneEntityCfg("robot", joint_names=[".*hip_joint", ".*shoulder_joint"]),
+            "stiffness_distribution_params": (0.8, 1.2),
+            "damping_distribution_params": (0.8, 1.2),
+            "operation": "scale",
+            "distribution": "log_uniform",
+        },
+    )
 
-    # randomize_leg_joint_actuator_gains = EventTerm(
-    #     func=mdp.randomize_actuator_gains,
-    #     mode="startup",
-    #     params={
-    #         "asset_cfg": SceneEntityCfg("robot", joint_names=".*leg_joint"),
-    #         "stiffness_distribution_params": (0.8, 1.3),
-    #         "damping_distribution_params": (0.8, 1.3),
-    #         "operation": "scale",
-    #         "distribution": "log_uniform",
-    #     },
-    # )
+    randomize_leg_joint_actuator_gains = EventTerm(
+        func=mdp.randomize_actuator_gains,
+        mode="startup",
+        params={
+            "asset_cfg": SceneEntityCfg("robot", joint_names=".*leg_joint"),
+            "stiffness_distribution_params": (0.8, 1.2),
+            "damping_distribution_params": (0.8, 1.2),
+            "operation": "scale",
+            "distribution": "log_uniform",
+        },
+    )
 
-    # randomize_wheel_actuator_gains = EventTerm(
-    #     func=mdp.randomize_actuator_gains,
-    #     mode="startup",
-    #     params={
-    #         "asset_cfg": SceneEntityCfg("robot", joint_names=".*wheel_joint"),
-    #         "stiffness_distribution_params": (0.7, 1.3),
-    #         "damping_distribution_params": (0.7, 1.3),
-    #         "operation": "scale",
-    #         "distribution": "log_uniform",
-    #     },
-    # )
+    randomize_wheel_actuator_gains = EventTerm(
+        func=mdp.randomize_actuator_gains,
+        mode="startup",
+        params={
+            "asset_cfg": SceneEntityCfg("robot", joint_names=".*wheel_joint"),
+            "stiffness_distribution_params": (0.8, 1.2),
+            "damping_distribution_params": (0.8, 1.2),
+            "operation": "scale",
+            "distribution": "log_uniform",
+        },
+
+    )
 
     randomize_com_positions = EventTerm(
         func=mdp.randomize_com_positions,

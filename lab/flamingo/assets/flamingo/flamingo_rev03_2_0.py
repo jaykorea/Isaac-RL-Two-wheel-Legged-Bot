@@ -70,12 +70,12 @@ FLAMINGO_CFG = ArticulationCfg(
             min_delay=0,  # physics time steps (min: 5.0 * 0 = 0.0ms)
             max_delay=4,  # physics time steps (max: 5.0 * 4 = 20.0ms)
             stiffness={
-                ".*_hip_joint": 90.0,
-                ".*_shoulder_joint": 90.0,
+                ".*_hip_joint": 70.0,
+                ".*_shoulder_joint": 70.0,
             },
             damping={
-                ".*_hip_joint": 1.5,
-                ".*_shoulder_joint": 1.5,
+                ".*_hip_joint": 0.7,
+                ".*_shoulder_joint": 0.7,
             },
             friction={
                 ".*_hip_joint": 0.0,
@@ -95,10 +95,10 @@ FLAMINGO_CFG = ArticulationCfg(
             min_delay=0,  # physics time steps (min: 5.0 * 0 = 0.0ms)
             max_delay=4,  # physics time steps (max: 5.0 * 4 = 20.0ms)
             stiffness={
-                ".*_leg_joint": 80.0,
+                ".*_leg_joint": 70.0,
             },
             damping={
-                ".*_leg_joint": 1.0,
+                ".*_leg_joint": 0.7,
             },
             friction={
                 ".*_leg_joint": 0.0,
@@ -116,7 +116,7 @@ FLAMINGO_CFG = ArticulationCfg(
             stiffness={
                 ".*_wheel_joint": 0.0,
             },
-            damping={".*_wheel_joint": 0.6},
+            damping={".*_wheel_joint": 0.5},
             friction={
                 ".*_wheel_joint": 0.0,
             },
