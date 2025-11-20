@@ -34,7 +34,7 @@ FLAMINGO_LIGHT_CFG = ArticulationCfg(
     ),
     
     init_state=ArticulationCfg.InitialStateCfg(
-        pos=(0.0, 0.0, 0.135),
+        pos=(0.0, 0.0, 0.115),
         joint_pos={
             "left_shoulder_joint": 0.0,
             "left_wheel_joint": 0.0,
@@ -52,10 +52,10 @@ FLAMINGO_LIGHT_CFG = ArticulationCfg(
             min_delay=0,  # physics time steps (min: 5.0 * 0 = 0.0ms)
             max_delay=4,  # physics time steps (max: 5.0 * 4 = 20.0ms)
             stiffness={
-                ".*_shoulder_joint": 65.0,
+                ".*_shoulder_joint": 45.0,
             },
             damping={
-                ".*_shoulder_joint": 1.0,
+                ".*_shoulder_joint": 0.75,
             },
             friction={
                 ".*_shoulder_joint": 0.0,
@@ -73,7 +73,7 @@ FLAMINGO_LIGHT_CFG = ArticulationCfg(
             stiffness={
                 ".*_wheel_joint": 0.0,
             },
-            damping={".*_wheel_joint": 0.5},
+            damping={".*_wheel_joint": 0.35},
             friction={
                 ".*_wheel_joint": 0.0,
             },
