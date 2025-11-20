@@ -181,7 +181,7 @@ class ManagerBasedConstraintRLEnv(ManagerBasedEnv, gym.Env):
         # note: checked here once to avoid multiple checks within the loop
         is_rendering = self.sim.has_gui() or self.sim.has_rtx_sensors()
 
-        # perform physics stepping
+        # perform physics stepping  
         for _ in range(self.cfg.decimation):
             self._sim_step_counter += 1
             # set actions into buffers

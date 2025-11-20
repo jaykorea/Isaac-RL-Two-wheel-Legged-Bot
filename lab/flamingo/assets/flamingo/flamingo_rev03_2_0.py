@@ -91,7 +91,7 @@ FLAMINGO_CFG = ArticulationCfg(
             effort_limit=60.0,
             velocity_limit=13.32,
             gear_ratio=-1.5,
-            gamma=1.0,
+            gamma=0.99,
             min_delay=0,  # physics time steps (min: 5.0 * 0 = 0.0ms)
             max_delay=4,  # physics time steps (max: 5.0 * 4 = 20.0ms)
             stiffness={
@@ -116,7 +116,7 @@ FLAMINGO_CFG = ArticulationCfg(
             stiffness={
                 ".*_wheel_joint": 0.0,
             },
-            damping={".*_wheel_joint": 0.5},
+            damping={".*_wheel_joint": 0.55},
             friction={
                 ".*_wheel_joint": 0.0,
             },

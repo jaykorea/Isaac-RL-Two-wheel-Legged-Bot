@@ -166,7 +166,7 @@ class ActionsCfg:
         asset_name="robot",
         joint_names=["left_hip_joint", "right_hip_joint", 
                      ],
-        scale=1.0,
+        scale=0.5,
         use_default_offset=False,
         preserve_order=True,
     )
@@ -175,7 +175,7 @@ class ActionsCfg:
         joint_names=["left_shoulder_joint", "right_shoulder_joint", 
                      "left_leg_joint", "right_leg_joint"
                      ],
-        scale=1.0,
+        scale=0.5,
         use_default_offset=False,
         preserve_order=True,
     )
@@ -216,7 +216,7 @@ class ObservationsCfg:
             params={
                 "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_joint", ".*_shoulder_joint"]),
             },            
-            scale=0.15)  # default: -1.5  
+            scale=0.15)
         joint_vel_leg = ObsTerm(
             func=mdp.joint_vel_leg_gear, 
             params={
@@ -297,14 +297,14 @@ class ObservationsCfg:
         """Observations for Stack policy group."""
         joint_pos_hip_shoulder = ObsTerm(
             func=mdp.joint_pos,
-            noise=Unoise(n_min=-0.1, n_max=0.1),  # default: -0.05
+            noise=Unoise(n_min=-0.05, n_max=0.05),  # default: -0.05
             params={
                 "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_joint", ".*_shoulder_joint"]),
             },
         )
         joint_pos_leg = ObsTerm(
             func=mdp.joint_pos_leg_gear,
-            noise=Unoise(n_min=-0.1, n_max=0.1), # default: 0.05
+            noise=Unoise(n_min=-0.05, n_max=0.05),  # default: 0.05
             params={
                 "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_leg_joint"]),
                 "gear_ratio": -1.5,
@@ -319,7 +319,7 @@ class ObservationsCfg:
             scale=0.15)  # default: -1.5  
         joint_vel_leg = ObsTerm(
             func=mdp.joint_vel_leg_gear,
-            noise=Unoise(n_min=-2.5, n_max=2.5), # default: 1.5
+            noise=Unoise(n_min=-1.5, n_max=1.5), # default: 1.5
             params={
                 "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_leg_joint"]),
                 "gear_ratio": -1.5,

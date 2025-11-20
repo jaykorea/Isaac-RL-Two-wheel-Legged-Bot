@@ -25,14 +25,14 @@ class FlamingoEduActionsCfg:
     joint_pos = mdp.JointPositionActionCfg(
         asset_name="robot",
         joint_names=["left_shoulder_joint", "right_shoulder_joint"],
-        scale=1.0,
+        scale=0.5,
         use_default_offset=False,
         preserve_order=True,
     )
     wheel_vel = mdp.JointVelocityActionCfg(
         asset_name="robot",
         joint_names=["left_wheel_joint", "right_wheel_joint"],
-        scale=40.0,
+        scale=30.0,
         use_default_offset=False,
         preserve_order=True
     )
@@ -122,11 +122,11 @@ class FlamingoRewardsCfg():
     action_rate_l2 = RewTerm(func=mdp.action_rate_l2, weight=-0.01)  # default: -0.01
 
     termination_penalty = RewTerm(func=mdp.is_terminated, weight=-200.0)
-    # time_conditioned_penalty = RewTerm(
-    #     func=mdp.is_terminated_term,
-    #     weight=-1000.0,
-    #     params={"term_keys": "time_illegal_contact"},
-    # )
+    time_conditioned_penalty = RewTerm(
+        func=mdp.is_terminated_term,
+        weight=-1000.0,
+        params={"term_keys": "time_illegal_contact"},
+    )
     is_alive = RewTerm(mdp.is_alive, weight=1.0) 
 
 
@@ -142,7 +142,7 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
         # environment
         self.episode_length_s = 20.0
         # scene
-        self.scene.robot = FLAMINGO_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
+        self.scene.robot = FLAMINGO_LIGHT_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
         self.scene.height_scanner = None
         self.scene.base_height_scanner = None
         self.scene.left_wheel_height_scanner = None
@@ -234,7 +234,7 @@ class FlamingoFlatEnvCfg_PLAY(FlamingoFlatEnvCfg):
         self.sim.render_interval = self.decimation
         self.debug_vis = True
         # scene
-        self.scene.robot = FLAMINGO_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
+        self.scene.robot = FLAMINGO_LIGHT_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
 
         # observations
         #! ****************** Observations setup - 0 *************** !#
