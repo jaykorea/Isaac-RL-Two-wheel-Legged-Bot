@@ -19,25 +19,6 @@ from lab.flamingo.assets.flamingo.flamingo_light_v1 import FLAMINGO_LIGHT_CFG  #
 
 
 @configclass
-class FlamingoEduActionsCfg:
-    """Action specifications for the MDP."""
-
-    joint_pos = mdp.JointPositionActionCfg(
-        asset_name="robot",
-        joint_names=["left_shoulder_joint", "right_shoulder_joint"],
-        scale=0.5,
-        use_default_offset=False,
-        preserve_order=True,
-    )
-    wheel_vel = mdp.JointVelocityActionCfg(
-        asset_name="robot",
-        joint_names=["left_wheel_joint", "right_wheel_joint"],
-        scale=30.0,
-        use_default_offset=False,
-        preserve_order=True
-    )
-
-@configclass
 class FlamingoRewardsCfg():
     # -- task
     track_lin_vel_xy_exp = RewTerm(
@@ -47,7 +28,7 @@ class FlamingoRewardsCfg():
         func=mdp.track_ang_vel_z_link_exp, weight=1.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
     )
 
-    lin_vel_z_l2 = RewTerm(func=mdp.lin_vel_z_link_l2, weight=-1.0)
+    lin_vel_z_l2 = RewTerm(func=mdp.lin_vel_z_link_l2, weight=-2.0)
     ang_vel_xy_l2 = RewTerm(func=mdp.ang_vel_xy_link_l2, weight=-0.05)
 
     # joint_target_deviation_range = RewTerm(
@@ -78,12 +59,12 @@ class FlamingoRewardsCfg():
     )
     joint_applied_torque_limits = RewTerm(
         func=mdp.applied_torque_limits,
-        weight=-0.025,  # default: -0.1
+        weight=-0.1,  # default: -0.1
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*_joint")},
     )
     shoulder_align_l1 = RewTerm(
         func=mdp.joint_align_l1,
-        weight=-0.15,  # default: -0.5
+        weight=-0.3,  # default: -0.5
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=".*_shoulder_joint")},
     )
 
@@ -92,7 +73,7 @@ class FlamingoRewardsCfg():
         func=mdp.base_height_adaptive_l2,
         weight=-25.0,
         params={
-            "target_height": 0.615, # default" 0.310
+            "target_height": 0.31, # default" 0.310
             "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
         },
     )
@@ -127,13 +108,12 @@ class FlamingoRewardsCfg():
         weight=-1000.0,
         params={"term_keys": "time_illegal_contact"},
     )
-    is_alive = RewTerm(mdp.is_alive, weight=1.0) 
+    is_alive = RewTerm(mdp.is_alive, weight=0.1)
 
 
 @configclass
 class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
 
-    actions: FlamingoEduActionsCfg = FlamingoEduActionsCfg()
     rewards: FlamingoRewardsCfg = FlamingoRewardsCfg()
 
     def __post_init__(self):

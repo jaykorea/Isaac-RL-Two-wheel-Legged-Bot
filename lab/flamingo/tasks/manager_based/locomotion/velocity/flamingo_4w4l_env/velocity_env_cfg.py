@@ -133,7 +133,7 @@ class ActionsCfg:
     wheel_vel = mdp.JointVelocityActionCfg(
         asset_name="robot",
         joint_names=["FL_wheel_joint", "FR_wheel_joint", "RL_wheel_joint", "RR_wheel_joint"],
-        scale=20.0,
+        scale=40.0,
         use_default_offset=False,
         preserve_order=True
     )

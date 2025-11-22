@@ -63,4 +63,3 @@ def time_illegal_contact(
     contact_time = contact_sensor.data.current_contact_time[:, sensor_cfg.body_ids]
 
     return torch.any(contact_time >= time_threshold, dim=1)
-
