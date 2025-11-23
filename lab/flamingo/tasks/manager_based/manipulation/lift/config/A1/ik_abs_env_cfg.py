@@ -81,9 +81,9 @@ class A1TeddyBearLiftEnvCfg(A1CubeLiftEnvCfg):
         )
 
         # Make the end effector less stiff to not hurt the poor teddy bear
-        self.scene.robot.actuators["joint_gripper"].effort_limit_sim = 3.5
-        self.scene.robot.actuators["joint_gripper"].stiffness = 10.0
-        self.scene.robot.actuators["joint_gripper"].damping = 0.5
+        self.scene.robot.actuators["gripper"].effort_limit_sim = 3.5
+        self.scene.robot.actuators["gripper"].stiffness = 10.0
+        self.scene.robot.actuators["gripper"].damping = 0.5
 
         # Disable replicate physics as it doesn't work for deformable objects
         # FIXME: This should be fixed by the PhysX replication system.

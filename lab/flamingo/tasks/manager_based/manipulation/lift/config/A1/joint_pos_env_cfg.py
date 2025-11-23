@@ -31,10 +31,10 @@ class A1CubeLiftEnvCfg(LiftEnvCfg):
 
         # Set actions for the specific robot type (A1)
         self.actions.arm_action = mdp.JointPositionActionCfg(
-            asset_name="robot", joint_names=["dof.*_joint"], scale=2.0, use_default_offset=True
+            asset_name="robot", joint_names=["dof.*_joint"], scale=1.0, use_default_offset=True
         )
         self.actions.gripper_action = mdp.JointPositionActionCfg(
-            asset_name="robot", joint_names=[".*_gripper_joint"], scale=0.5, use_default_offset=True
+            asset_name="robot", joint_names=[".*_gripper_joint"], scale=1.0, use_default_offset=True
         )
         # self.actions.gripper_action = mdp.BinaryJointPositionActionCfg(
         #     asset_name="robot",
