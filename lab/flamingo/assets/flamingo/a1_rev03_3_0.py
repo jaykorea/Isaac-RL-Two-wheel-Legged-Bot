@@ -36,7 +36,7 @@ A1_CFG = ArticulationCfg(
     ),
     
     init_state=ArticulationCfg.InitialStateCfg(
-        pos=(0.2, 0.0, 0.0),
+        pos=(0.0, 0.0, 0.0),
         joint_pos={
             "dof1_joint": 0.0,
             "dof2_joint": 0.0,
@@ -58,12 +58,12 @@ A1_CFG = ArticulationCfg(
             min_delay=0,  # physics time steps (min: 5.0 * 0 = 0.0ms)
             max_delay=0,  # physics time steps (max: 5.0 * 4 = 20.0ms)
             stiffness={
-                "dof1_joint": 50.0,
-                "dof2_joint": 50.0,
+                "dof1_joint": 100.0,
+                "dof2_joint": 100.0,
             },
             damping={
-                "dof1_joint": 2.0,
-                "dof2_joint": 2.0,
+                "dof1_joint": 10.0,
+                "dof2_joint": 10.0,
             },
             friction={
                 "dof1_joint": 0.0,
@@ -81,10 +81,10 @@ A1_CFG = ArticulationCfg(
             min_delay=0,  # physics time steps (min: 5.0 * 0 = 0.0ms)
             max_delay=0,  # physics time steps (max: 5.0 * 4 = 20.0ms)
             stiffness={
-                "dof3_joint": 40.0,
+                "dof3_joint": 80.0,
             },
             damping={
-                "dof3_joint": 2.0,
+                "dof3_joint": 5.0,
             },
             friction={
                 "dof3_joint": 0.0,
@@ -100,12 +100,12 @@ A1_CFG = ArticulationCfg(
             min_delay=0,  # physics time steps (min: 5.0 * 0 = 0.0ms)
             max_delay=0,  # physics time steps (max: 5.0 * 4 = 20.0ms)
             stiffness={
-                "dof4_joint": 30.0,
-                "dof5_joint": 30.0,
+                "dof4_joint": 50.0,
+                "dof5_joint": 50.0,
             },
             damping={
-                "dof4_joint": 1.5,
-                "dof5_joint": 1.5,
+                "dof4_joint": 2.0,
+                "dof5_joint": 2.0,
             },
             friction={
                 "dof4_joint": 0.0,
@@ -123,7 +123,7 @@ A1_CFG = ArticulationCfg(
             min_delay=0,  # physics time steps (min: 5.0 * 0 = 0.0ms)
             max_delay=0,  # physics time steps (max: 5.0 * 4 = 20.0ms)
             stiffness={
-                "dof6_joint": 20.0,
+                "dof6_joint": 15.0,
             },
             damping={
                 "dof6_joint": 1.0,
@@ -142,7 +142,7 @@ A1_CFG = ArticulationCfg(
             min_delay=0,  # physics time steps (min: 5.0 * 0 = 0.0ms)
             max_delay=0,  # physics time steps (max: 5.0 * 4 = 20.0ms)
             stiffness={
-                ".*_gripper_joint": 20.0,
+                ".*_gripper_joint": 15.0,
             },
             damping={
                 ".*_gripper_joint": 1.0,
