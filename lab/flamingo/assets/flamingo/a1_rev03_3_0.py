@@ -19,7 +19,7 @@ from lab.flamingo.assets.flamingo import FLAMINGO_ASSETS_DATA_DIR
 
 A1_CFG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
-        usd_path=f"{FLAMINGO_ASSETS_DATA_DIR}/Robots/Flamingo_Arm/A1_rev_3_3_0/A1_rev_3_3_0.usd",
+        usd_path=f"{FLAMINGO_ASSETS_DATA_DIR}/Robots/Flamingo_Arm/A1_rev_3_3_0/asset/A1_rev_3_3_0.usd",
         activate_contact_sensors=True,
         rigid_props=sim_utils.RigidBodyPropertiesCfg(
             disable_gravity=False,
