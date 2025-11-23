@@ -18,7 +18,7 @@ from lab.flamingo.tasks.manager_based.manipulation.lift.lift_env_cfg import Lift
 # Pre-defined configs
 ##
 from isaaclab.markers.config import FRAME_MARKER_CFG  # isort: skip
-from lab.flamingo.assets.flamingo.a1_rev03_3_0 import A1_CFG  # isort: skip
+from lab.flamingo.assets.flamingo.a1_rev03_3_0 import A1_CFG, A1_HIGH_PD_CFG  # isort: skip
 
 @configclass
 class A1CubeLiftEnvCfg(LiftEnvCfg):
@@ -27,7 +27,7 @@ class A1CubeLiftEnvCfg(LiftEnvCfg):
         super().__post_init__()
 
         # Set A1 as robot
-        self.scene.robot = A1_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
+        self.scene.robot = A1_HIGH_PD_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
 
         # Set actions for the specific robot type (A1)
         self.actions.arm_action = mdp.JointPositionActionCfg(
