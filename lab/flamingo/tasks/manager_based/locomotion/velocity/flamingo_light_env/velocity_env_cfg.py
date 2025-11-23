@@ -366,36 +366,36 @@ class EventCfg:
         },
     )
 
-    # randomize_joint_actuator_gains = EventTerm(
-    #     func=mdp.randomize_actuator_gains,
-    #     mode="startup",
-    #     params={
-    #         "asset_cfg": SceneEntityCfg("robot", joint_names=[".*shoulder_joint"]),
-    #         "stiffness_distribution_params": (0.9, 1.2),
-    #         "damping_distribution_params": (0.9, 1.2),
-    #         "operation": "scale",
-    #         "distribution": "log_uniform",
-    #     },
-    # )
+    randomize_joint_actuator_gains = EventTerm(
+        func=mdp.randomize_actuator_gains,
+        mode="startup",
+        params={
+            "asset_cfg": SceneEntityCfg("robot", joint_names=[".*shoulder_joint"]),
+            "stiffness_distribution_params": (0.9, 1.2),
+            "damping_distribution_params": (0.9, 1.2),
+            "operation": "scale",
+            "distribution": "log_uniform",
+        },
+    )
 
-    # randomize_wheel_actuator_gains = EventTerm(
-    #     func=mdp.randomize_actuator_gains,
-    #     mode="startup",
-    #     params={
-    #         "asset_cfg": SceneEntityCfg("robot", joint_names=".*wheel_joint"),
-    #         "stiffness_distribution_params": (0.9, 1.2),
-    #         "damping_distribution_params": (0.9, 1.2),
-    #         "operation": "scale",
-    #         "distribution": "log_uniform",
-    #     },
-    # )
+    randomize_wheel_actuator_gains = EventTerm(
+        func=mdp.randomize_actuator_gains,
+        mode="startup",
+        params={
+            "asset_cfg": SceneEntityCfg("robot", joint_names=".*wheel_joint"),
+            "stiffness_distribution_params": (0.9, 1.2),
+            "damping_distribution_params": (0.9, 1.2),
+            "operation": "scale",
+            "distribution": "log_uniform",
+        },
+    )
 
     randomize_com_positions = EventTerm(
         func=mdp.randomize_com_positions,
         mode="startup",
         params={
             "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
-            "com_distribution_params": (-0.05, -0.01),
+            "com_distribution_params": (-0.02, 0.05),
             "operation": "add",
         },
     )

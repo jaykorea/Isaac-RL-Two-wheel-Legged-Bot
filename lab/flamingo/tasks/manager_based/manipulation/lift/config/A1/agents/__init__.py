@@ -3,6 +3,5 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-"""Manipulation environments for fixed-arm robots."""
 
-from .lift import *  # noqa
+from . import co_rl_cfg  # noqa: F401, F403
