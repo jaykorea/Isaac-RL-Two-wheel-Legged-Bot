@@ -109,3 +109,15 @@ class A1TeddyBearLiftEnvCfg(A1CubeLiftEnvCfg):
         self.rewards.object_goal_tracking = None
         self.rewards.object_goal_tracking_fine_grained = None
         self.observations.stack_policy.object_position = None
+
+@configclass
+class A1TeddyBearLiftEnvCfg_PLAY(A1TeddyBearLiftEnvCfg):
+    def __post_init__(self):
+        # post init of parent
+        super().__post_init__()
+        # make a smaller scene for play
+        self.scene.num_envs = 50
+        self.scene.env_spacing = 2.5
+        # disable randomization for play
+        self.observations.none_stack_policy.enable_corruption = False
+        self.observations.stack_policy.enable_corruption = False

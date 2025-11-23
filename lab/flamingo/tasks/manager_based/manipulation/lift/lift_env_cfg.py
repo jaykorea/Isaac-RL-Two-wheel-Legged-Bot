@@ -171,28 +171,46 @@ class EventCfg:
 class RewardsCfg:
     """Reward terms for the MDP."""
 
-    reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1}, weight=1.0)
+    reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1}, weight=5.0)
 
-    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.04}, weight=15.0)
+    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.04}, weight=10.0)
 
     object_goal_tracking = RewTerm(
         func=mdp.object_goal_distance,
         params={"std": 0.3, "minimal_height": 0.04, "command_name": "object_pose"},
-        weight=16.0,
+        weight=15.0,
     )
 
     object_goal_tracking_fine_grained = RewTerm(
         func=mdp.object_goal_distance,
         params={"std": 0.05, "minimal_height": 0.04, "command_name": "object_pose"},
-        weight=5.0,
+        weight=7.5,
     )
 
+    # object_orientation_alignment = RewTerm(
+    #     func=mdp.object_orientation_alignment,
+    #     params={"command_name": "object_pose", "orientation_weight": 1.0},
+    #     weight=5.0,
+    # )
+
+    # object_minimize_roll_pitch = RewTerm(
+    #     func=mdp.object_minimize_roll_pitch,
+    #     params={"object_cfg": SceneEntityCfg("object")},
+    #     weight=-2.5,
+    # )
+
+    # grasp_plate = RewTerm(
+    #     func=mdp.grasp_object,
+    #     params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_gripper_joint"])},
+    #     weight=5.0,
+    # )
+
     # action penalty
-    action_rate = RewTerm(func=mdp.action_rate_l2, weight=-1e-4)
+    action_rate = RewTerm(func=mdp.action_rate_l2, weight=-1e-3)
 
     joint_vel = RewTerm(
         func=mdp.joint_vel_l2,
-        weight=-1e-4,
+        weight=-1e-3,
         params={"asset_cfg": SceneEntityCfg("robot")},
     )
 
