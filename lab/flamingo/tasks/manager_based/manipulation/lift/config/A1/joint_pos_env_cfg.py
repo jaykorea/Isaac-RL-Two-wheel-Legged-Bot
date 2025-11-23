@@ -40,7 +40,7 @@ class A1CubeLiftEnvCfg(LiftEnvCfg):
             close_command_expr={".*_gripper_joint": 0.00},
         )
         # Set the body name for the end effector
-        self.commands.object_pose.body_name = "dof6_link"
+        self.commands.object_pose.body_name = "gripper_link"
 
         # Set Cube as object
         self.scene.object = RigidObjectCfg(
@@ -66,14 +66,14 @@ class A1CubeLiftEnvCfg(LiftEnvCfg):
         marker_cfg.prim_path = "/Visuals/FrameTransformer"
         self.scene.ee_frame = FrameTransformerCfg(
             prim_path="{ENV_REGEX_NS}/Robot/base_link",
-            debug_vis=False,
+            debug_vis=True,
             visualizer_cfg=marker_cfg,
             target_frames=[
                 FrameTransformerCfg.FrameCfg(
-                    prim_path="{ENV_REGEX_NS}/Robot/dof6_link",
+                    prim_path="{ENV_REGEX_NS}/Robot/gripper_link",
                     name="end_effector",
                     offset=OffsetCfg(
-                        pos=[0.0, 0.0, 0.18],
+                        pos=[0.0, 0.0, 0.1],
                     ),
                 ),
             ],
