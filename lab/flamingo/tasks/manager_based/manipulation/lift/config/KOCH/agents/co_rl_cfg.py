@@ -15,11 +15,11 @@ from scripts.co_rl.core.wrapper import (
 
 
 @configclass
-class A1PPORunnerCfg(CoRlPolicyRunnerCfg):
+class KOCHPPORunnerCfg(CoRlPolicyRunnerCfg):
     num_steps_per_env = 24
     max_iterations = 1500
     save_interval = 100
-    experiment_name = "A1-v0"
+    experiment_name = "KOCH-v0"
     experiment_description = "test"
     empirical_normalization = False
     policy = CoRlPpoActorCriticCfg(
@@ -43,13 +43,12 @@ class A1PPORunnerCfg(CoRlPolicyRunnerCfg):
         max_grad_norm=1.0,
     )
 
-
 @configclass
-class A1PPORunnerCfg_Lift_Cube(A1PPORunnerCfg):
+class KOCHPPORunnerCfg_Lift_Cube(KOCHPPORunnerCfg):
     def __post_init__(self):
         super().__post_init__()
 
         self.max_iterations = 5000
-        self.experiment_name = "A1_Lift_Cube-v0"
+        self.experiment_name = "KOCH_Lift_Cube-v0"
         self.policy.actor_hidden_dims = [256, 128, 64]
         self.policy.critic_hidden_dims = [256, 128, 64]

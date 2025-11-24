@@ -42,7 +42,7 @@ class A1CubeLiftEnvCfg(joint_pos_env_cfg.A1CubeLiftEnvCfg):
             asset_name="robot",
             joint_names=["dof.*_joint"],
             body_name="gripper_link",
-            controller=DifferentialIKControllerCfg(command_type="pose", use_relative_mode=False, ik_method="dls"),
+            controller=DifferentialIKControllerCfg(command_type="pose", use_relative_mode=False, ik_method="dls",ik_params={"lambda_val": 0.2}),
             body_offset=DifferentialInverseKinematicsActionCfg.OffsetCfg(pos=[0.0, 0.0, 0.1]),
         )
 
@@ -73,7 +73,7 @@ class A1TeddyBearLiftEnvCfg(A1CubeLiftEnvCfg):
 
         self.scene.object = DeformableObjectCfg(
             prim_path="{ENV_REGEX_NS}/Object",
-            init_state=DeformableObjectCfg.InitialStateCfg(pos=(0.5, 0, 0.05), rot=(0.707, 0, 0, 0.707)),
+            init_state=DeformableObjectCfg.InitialStateCfg(pos=(0.4, 0, 0.05), rot=(0.707, 0, 0, 0.707)),
             spawn=UsdFileCfg(
                 usd_path=f"{ISAACLAB_NUCLEUS_DIR}/Objects/Teddy_Bear/teddy_bear.usd",
                 scale=(0.01, 0.01, 0.01),
@@ -81,8 +81,8 @@ class A1TeddyBearLiftEnvCfg(A1CubeLiftEnvCfg):
         )
 
         # Make the end effector less stiff to not hurt the poor teddy bear
-        self.scene.robot.actuators["gripper"].effort_limit_sim = 3.5
-        self.scene.robot.actuators["gripper"].stiffness = 10.0
+        self.scene.robot.actuators["gripper"].effort_limit_sim = 5.5
+        self.scene.robot.actuators["gripper"].stiffness = 5.0
         self.scene.robot.actuators["gripper"].damping = 0.5
 
         # Disable replicate physics as it doesn't work for deformable objects

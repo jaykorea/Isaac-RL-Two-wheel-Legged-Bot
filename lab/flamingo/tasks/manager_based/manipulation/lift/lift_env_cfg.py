@@ -20,6 +20,7 @@ from isaaclab.sensors.frame_transformer.frame_transformer_cfg import FrameTransf
 from isaaclab.sim.spawners.from_files.from_files_cfg import GroundPlaneCfg, UsdFileCfg
 from isaaclab.utils import configclass
 from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR
+from isaaclab.sensors import ContactSensorCfg
 
 from . import mdp
 
@@ -41,6 +42,8 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
     ee_frame: FrameTransformerCfg = MISSING
     # target object: will be populated by agent env cfg
     object: RigidObjectCfg | DeformableObjectCfg = MISSING
+
+    contact_forces = ContactSensorCfg(prim_path="{ENV_REGEX_NS}/Robot/.*", history_length=3, track_air_time=True)
 
     # Table
     table = AssetBaseCfg(
@@ -78,7 +81,7 @@ class CommandsCfg:
         resampling_time_range=(5.0, 5.0),
         debug_vis=True,
         ranges=mdp.UniformPoseCommandCfg.Ranges(
-            pos_x=(0.3, 0.4), pos_y=(-0.25, 0.25), pos_z=(0.2, 0.35), roll=(0.0, 0.0), pitch=(0.0, 0.0), yaw=(0.0, 0.0)
+            pos_x=(0.3, 0.35), pos_y=(-0.35, 0.35), pos_z=(0.3, 0.45), roll=(0.0, 0.0), pitch=(0.0, 0.0), yaw=(0.0, 0.0)
         ),
     )
 
@@ -159,7 +162,7 @@ class EventCfg:
         func=mdp.reset_root_state_uniform,
         mode="reset",
         params={
-            "pose_range": {"x": (-0.1, 0.1), "y": (-0.25, 0.25), "z": (0.0, 0.0)},
+            "pose_range": {"x": (-0.1, 0.1), "y": (-0.3, 0.3), "z": (0.0, 0.0)},
             "velocity_range": {},
             "asset_cfg": SceneEntityCfg("object", body_names="Object"),
         },
@@ -170,9 +173,11 @@ class EventCfg:
 class RewardsCfg:
     """Reward terms for the MDP."""
 
-    reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1}, weight=5.0)
+    reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.15}, weight=7.5)
 
-    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.04}, weight=10.0)
+    reaching_object_fine_graned = RewTerm(func=mdp.object_ee_distance, params={"std": 0.075}, weight=15.0)
+
+    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.04}, weight=25.0)
 
     object_goal_tracking = RewTerm(
         func=mdp.object_goal_distance,
@@ -198,14 +203,14 @@ class RewardsCfg:
     #     weight=-2.5,
     # )
 
-    # grasp_plate = RewTerm(
+    # grasp_object = RewTerm(
     #     func=mdp.grasp_object,
     #     params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_gripper_joint"])},
     #     weight=5.0,
     # )
 
     # action penalty
-    action_rate = RewTerm(func=mdp.action_rate_l2, weight=-1e-3)
+    action_rate = RewTerm(func=mdp.action_rate_l2, weight=-1e-2)
 
     joint_vel = RewTerm(
         func=mdp.joint_vel_l2,
@@ -222,6 +227,11 @@ class TerminationsCfg:
 
     object_dropping = DoneTerm(
         func=mdp.root_height_below_minimum, params={"minimum_height": -0.05, "asset_cfg": SceneEntityCfg("object")}
+    )
+
+    illegal_contact = DoneTerm(
+        func=mdp.illegal_contact,
+        params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=["base_link"]), "threshold": 2.0},
     )
 
 
@@ -267,6 +277,9 @@ class LiftEnvCfg(ManagerBasedRLEnvCfg):
         # simulation settings
         self.sim.dt = 0.01  # 100Hz
         self.sim.render_interval = self.decimation
+
+        if self.scene.contact_forces is not None:
+            self.scene.contact_forces.update_period = self.sim.dt
 
         self.sim.physx.bounce_threshold_velocity = 0.2
         self.sim.physx.bounce_threshold_velocity = 0.01

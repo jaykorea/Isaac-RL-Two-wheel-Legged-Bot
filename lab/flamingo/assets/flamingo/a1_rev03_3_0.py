@@ -39,10 +39,10 @@ A1_CFG = ArticulationCfg(
         pos=(0.0, 0.0, 0.0),
         joint_pos={
             "dof1_joint": 0.0,
-            "dof2_joint": 0.0,
-            "dof3_joint": 0.0,
+            "dof2_joint": -1.5708,
+            "dof3_joint": 1.7458,
             "dof4_joint": 0.0,
-            "dof5_joint": 0.0,
+            "dof5_joint": -3.49396,
             "dof6_joint": 0.0,
             "left_gripper_joint": 0.0,
             "right_gripper_joint": 0.0,

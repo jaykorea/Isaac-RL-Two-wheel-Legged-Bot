@@ -55,6 +55,7 @@ from isaaclab.utils.math import subtract_frame_transforms
 ##
 from isaaclab_assets import FRANKA_PANDA_HIGH_PD_CFG, UR10_CFG  # isort:skip
 from lab.flamingo.assets.flamingo.a1_rev03_3_0 import A1_CFG, A1_HIGH_PD_CFG  # isort:skip
+from lab.flamingo.assets.flamingo.koch_rev01_0_0 import KOCH_CFG, KOCH_CFG_HIGH_PD_CFG # isort:skip
 
 @configclass
 class TableTopSceneCfg(InteractiveSceneCfg):
@@ -87,6 +88,10 @@ class TableTopSceneCfg(InteractiveSceneCfg):
         robot = FRANKA_PANDA_HIGH_PD_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
     elif args_cli.robot == "ur10":
         robot = UR10_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
+    elif args_cli.robot == "koch":
+        robot = KOCH_CFG_HIGH_PD_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
+        robot.init_state.pos = (0.0, 0.0, 0.0)
+        robot.init_state.rot = (1.0, 0.0, 0.0, 0.0)
     else:
         raise ValueError(f"Robot {args_cli.robot} is not supported. Valid: franka_panda, ur10")
 
@@ -98,7 +103,7 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
     robot = scene["robot"]
 
     # Create controller
-    diff_ik_cfg = DifferentialIKControllerCfg(command_type="pose", use_relative_mode=False, ik_method="dls",ik_params={"lambda_val": 0.1})
+    diff_ik_cfg = DifferentialIKControllerCfg(command_type="pose", use_relative_mode=False, ik_method="dls", ik_params={"lambda_val": 0.01})
     diff_ik_controller = DifferentialIKController(diff_ik_cfg, num_envs=scene.num_envs, device=sim.device)
 
     # Markers
@@ -108,11 +113,18 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
     goal_marker = VisualizationMarkers(frame_marker_cfg.replace(prim_path="/Visuals/ee_goal"))
 
     # Define goals for the arm
-    ee_goals = [
-        [0.3, 0.35, 0.45, 0.707, 0, 0.707, 0],
-        [0.3, -0.35, 0.45, 0.707, 0.707, 0.0, 0.0],
-        [0.3, 0, 0.35, 0.0, 1.0, 0.0, 0.0],
-    ]
+    if args_cli.robot == "koch":
+        ee_goals = [
+            [-0.15, 0.0, 0.05, 0.0, 0.0, 0.0, 0.0],
+            [-0.15, -0.0, 0.05, 0.0, 0.0, 0.0, 0.0],
+            [-0.15, -0.0, 0.2, 0.0, 1.0, 0.0, 0.0],
+        ]
+    else:
+        ee_goals = [
+            [0.3, 0.35, 0.45, 0.707, 0, 0.707, 0],
+            [0.3, -0.35, 0.45, 0.707, 0.707, 0.0, 0.0],
+            [0.3, 0, 0.35, 0.0, 1.0, 0.0, 0.0],
+        ]
     ee_goals = torch.tensor(ee_goals, device=sim.device)
     # Track the given command
     current_goal_idx = 0
@@ -123,6 +135,8 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
     # Specify robot-specific parameters
     if args_cli.robot == "a1":
         robot_entity_cfg = SceneEntityCfg("robot", joint_names=["dof.*_joint"], body_names=["gripper_link"])
+    elif args_cli.robot == "koch":
+        robot_entity_cfg = SceneEntityCfg("robot", joint_names=["joint_.*"], body_names=["gripper_tip_link"])
     elif args_cli.robot == "franka_panda":
         robot_entity_cfg = SceneEntityCfg("robot", joint_names=["panda_joint.*"], body_names=["panda_hand"])
     elif args_cli.robot == "ur10":
