@@ -142,10 +142,10 @@ A1_CFG = ArticulationCfg(
             min_delay=0,  # physics time steps (min: 5.0 * 0 = 0.0ms)
             max_delay=0,  # physics time steps (max: 5.0 * 4 = 20.0ms)
             stiffness={
-                ".*_gripper_joint": 15.0,
+                ".*_gripper_joint": 30.0,
             },
             damping={
-                ".*_gripper_joint": 1.0,
+                ".*_gripper_joint": 2.0,
             },
             friction={
                 ".*_gripper_joint": 0.0,

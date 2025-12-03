@@ -24,6 +24,8 @@ from isaaclab.sensors import ContactSensorCfg
 
 from . import mdp
 
+import lab.flamingo.tasks.manager_based.manipulation.lift.mdp as lift_mdp
+
 ##
 # Scene definition
 ##
@@ -42,6 +44,8 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
     ee_frame: FrameTransformerCfg = MISSING
     # target object: will be populated by agent env cfg
     object: RigidObjectCfg | DeformableObjectCfg = MISSING
+
+    screen: RigidObjectCfg = None
 
     contact_forces = ContactSensorCfg(prim_path="{ENV_REGEX_NS}/Robot/.*", history_length=3, track_air_time=True)
 
@@ -75,15 +79,26 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
 class CommandsCfg:
     """Command terms for the MDP."""
 
-    object_pose = mdp.UniformPoseCommandCfg(
+    object_pose = lift_mdp.ReversePoseCommandCfg(
         asset_name="robot",
+        object_name="object",
         body_name=MISSING,  # will be set by agent env cfg
         resampling_time_range=(5.0, 5.0),
         debug_vis=True,
-        ranges=mdp.UniformPoseCommandCfg.Ranges(
-            pos_x=(0.3, 0.35), pos_y=(-0.35, 0.35), pos_z=(0.3, 0.45), roll=(0.0, 0.0), pitch=(0.0, 0.0), yaw=(0.0, 0.0)
+        ranges=lift_mdp.ReversePoseCommandCfg.Ranges(
+            pos_x=(0.25, 0.3), pos_y=(-0.3, 0.3), pos_z=(0.2, 0.25), roll=(0.0, 0.0), pitch=(0.0, 0.0), yaw=(0.0, 0.0)
         ),
     )
+
+    # object_pose = mdp.UniformPoseCommandCfg(
+    #     asset_name="robot",
+    #     body_name=MISSING,  # will be set by agent env cfg
+    #     resampling_time_range=(5.0, 5.0),
+    #     debug_vis=True,
+    #     ranges=mdp.UniformPoseCommandCfg.Ranges(
+    #         pos_x=(0.25, 0.3), pos_y=(-0.3, 0.3), pos_z=(0.2, 0.25), roll=(0.0, 0.0), pitch=(0.0, 0.0), yaw=(0.0, 0.0)
+    #     ),
+    # )
 
 
 @configclass
@@ -159,14 +174,38 @@ class EventCfg:
     reset_all = EventTerm(func=mdp.reset_scene_to_default, mode="reset")
 
     reset_object_position = EventTerm(
-        func=mdp.reset_root_state_uniform,
+        func=lift_mdp.reset_root_state_binary,
         mode="reset",
         params={
-            "pose_range": {"x": (-0.1, 0.1), "y": (-0.3, 0.3), "z": (0.0, 0.0)},
+            "pose_range": {"x": (0.35, 0.4), "y": (-0.3, 0.3), "z": (0.0, 0.0)},
             "velocity_range": {},
+            "unoise": 0.05,
             "asset_cfg": SceneEntityCfg("object", body_names="Object"),
         },
     )
+
+    # reset_object_position = EventTerm(
+    #     func=mdp.reset_root_state_uniform,
+    #     mode="reset",
+    #     params={
+    #         "pose_range": {"x": (-0.0, 0.35), "y": (-0.3, 0.3), "z": (0.0, 0.0)},
+    #         "velocity_range": {},
+    #         "asset_cfg": SceneEntityCfg("object", body_names="Object"),
+    #     },
+    # )
+
+    # startup
+    # physics_material = EventTerm(
+    #     func=mdp.randomize_rigid_body_material,
+    #     mode="startup",
+    #     params={
+    #         "asset_cfg": SceneEntityCfg("robot", body_names=".*"),
+    #         "static_friction_range": (1.5, 1.5),
+    #         "dynamic_friction_range": (1.2, 1.2),
+    #         "restitution_range": (0.0, 0.0),
+    #         "num_buckets": 1,
+    #     },
+    # )
 
 
 @configclass

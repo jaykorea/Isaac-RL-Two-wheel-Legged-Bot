@@ -103,10 +103,11 @@ class DifferentialIKAction:
         else:
             self._offset_pos, self._offset_rot = None, None
 
-    # IK command 설정
-    def set_command(self, command: torch.Tensor):
+    def set_command(
+        self, command: torch.Tensor, ee_pos: torch.Tensor | None = None, ee_quat: torch.Tensor | None = None
+    ):
         """command: (num_envs, 7) = [pos(3), quat(4)] in base frame."""
-        self._ik.set_command(command)
+        self._ik.set_command(command, ee_pos, ee_quat)
 
     def reset(self):
         self._ik.reset()
@@ -294,7 +295,8 @@ class TableTopSceneCfg(InteractiveSceneCfg):
         robot = KOCH_CFG_HIGH_PD_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
         table.init_state.pos = [-0.5, 0.0, 0.0]
         table.init_state.rot = [-0.707, 0, 0, 0.707]
-        cube.init_state.pos = [-0.2, 0.0, 0.055]
+
+        cube.init_state.pos = [-0.3, 0.0, 0.055]
     else:
         raise ValueError(f"Robot {args_cli.robot} is not supported. Valid: franka_panda, ur10, a1, koch")
 
@@ -328,9 +330,15 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
     if args_cli.robot == "a1":
         robot_entity_cfg = SceneEntityCfg("robot", joint_names=["dof.*_joint"], body_names=["gripper_tip_link"])
         body_offset_pos = None
+        gripper_joint_names = ["left_gripper_joint", "right_gripper_joint"]
+        open_positions = [0.04, 0.04]
+        close_positions = [0.0, 0.0]
     elif args_cli.robot == "koch":
         robot_entity_cfg = SceneEntityCfg("robot", joint_names=["joint_.*"], body_names=["gripper_tip_link"])
         body_offset_pos = None
+        gripper_joint_names = ["gripper_joint"]
+        open_positions = [0.04]
+        close_positions = [0.0]
     elif args_cli.robot == "franka_panda":
         robot_entity_cfg = SceneEntityCfg("robot", joint_names=["panda_joint.*"], body_names=["panda_hand"])
         body_offset_pos = [0.0, 0.0, 0.1]
@@ -371,9 +379,9 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
 
     gripper_action = BinaryGripperAction(
         robot=robot,
-        joint_names=["left_gripper_joint", "right_gripper_joint"],
-        open_positions=[0.04, 0.04],
-        close_positions=[0.0, 0.0],
+        joint_names=gripper_joint_names,
+        open_positions=open_positions,
+        close_positions=close_positions,
         num_envs=scene.num_envs,
         device=robot.device,
     )
