@@ -14,10 +14,11 @@ from typing import TYPE_CHECKING
 from isaaclab.utils import configclass
 
 from isaaclab.assets import Articulation, RigidObject
+from isaaclab.sensors  import FrameTransformer
 from isaaclab.managers import CommandTerm
 from isaaclab.markers import VisualizationMarkersCfg
 from isaaclab.markers.config import BLUE_ARROW_X_MARKER_CFG, FRAME_MARKER_CFG, GREEN_ARROW_X_MARKER_CFG
-from isaaclab.utils.math import combine_frame_transforms, compute_pose_error, quat_from_euler_xyz, quat_unique
+from isaaclab.utils.math import combine_frame_transforms, compute_pose_error, quat_from_euler_xyz, quat_unique, subtract_frame_transforms
 
 if TYPE_CHECKING:
     from isaaclab.envs import ManagerBasedEnv
@@ -62,6 +63,8 @@ class ReversePoseCommand(CommandTerm):
         # extract the robot and body index for which the command is generated
         self.robot: Articulation = env.scene[cfg.asset_name]
         self.object: RigidObject = env.scene[cfg.object_name]
+        self.obstacle: RigidObject = env.scene[cfg.obstacle_name]
+        self.ee: FrameTransformer = env.scene[cfg.ee_name]
         self.body_idx = self.robot.find_bodies(cfg.body_name)[0][0]
 
         # create buffers
@@ -69,9 +72,14 @@ class ReversePoseCommand(CommandTerm):
         self.pose_command_b = torch.zeros(self.num_envs, 7, device=self.device)
         self.pose_command_b[:, 3] = 1.0
         self.pose_command_w = torch.zeros_like(self.pose_command_b)
+        # -- destiantion: (x, y, z, qw, qx, qy, qz) in world frame
+        self.destination_w = torch.zeros_like(self.pose_command_b)
+            
         # -- metrics
         self.metrics["position_error"] = torch.zeros(self.num_envs, device=self.device)
         self.metrics["orientation_error"] = torch.zeros(self.num_envs, device=self.device)
+
+        self.cfg.resampling_time_range = (env.max_episode_length_s, env.max_episode_length_s)
 
     def __str__(self) -> str:
         msg = "ReversePoseCommand:\n"
@@ -114,23 +122,35 @@ class ReversePoseCommand(CommandTerm):
         self.metrics["orientation_error"] = torch.norm(rot_error, dim=-1)
 
     def _resample_command(self, env_ids: Sequence[int]):
-        # sample object pose
-        object_pos = self.object.data.root_pos_w[env_ids]
+        # object pose in robot base frame (rel)
+        object_pos_abs = self.object.data.root_pos_w[env_ids]
+        object_quat_abs = self.object.data.root_quat_w[env_ids]
+        object_pos_rel, object_quat_rel = subtract_frame_transforms(
+            self.robot.data.root_pos_w[env_ids], self.robot.data.root_quat_w[env_ids],
+            object_pos_abs, object_quat_abs
+        )
 
-        # sample new pose targets
-        # -- position
         r = torch.empty(len(env_ids), device=self.device)
+
+        # --- fill BASE-frame command (pose_command_b) ---
         self.pose_command_b[env_ids, 0] = r.uniform_(*self.cfg.ranges.pos_x)
-        self.pose_command_b[env_ids, 1] = -object_pos[:, 1]
+        self.pose_command_b[env_ids, 1] = -object_pos_rel[:, 1]          # ✅ rel 사용
         self.pose_command_b[env_ids, 2] = r.uniform_(*self.cfg.ranges.pos_z)
-        # -- orientation
-        euler_angles = torch.zeros_like(self.pose_command_b[env_ids, :3])
+
+        euler_angles = torch.zeros((len(env_ids), 3), device=self.device)
         euler_angles[:, 0].uniform_(*self.cfg.ranges.roll)
         euler_angles[:, 1].uniform_(*self.cfg.ranges.pitch)
         euler_angles[:, 2].uniform_(*self.cfg.ranges.yaw)
         quat = quat_from_euler_xyz(euler_angles[:, 0], euler_angles[:, 1], euler_angles[:, 2])
-        # make sure the quaternion has real part as positive
         self.pose_command_b[env_ids, 3:] = quat_unique(quat) if self.cfg.make_quat_unique else quat
+
+        # --- optional: compute world destination for debug/visualization ---
+        self.destination_w[env_ids, :3], self.destination_w[env_ids, 3:] = combine_frame_transforms(
+            self.robot.data.root_pos_w[env_ids],
+            self.robot.data.root_quat_w[env_ids],
+            self.pose_command_b[env_ids, :3],
+            self.pose_command_b[env_ids, 3:],
+        )
 
     def _update_command(self):
         pass
@@ -175,6 +195,12 @@ class ReversePoseCommandCfg(CommandTermCfg):
 
     object_name: str = MISSING
     """Name of the object in the environment related to the commands."""
+
+    obstacle_name: str = MISSING
+    """Name of the obstacle in the environment related to the commands."""
+
+    ee_name: str = MISSING
+    """Name of the end-effector frame in the environment related to the commands."""
 
     body_name: str = MISSING
     """Name of the body in the asset for which the commands are generated."""

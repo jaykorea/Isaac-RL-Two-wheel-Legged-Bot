@@ -95,7 +95,7 @@ class WolfFlatEnvCfg(LocomotionVelocityRoughEnvCfg):
         
         self.observations.none_stack_critic.height_scan = None
         self.observations.none_stack_policy.height_scan = None
-        self.observations.obs_info = None
+        # self.observations.obs_info = None
 
         # reset_robot_joint_zero should be called here
         self.events.reset_robot_joints.params["position_range"] = (-0.1, 0.1)

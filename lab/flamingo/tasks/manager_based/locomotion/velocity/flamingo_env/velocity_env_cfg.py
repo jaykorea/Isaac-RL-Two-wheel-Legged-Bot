@@ -267,9 +267,10 @@ class ObservationsCfg:
             clip=(-1.0, 1.0),
         )
 
-        base_lin_vel_x = ObsTerm(func=mdp.base_lin_vel_x_link, scale=2.0)
-        base_lin_vel_y = ObsTerm(func=mdp.base_lin_vel_y_link)
         base_lin_vel_z = ObsTerm(func=mdp.base_lin_vel_z_link, scale=0.25)
+        base_lin_vel_y = ObsTerm(func=mdp.base_lin_vel_y_link)
+        base_lin_vel_x = ObsTerm(func=mdp.base_lin_vel_x_link, scale=2.0)
+
         base_pos_z = ObsTerm(func=mdp.base_pos_z_rel_link, params={"sensor_cfg": SceneEntityCfg("base_height_scanner")})
         current_reward = ObsTerm(func=mdp.current_reward)
 

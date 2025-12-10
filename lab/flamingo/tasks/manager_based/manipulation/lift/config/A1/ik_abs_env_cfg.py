@@ -42,7 +42,7 @@ class A1CubeLiftEnvCfg(joint_pos_env_cfg.A1CubeLiftEnvCfg):
             asset_name="robot",
             joint_names=["dof.*_joint"],
             body_name="gripper_tip_link",
-            controller=DifferentialIKControllerCfg(command_type="pose", use_relative_mode=False, ik_method="dls",ik_params={"lambda_val": 0.4}),
+            controller=DifferentialIKControllerCfg(command_type="pose", use_relative_mode=False, ik_method="dls",ik_params={"lambda_val": 0.2}),
             body_offset=DifferentialInverseKinematicsActionCfg.OffsetCfg(pos=[0.0, 0.0, 0.0]),
         )
 

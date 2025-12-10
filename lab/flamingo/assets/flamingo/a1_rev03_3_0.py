@@ -39,10 +39,10 @@ A1_CFG = ArticulationCfg(
         pos=(0.0, 0.0, 0.0),
         joint_pos={
             "dof1_joint": 0.0,
-            "dof2_joint": -1.5708,
-            "dof3_joint": 1.7458,
+            "dof2_joint": -0.523599,
+            "dof3_joint": 0.523599,
             "dof4_joint": 0.0,
-            "dof5_joint": -3.49396,
+            "dof5_joint": -3.49066,
             "dof6_joint": 0.0,
             "left_gripper_joint": 0.0,
             "right_gripper_joint": 0.0,
@@ -51,26 +51,41 @@ A1_CFG = ArticulationCfg(
     ),
     soft_joint_pos_limit_factor=0.9,
     actuators={
-        "joint_12": DelayedPDActuatorCfg(
-            joint_names_expr=["dof1_joint", "dof2_joint"],
+        "joint_1": DelayedPDActuatorCfg(
+            joint_names_expr=["dof1_joint"],
             effort_limit=60.0,
             velocity_limit=20.0,
             min_delay=0,  # physics time steps (min: 5.0 * 0 = 0.0ms)
             max_delay=0,  # physics time steps (max: 5.0 * 4 = 20.0ms)
             stiffness={
-                "dof1_joint": 100.0,
-                "dof2_joint": 100.0,
+                "dof1_joint": 45.0,
             },
             damping={
-                "dof1_joint": 10.0,
-                "dof2_joint": 10.0,
+                "dof1_joint": 5.0,
             },
             friction={
                 "dof1_joint": 0.0,
-                "dof2_joint": 0.0,
             },
             armature={
                 "dof1_joint": 0.01,
+            },
+        ),
+        "joint_2": DelayedPDActuatorCfg(
+            joint_names_expr=["dof2_joint"],
+            effort_limit=60.0,
+            velocity_limit=20.0,
+            min_delay=0,  # physics time steps (min: 5.0 * 0 = 0.0ms)
+            max_delay=0,  # physics time steps (max: 5.0 * 4 = 20.0ms)
+            stiffness={
+                "dof2_joint": 50.0,
+            },
+            damping={
+                "dof2_joint": 5.0,
+            },
+            friction={
+                "dof2_joint": 0.0,
+            },
+            armature={
                 "dof2_joint": 0.01,
             },
         ),
@@ -81,10 +96,10 @@ A1_CFG = ArticulationCfg(
             min_delay=0,  # physics time steps (min: 5.0 * 0 = 0.0ms)
             max_delay=0,  # physics time steps (max: 5.0 * 4 = 20.0ms)
             stiffness={
-                "dof3_joint": 80.0,
+                "dof3_joint": 35.0,
             },
             damping={
-                "dof3_joint": 5.0,
+                "dof3_joint": 3.5,
             },
             friction={
                 "dof3_joint": 0.0,
@@ -100,12 +115,12 @@ A1_CFG = ArticulationCfg(
             min_delay=0,  # physics time steps (min: 5.0 * 0 = 0.0ms)
             max_delay=0,  # physics time steps (max: 5.0 * 4 = 20.0ms)
             stiffness={
-                "dof4_joint": 50.0,
-                "dof5_joint": 50.0,
+                "dof4_joint": 30.0,
+                "dof5_joint": 30.0,
             },
             damping={
-                "dof4_joint": 2.0,
-                "dof5_joint": 2.0,
+                "dof4_joint": 3.0,
+                "dof5_joint": 3.0,
             },
             friction={
                 "dof4_joint": 0.0,
@@ -123,7 +138,7 @@ A1_CFG = ArticulationCfg(
             min_delay=0,  # physics time steps (min: 5.0 * 0 = 0.0ms)
             max_delay=0,  # physics time steps (max: 5.0 * 4 = 20.0ms)
             stiffness={
-                "dof6_joint": 15.0,
+                "dof6_joint": 20.0,
             },
             damping={
                 "dof6_joint": 1.0,
@@ -142,10 +157,10 @@ A1_CFG = ArticulationCfg(
             min_delay=0,  # physics time steps (min: 5.0 * 0 = 0.0ms)
             max_delay=0,  # physics time steps (max: 5.0 * 4 = 20.0ms)
             stiffness={
-                ".*_gripper_joint": 30.0,
+                ".*_gripper_joint": 20.0,
             },
             damping={
-                ".*_gripper_joint": 2.0,
+                ".*_gripper_joint": 1.0,
             },
             friction={
                 ".*_gripper_joint": 0.0,

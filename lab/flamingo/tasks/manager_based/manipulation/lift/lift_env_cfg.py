@@ -20,7 +20,7 @@ from isaaclab.sensors.frame_transformer.frame_transformer_cfg import FrameTransf
 from isaaclab.sim.spawners.from_files.from_files_cfg import GroundPlaneCfg, UsdFileCfg
 from isaaclab.utils import configclass
 from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR
-from isaaclab.sensors import ContactSensorCfg
+from isaaclab.sensors import ContactSensorCfg, TiledCameraCfg, CameraCfg
 
 from . import mdp
 
@@ -46,6 +46,8 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
     object: RigidObjectCfg | DeformableObjectCfg = MISSING
 
     screen: RigidObjectCfg = None
+    
+    camera: TiledCameraCfg | CameraCfg = None
 
     contact_forces = ContactSensorCfg(prim_path="{ENV_REGEX_NS}/Robot/.*", history_length=3, track_air_time=True)
 
@@ -82,11 +84,13 @@ class CommandsCfg:
     object_pose = lift_mdp.ReversePoseCommandCfg(
         asset_name="robot",
         object_name="object",
+        obstacle_name="screen",
+        ee_name="ee_frame",
         body_name=MISSING,  # will be set by agent env cfg
         resampling_time_range=(5.0, 5.0),
         debug_vis=True,
         ranges=lift_mdp.ReversePoseCommandCfg.Ranges(
-            pos_x=(0.25, 0.3), pos_y=(-0.3, 0.3), pos_z=(0.2, 0.25), roll=(0.0, 0.0), pitch=(0.0, 0.0), yaw=(0.0, 0.0)
+            pos_x=(0.25, 0.3), pos_y=(-0.3, 0.3), pos_z=(0.055, 0.075), roll=(0.0, 0.0), pitch=(0.0, 0.0), yaw=(0.0, 0.0)
         ),
     )
 
@@ -177,7 +181,7 @@ class EventCfg:
         func=lift_mdp.reset_root_state_binary,
         mode="reset",
         params={
-            "pose_range": {"x": (0.35, 0.4), "y": (-0.3, 0.3), "z": (0.0, 0.0)},
+            "pose_range": {"x": (0.3, 0.4), "y": (-0.3, 0.3)},
             "velocity_range": {},
             "unoise": 0.05,
             "asset_cfg": SceneEntityCfg("object", body_names="Object"),
@@ -297,7 +301,7 @@ class LiftEnvCfg(ManagerBasedRLEnvCfg):
     """Configuration for the lifting environment."""
 
     # Scene settings
-    scene: ObjectTableSceneCfg = ObjectTableSceneCfg(num_envs=4096, env_spacing=2.5)
+    scene: ObjectTableSceneCfg = ObjectTableSceneCfg(num_envs=4096, env_spacing=3.5)
     # Basic settings
     observations: ObservationsCfg = ObservationsCfg()
     actions: ActionsCfg = ActionsCfg()

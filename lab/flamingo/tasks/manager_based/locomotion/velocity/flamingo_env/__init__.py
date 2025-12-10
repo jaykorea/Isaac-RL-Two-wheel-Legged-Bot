@@ -139,6 +139,44 @@ gym.register(
 )
 ##########################################SRM###################################################
 gym.register(
+    id="Isaac-Velocity-Flat-Flamingo-v1-srmppo",
+    entry_point="isaaclab.envs:ManagerBasedRLEnv",
+    disable_env_checker=True,
+    kwargs={
+        "env_cfg_entry_point": flat_env.flat_env_stand_drive_cfg.FlamingoFlatEnvCfg,
+        "co_rl_cfg_entry_point": agents.co_rl_cfg.FlamingoFlatSRMPPORunnerCfg_Stand_Drive,
+    },
+)
+
+gym.register(
+    id="Isaac-Velocity-Flat-Flamingo-v1-srmppo-Play",
+    entry_point="isaaclab.envs:ManagerBasedRLEnv",
+    disable_env_checker=True,
+    kwargs={
+        "env_cfg_entry_point": flat_env.flat_env_stand_drive_cfg.FlamingoFlatEnvCfg_PLAY,
+        "co_rl_cfg_entry_point": agents.co_rl_cfg.FlamingoFlatSRMPPORunnerCfg_Stand_Drive,
+    },
+)
+gym.register(
+    id="Isaac-TrackZ-Flat-Flamingo-v1-srmppo",
+    entry_point="isaaclab.envs:ManagerBasedRLEnv",
+    disable_env_checker=True,
+    kwargs={
+        "env_cfg_entry_point": flat_env.flat_env_track_z_cfg.FlamingoFlatEnvCfg,
+        "co_rl_cfg_entry_point": agents.co_rl_cfg.FlamingoFlatSRMPPORunnerCfg_Track_Z,
+    },
+)
+
+gym.register(
+    id="Isaac-TrackZ-Flat-Flamingo-v1-srmppo-Play",
+    entry_point="isaaclab.envs:ManagerBasedRLEnv",
+    disable_env_checker=True,
+    kwargs={
+        "env_cfg_entry_point": flat_env.flat_env_track_z_cfg.FlamingoFlatEnvCfg_PLAY,
+        "co_rl_cfg_entry_point": agents.co_rl_cfg.FlamingoFlatSRMPPORunnerCfg_Track_Z,
+    },
+)
+gym.register(
     id="Isaac-TrackYK-Flat-Flamingo-v1-srmppo",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
@@ -149,7 +187,7 @@ gym.register(
 )
 
 gym.register(
-    id="Isaac-TrackYK-Flat-Flamingo-Play-v1-srmppo",
+    id="Isaac-TrackYK-Flat-Flamingo-Play-v1-srmppo-Play",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={

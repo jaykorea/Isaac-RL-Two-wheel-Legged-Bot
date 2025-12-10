@@ -4,15 +4,21 @@
 # SPDX-License-Identifier: BSD-3-Clause
 import isaaclab.sim as sim_utils
 from isaaclab.assets import RigidObjectCfg
-from isaaclab.sensors import FrameTransformerCfg
+from isaaclab.sensors import FrameTransformerCfg, CameraCfg, TiledCameraCfg
 from isaaclab.sensors.frame_transformer.frame_transformer_cfg import OffsetCfg
+
 from isaaclab.sim.schemas.schemas_cfg import RigidBodyPropertiesCfg
 from isaaclab.sim.spawners.from_files.from_files_cfg import UsdFileCfg
 from isaaclab.utils import configclass
 from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR
 
 from isaaclab_tasks.manager_based.manipulation.lift import mdp
+import lab.flamingo.tasks.manager_based.manipulation.lift.mdp as lift_mdp
+
 from lab.flamingo.tasks.manager_based.manipulation.lift.lift_env_cfg import LiftEnvCfg
+from lab.flamingo.tasks.manager_based.manipulation.lift.lift_env_cfg import TerminationsCfg
+from isaaclab.managers import TerminationTermCfg as DoneTerm
+from isaaclab.managers import SceneEntityCfg
 
 ##
 # Pre-defined configs
@@ -20,8 +26,19 @@ from lab.flamingo.tasks.manager_based.manipulation.lift.lift_env_cfg import Lift
 from isaaclab.markers.config import FRAME_MARKER_CFG  # isort: skip
 from lab.flamingo.assets.flamingo.a1_rev03_3_0 import A1_CFG, A1_HIGH_PD_CFG  # isort: skip
 
+
+class A1CubeTerminationsCfg(TerminationsCfg):
+    obstacle_fall_down = DoneTerm(
+        func=lift_mdp.obstacle_fall_down,
+        params={
+            "obstacle_cfg": SceneEntityCfg("screen"),
+            "threshold": 0.25},
+    )
+
 @configclass
 class A1CubeLiftEnvCfg(LiftEnvCfg):
+    # terminations: A1CubeTerminationsCfg = A1CubeTerminationsCfg()
+
     def __post_init__(self):
         # post init of parent
         super().__post_init__()
@@ -68,7 +85,7 @@ class A1CubeLiftEnvCfg(LiftEnvCfg):
         self.scene.object = RigidObjectCfg(
             prim_path="{ENV_REGEX_NS}/Object",
             spawn=sim_utils.CuboidCfg(
-                size=(0.04, 0.04, 0.04),
+                size=(0.055, 0.055, 0.11),
                 rigid_props=sim_utils.RigidBodyPropertiesCfg(
                     solver_position_iteration_count=16,
                     solver_velocity_iteration_count=1,
@@ -84,31 +101,45 @@ class A1CubeLiftEnvCfg(LiftEnvCfg):
                 ),
                 visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color=(1.0, 1.0, 0.0)),
             ),
-            init_state=RigidObjectCfg.InitialStateCfg(pos=[0.0, 0.0, 0.0], rot=[1, 0, 0 ,0]),
+            init_state=RigidObjectCfg.InitialStateCfg(pos=[0.0, 0.0, 0.025], rot=[1, 0, 0 ,0]),
         )
 
-        # self.scene.screen = RigidObjectCfg(
-        #     prim_path="{ENV_REGEX_NS}/screen",
-        #     spawn=sim_utils.CuboidCfg(
-        #         size=(0.45, 0.075, 0.5),
-        #         rigid_props=sim_utils.RigidBodyPropertiesCfg(
-        #             solver_position_iteration_count=4,
-        #             solver_velocity_iteration_count=0,
-        #             max_angular_velocity=1000.0,
-        #             max_linear_velocity=1000.0,
-        #             max_depenetration_velocity=1.0,
-        #             disable_gravity=False,
-        #         ),
-        #         mass_props=sim_utils.MassPropertiesCfg(mass=150.0),
-        #         collision_props=sim_utils.CollisionPropertiesCfg(),
-        #         physics_material=sim_utils.RigidBodyMaterialCfg(
-        #             static_friction=2.5, dynamic_friction=2.0, restitution=0.0
-        #         ),
-        #         visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color=(0.5, 0.0, 0.0)),
-        #     ),
-        #     init_state=RigidObjectCfg.InitialStateCfg(pos=[0.6, 0, 0.25], rot=[1, 0, 0 ,0]),
-        # )
+        self.scene.screen = RigidObjectCfg(
+            prim_path="{ENV_REGEX_NS}/Screen",
+            spawn=sim_utils.CuboidCfg(
+                size=(0.45, 0.035, 0.5),
+                rigid_props=sim_utils.RigidBodyPropertiesCfg(
+                    solver_position_iteration_count=4,
+                    solver_velocity_iteration_count=0,
+                    max_angular_velocity=1000.0,
+                    max_linear_velocity=1000.0,
+                    max_depenetration_velocity=1.0,
+                    disable_gravity=False,
+                ),
+                mass_props=sim_utils.MassPropertiesCfg(mass=5.0),
+                collision_props=sim_utils.CollisionPropertiesCfg(),
+                physics_material=sim_utils.RigidBodyMaterialCfg(
+                    static_friction=2.5, dynamic_friction=2.0, restitution=0.0
+                ),
+                visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color=(0.5, 0.0, 0.0)),
+            ),
+            init_state=RigidObjectCfg.InitialStateCfg(pos=[0.475, 0, 0.25], rot=[1, 0, 0 ,0]),
+        )
 
+        # sensors
+        self.scene.camera = CameraCfg(
+            prim_path="{ENV_REGEX_NS}/Robot/base_link/camera_link",
+            update_period=0.1,
+            height=480,
+            width=640,
+            data_types=["rgb", "distance_to_image_plane"],
+            spawn=sim_utils.PinholeCameraCfg(
+                focal_length=24.0, focus_distance=400.0, horizontal_aperture=20.955, clipping_range=(0.1, 4.0)
+            ),
+            # offset=CameraCfg.OffsetCfg(pos=(0.07, 0.0, 0.04), rot=(0.5, -0.5, 0.5, -0.5), convention="ros"),
+            offset=CameraCfg.OffsetCfg(pos=(0.3, 0.0, 1.3), rot=(0, 1, 0, 0), convention="ros"),
+        )
+    
         # Listens to the required transforms
         marker_cfg = FRAME_MARKER_CFG.copy()
         marker_cfg.markers["frame"].scale = (0.1, 0.1, 0.1)

@@ -33,11 +33,20 @@ class FlamingoCurriculumCfg(CurriculumCfg):
 @configclass
 class FlamingoRewardsCfg():
     # -- task
+    # track_lin_vel_xy_exp = RewTerm(
+    #     func=mdp.track_lin_vel_xy_link_exp, weight=2.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
+    # )
+    # track_ang_vel_z_exp = RewTerm(
+    #     func=mdp.track_ang_vel_z_link_exp, weight=1.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
+    # )
+
     track_lin_vel_xy_exp = RewTerm(
-        func=mdp.track_lin_vel_xy_link_exp, weight=2.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
+        func=mdp.track_lin_vel_xy_yaw_frame_exp,
+        weight=2.0,
+        params={"command_name": "base_velocity", "std": 0.25},
     )
     track_ang_vel_z_exp = RewTerm(
-        func=mdp.track_ang_vel_z_link_exp, weight=1.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
+        func=mdp.track_ang_vel_z_world_exp, weight=1.0, params={"command_name": "base_velocity", "std": 0.25}  #0.5
     )
 
     # track_lin_vel_xy_exp_fine_grained = RewTerm(
@@ -165,10 +174,10 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
         self.observations.none_stack_critic.base_pos_z.params["sensor_cfg"] = None
 
         self.observations.none_stack_policy.height_scan = None
-        self.observations.none_stack_policy.base_lin_vel = None
-        self.observations.none_stack_policy.base_pos_z = None
-        self.observations.none_stack_policy.current_reward = None
-        self.observations.none_stack_policy.is_contact = None
+        # self.observations.none_stack_policy.base_lin_vel = None
+        # self.observations.none_stack_policy.base_pos_z = None
+        # self.observations.none_stack_policy.current_reward = None
+        # self.observations.none_stack_policy.is_contact = None
         self.observations.none_stack_policy.lift_mask = None
 
         self.observations.none_stack_policy.roll_pitch_commands = None
