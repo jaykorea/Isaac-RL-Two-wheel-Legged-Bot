@@ -1,3 +1,35 @@
+
+<div align="right">
+  <details>
+    <summary >🌐 Language</summary>
+    <div>
+      <div align="center">
+        <a href="https://openaitx.github.io/view.html?user=jaykorea&project=Isaac-RL-Two-wheel-Legged-Bot&lang=en">English</a>
+        | <a href="https://openaitx.github.io/view.html?user=jaykorea&project=Isaac-RL-Two-wheel-Legged-Bot&lang=zh-CN">简体中文</a>
+        | <a href="https://openaitx.github.io/view.html?user=jaykorea&project=Isaac-RL-Two-wheel-Legged-Bot&lang=zh-TW">繁體中文</a>
+        | <a href="https://openaitx.github.io/view.html?user=jaykorea&project=Isaac-RL-Two-wheel-Legged-Bot&lang=ja">日本語</a>
+        | <a href="https://openaitx.github.io/view.html?user=jaykorea&project=Isaac-RL-Two-wheel-Legged-Bot&lang=ko">한국어</a>
+        | <a href="https://openaitx.github.io/view.html?user=jaykorea&project=Isaac-RL-Two-wheel-Legged-Bot&lang=hi">हिन्दी</a>
+        | <a href="https://openaitx.github.io/view.html?user=jaykorea&project=Isaac-RL-Two-wheel-Legged-Bot&lang=th">ไทย</a>
+        | <a href="https://openaitx.github.io/view.html?user=jaykorea&project=Isaac-RL-Two-wheel-Legged-Bot&lang=fr">Français</a>
+        | <a href="https://openaitx.github.io/view.html?user=jaykorea&project=Isaac-RL-Two-wheel-Legged-Bot&lang=de">Deutsch</a>
+        | <a href="https://openaitx.github.io/view.html?user=jaykorea&project=Isaac-RL-Two-wheel-Legged-Bot&lang=es">Español</a>
+        | <a href="https://openaitx.github.io/view.html?user=jaykorea&project=Isaac-RL-Two-wheel-Legged-Bot&lang=it">Italiano</a>
+        | <a href="https://openaitx.github.io/view.html?user=jaykorea&project=Isaac-RL-Two-wheel-Legged-Bot&lang=ru">Русский</a>
+        | <a href="https://openaitx.github.io/view.html?user=jaykorea&project=Isaac-RL-Two-wheel-Legged-Bot&lang=pt">Português</a>
+        | <a href="https://openaitx.github.io/view.html?user=jaykorea&project=Isaac-RL-Two-wheel-Legged-Bot&lang=nl">Nederlands</a>
+        | <a href="https://openaitx.github.io/view.html?user=jaykorea&project=Isaac-RL-Two-wheel-Legged-Bot&lang=pl">Polski</a>
+        | <a href="https://openaitx.github.io/view.html?user=jaykorea&project=Isaac-RL-Two-wheel-Legged-Bot&lang=ar">العربية</a>
+        | <a href="https://openaitx.github.io/view.html?user=jaykorea&project=Isaac-RL-Two-wheel-Legged-Bot&lang=fa">فارسی</a>
+        | <a href="https://openaitx.github.io/view.html?user=jaykorea&project=Isaac-RL-Two-wheel-Legged-Bot&lang=tr">Türkçe</a>
+        | <a href="https://openaitx.github.io/view.html?user=jaykorea&project=Isaac-RL-Two-wheel-Legged-Bot&lang=vi">Tiếng Việt</a>
+        | <a href="https://openaitx.github.io/view.html?user=jaykorea&project=Isaac-RL-Two-wheel-Legged-Bot&lang=id">Bahasa Indonesia</a>
+        | <a href="https://openaitx.github.io/view.html?user=jaykorea&project=Isaac-RL-Two-wheel-Legged-Bot&lang=as">অসমীয়া</
+      </div>
+    </div>
+  </details>
+</div>
+
 # Isaac LAB for Flamingo
 
 [![IsaacSim](https://img.shields.io/badge/IsaacSim-4.5-silver.svg)](https://docs.omniverse.nvidia.com/isaacsim/latest/overview.html)
