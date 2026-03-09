@@ -37,12 +37,13 @@ KOCH_CFG = ArticulationCfg(
     
     init_state=ArticulationCfg.InitialStateCfg(
         pos=(0.0, 0.0, 0.0),
+        rot=(0.0, 0.0, 0.0, 1.0),
         joint_pos={
             "joint_1": 0.0,
             "joint_2": 0.0,
             "joint_3": 0.0,
             "joint_4": 0.0,
-            "joint_5": 0.0,
+            "joint_5": -1.57,
             "gripper_joint": 0.0,
         },
         joint_vel={".*": 0.0},

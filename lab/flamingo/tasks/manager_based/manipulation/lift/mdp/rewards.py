@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 from isaaclab.assets import RigidObject
 from isaaclab.managers import SceneEntityCfg
 from isaaclab.sensors import FrameTransformer
-from isaaclab.utils.math import combine_frame_transforms
+from isaaclab.utils.math import combine_frame_transforms, quat_rotate_inverse
 
 if TYPE_CHECKING:
     from isaaclab.envs import ManagerBasedRLEnv
@@ -143,3 +143,35 @@ def grasp_object(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg) -> torch.Ten
     is_close = (distance_xy > 0.0575 - 0.02) & (distance_xy < 0.0575 + 0.02)  # & (distance_z < 0.1)
 
     return is_close * torch.sum(0.04 - gripper_joint_pos, dim=1)
+
+def ee_orientation_align(
+    env: ManagerBasedRLEnv,
+    std: float,  # std 파라미터 추가
+    object_cfg: SceneEntityCfg = SceneEntityCfg("object"),
+    ee_frame_cfg: SceneEntityCfg = SceneEntityCfg("ee_frame"),
+) -> torch.Tensor:
+    """Reward the agent for aligning the end-effector with the vertical axis (z-axis) using tanh-kernel."""
+    
+    # 1. End-Effector의 회전 정보 가져오기
+    ee_frame: FrameTransformer = env.scene[ee_frame_cfg.name]
+    ee_quat = ee_frame.data.target_quat_w[..., 0, :]
+    
+    # 2. 쿼터니언을 회전 행렬로 변환하여 로컬 Z축 벡터 추출
+    # (Isaac Lab의 math 유틸리티 사용)
+    from isaaclab.utils.math import quat_rotate
+    
+    # 로봇의 그리퍼가 향하는 방향(로컬 Z축) 벡터 계산
+    ee_z_dir = quat_rotate(ee_quat, torch.tensor([0.0, 0.0, 1.0], device=env.device).repeat(env.num_envs, 1))
+    
+    # 3. 목표 방향 (World의 -Z 방향, 즉 수직 아래)
+    target_dir = torch.tensor([0.0, 0.0, -1.0], device=env.device).repeat(env.num_envs, 1)
+    
+    # 4. 정렬 오차(Error) 계산
+    # 내적(Dot Product)값은 -1 ~ 1 사이. 1이면 완벽 정렬.
+    # 따라서 (1 - 내적)을 하면, 정렬될수록 0에 가까워지는 '오차'가 됨.
+    # 범위: 0(완벽) ~ 2(반대)
+    alignment_error = 1.0 - torch.sum(ee_z_dir * target_dir, dim=1)
+    
+    # 5. Tanh Kernel 적용
+    # 오차가 0에 가까우면 1.0, 오차가 커지면 0.0으로 떨어짐
+    return 1.0 - torch.tanh(alignment_error / std)

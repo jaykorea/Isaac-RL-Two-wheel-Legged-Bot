@@ -47,7 +47,8 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
 
     screen: RigidObjectCfg = None
     
-    camera: TiledCameraCfg | CameraCfg = None
+    tv_camera: TiledCameraCfg | CameraCfg = None
+    ee_camera: TiledCameraCfg | CameraCfg = None
 
     contact_forces = ContactSensorCfg(prim_path="{ENV_REGEX_NS}/Robot/.*", history_length=3, track_air_time=True)
 
@@ -81,28 +82,15 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
 class CommandsCfg:
     """Command terms for the MDP."""
 
-    object_pose = lift_mdp.ReversePoseCommandCfg(
+    object_pose = mdp.UniformPoseCommandCfg(
         asset_name="robot",
-        object_name="object",
-        obstacle_name="screen",
-        ee_name="ee_frame",
         body_name=MISSING,  # will be set by agent env cfg
         resampling_time_range=(5.0, 5.0),
         debug_vis=True,
-        ranges=lift_mdp.ReversePoseCommandCfg.Ranges(
-            pos_x=(0.25, 0.3), pos_y=(-0.3, 0.3), pos_z=(0.055, 0.075), roll=(0.0, 0.0), pitch=(0.0, 0.0), yaw=(0.0, 0.0)
+        ranges=mdp.UniformPoseCommandCfg.Ranges(
+            pos_x=(0.15, 0.2), pos_y=(-0.1, 0.1), pos_z=(0.1, 0.15), roll=(0.0, 0.0), pitch=(0.0, 0.0), yaw=(0.0, 0.0)
         ),
     )
-
-    # object_pose = mdp.UniformPoseCommandCfg(
-    #     asset_name="robot",
-    #     body_name=MISSING,  # will be set by agent env cfg
-    #     resampling_time_range=(5.0, 5.0),
-    #     debug_vis=True,
-    #     ranges=mdp.UniformPoseCommandCfg.Ranges(
-    #         pos_x=(0.25, 0.3), pos_y=(-0.3, 0.3), pos_z=(0.2, 0.25), roll=(0.0, 0.0), pitch=(0.0, 0.0), yaw=(0.0, 0.0)
-    #     ),
-    # )
 
 
 @configclass
@@ -122,11 +110,12 @@ class ObservationsCfg:
     class NoneStackCriticCfg(ObsGroup):
         """Observations for policy group."""
 
-        target_object_position = ObsTerm(func=mdp.generated_commands, params={"command_name": "object_pose"})
+        pass
+        # target_object_position = ObsTerm(func=mdp.generated_commands, params={"command_name": "object_pose"})
 
         def __post_init__(self):
             self.enable_corruption = False
-            self.concatenate_terms = True
+            self.concatenate_terms = False
 
     @configclass
     class StackCriticCfg(ObsGroup):
@@ -134,7 +123,7 @@ class ObservationsCfg:
 
         joint_pos = ObsTerm(func=mdp.joint_pos_rel)
         joint_vel = ObsTerm(func=mdp.joint_vel_rel)
-        object_position = ObsTerm(func=mdp.object_position_in_robot_root_frame)
+        # object_position = ObsTerm(func=mdp.object_position_in_robot_root_frame)
         actions = ObsTerm(func=mdp.last_action)
 
         def __post_init__(self):
@@ -145,11 +134,11 @@ class ObservationsCfg:
     class NoneStackPolicyCfg(ObsGroup):
         """Observations for policy group."""
 
-        target_object_position = ObsTerm(func=mdp.generated_commands, params={"command_name": "object_pose"})
+        # target_object_position = ObsTerm(func=mdp.generated_commands, params={"command_name": "object_pose"})
 
         def __post_init__(self):
             self.enable_corruption = True
-            self.concatenate_terms = True
+            self.concatenate_terms = False
 
     @configclass
     class StackPolicyCfg(ObsGroup):
@@ -157,12 +146,13 @@ class ObservationsCfg:
 
         joint_pos = ObsTerm(func=mdp.joint_pos_rel)
         joint_vel = ObsTerm(func=mdp.joint_vel_rel)
-        object_position = ObsTerm(func=mdp.object_position_in_robot_root_frame)
+        # object_position = ObsTerm(func=mdp.object_position_in_robot_root_frame)
         actions = ObsTerm(func=mdp.last_action)
 
         def __post_init__(self):
             self.enable_corruption = True
             self.concatenate_terms = True
+            
 
     # observation groups
     none_stack_critic: NoneStackCriticCfg = NoneStackCriticCfg()
@@ -181,7 +171,7 @@ class EventCfg:
         func=lift_mdp.reset_root_state_binary,
         mode="reset",
         params={
-            "pose_range": {"x": (0.3, 0.4), "y": (-0.3, 0.3)},
+            "pose_range": {"x": (0.15, 0.17), "y": (-0.1, 0.1)},
             "velocity_range": {},
             "unoise": 0.05,
             "asset_cfg": SceneEntityCfg("object", body_names="Object"),
@@ -216,29 +206,23 @@ class EventCfg:
 class RewardsCfg:
     """Reward terms for the MDP."""
 
-    reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.15}, weight=7.5)
+    reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.15}, weight=1.5)
 
-    reaching_object_fine_graned = RewTerm(func=mdp.object_ee_distance, params={"std": 0.075}, weight=15.0)
+    reaching_object_fine_graned = RewTerm(func=mdp.object_ee_distance, params={"std": 0.075}, weight=3.0)
 
-    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.04}, weight=25.0)
+    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.02}, weight=35.0)
 
     object_goal_tracking = RewTerm(
         func=mdp.object_goal_distance,
-        params={"std": 0.3, "minimal_height": 0.04, "command_name": "object_pose"},
-        weight=15.0,
+        params={"std": 0.5, "minimal_height": 0.02, "command_name": "object_pose"},
+        weight=30.0,
     )
 
     object_goal_tracking_fine_grained = RewTerm(
         func=mdp.object_goal_distance,
-        params={"std": 0.05, "minimal_height": 0.04, "command_name": "object_pose"},
-        weight=7.5,
+        params={"std": 0.1, "minimal_height": 0.02, "command_name": "object_pose"},
+        weight=14.5,
     )
-
-    # object_orientation_alignment = RewTerm(
-    #     func=mdp.object_orientation_alignment,
-    #     params={"command_name": "object_pose", "orientation_weight": 1.0},
-    #     weight=5.0,
-    # )
 
     # object_minimize_roll_pitch = RewTerm(
     #     func=mdp.object_minimize_roll_pitch,

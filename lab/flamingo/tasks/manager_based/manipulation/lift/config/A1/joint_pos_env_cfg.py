@@ -12,12 +12,19 @@ from isaaclab.sim.spawners.from_files.from_files_cfg import UsdFileCfg
 from isaaclab.utils import configclass
 from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR
 
+from dataclasses import MISSING
+
 from isaaclab_tasks.manager_based.manipulation.lift import mdp
 import lab.flamingo.tasks.manager_based.manipulation.lift.mdp as lift_mdp
 
 from lab.flamingo.tasks.manager_based.manipulation.lift.lift_env_cfg import LiftEnvCfg
 from lab.flamingo.tasks.manager_based.manipulation.lift.lift_env_cfg import TerminationsCfg
+from lab.flamingo.tasks.manager_based.manipulation.lift.lift_env_cfg import ObservationsCfg
 from isaaclab.managers import TerminationTermCfg as DoneTerm
+from isaaclab.managers import EventTermCfg as EventTerm
+from isaaclab.managers import RewardTermCfg as RewTerm
+from isaaclab.managers import ObservationGroupCfg as ObsGroup
+from isaaclab.managers import ObservationTermCfg as ObsTerm
 from isaaclab.managers import SceneEntityCfg
 
 ##
@@ -26,7 +33,90 @@ from isaaclab.managers import SceneEntityCfg
 from isaaclab.markers.config import FRAME_MARKER_CFG  # isort: skip
 from lab.flamingo.assets.flamingo.a1_rev03_3_0 import A1_CFG, A1_HIGH_PD_CFG  # isort: skip
 
+@configclass
+class A1ObservationsCfg(ObservationsCfg):
+    """Observations for the MDP."""
 
+    @configclass
+    class ObsInfoCfg(ObsGroup):
+        """Observation info group."""
+
+        cbf = ObsTerm(
+            func=lift_mdp.obstacle_ee_aabb_distance,
+            params={
+                "obstacle_cfg": SceneEntityCfg("screen"),
+                "ee_frame_cfg": SceneEntityCfg("ee_frame"),
+                "margin": 0.025,
+            }
+        )
+
+        def __post_init__(self):
+            self.enable_corruption = True
+            self.concatenate_terms = True
+
+    obs_info: ObsInfoCfg = ObsInfoCfg()
+
+@configclass
+class A1RewardsCfg:
+    """Reward terms for the MDP."""
+
+    reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.15}, weight=1.5)
+
+    reaching_object_fine_graned = RewTerm(func=mdp.object_ee_distance, params={"std": 0.075}, weight=3.0)
+
+    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.02}, weight=35.0)
+
+    object_goal_tracking = RewTerm(
+        func=mdp.object_goal_distance,
+        params={"std": 0.25, "minimal_height": 0.02, "command_name": "object_pose"},
+        weight=5.0,
+    )
+
+    object_goal_tracking_fine_grained = RewTerm(
+        func=mdp.object_goal_distance,
+        params={"std": 0.05, "minimal_height": 0.02, "command_name": "object_pose"},
+        weight=10.0,
+    )
+
+    # action penalty
+    action_rate = RewTerm(func=mdp.action_rate_l2, weight=-1e-2)
+
+    joint_vel = RewTerm(
+        func=mdp.joint_vel_l2,
+        weight=-1e-3,
+        params={"asset_cfg": SceneEntityCfg("robot")},
+    )
+
+
+@configclass
+class A1CommandsCfg:
+    """Command terms for the MDP."""
+
+    object_pose = lift_mdp.ReversePoseCommandCfg(
+        asset_name="robot",
+        object_name="object",
+        obstacle_name="screen",
+        ee_name="ee_frame",
+        body_name=MISSING,  # will be set by agent env cfg
+        resampling_time_range=(5.0, 5.0),
+        debug_vis=False,
+        ranges=lift_mdp.ReversePoseCommandCfg.Ranges(
+            pos_x=(0.25, 0.3), pos_y=(-0.3, 0.3), pos_z=(0.055, 0.075), roll=(0.0, 0.0), pitch=(0.0, 0.0), yaw=(0.0, 0.0)
+        ),
+    )
+
+    # object_pose = mdp.UniformPoseCommandCfg(
+    #     asset_name="robot",
+    #     body_name=MISSING,  # will be set by agent env cfg
+    #     resampling_time_range=(5.0, 5.0),
+    #     debug_vis=True,
+    #     ranges=mdp.UniformPoseCommandCfg.Ranges(
+    #         pos_x=(0.25, 0.3), pos_y=(-0.3, 0.3), pos_z=(0.2, 0.25), roll=(0.0, 0.0), pitch=(0.0, 0.0), yaw=(0.0, 0.0)
+    #     ),
+    # )
+
+
+@configclass
 class A1CubeTerminationsCfg(TerminationsCfg):
     obstacle_fall_down = DoneTerm(
         func=lift_mdp.obstacle_fall_down,
@@ -36,8 +126,53 @@ class A1CubeTerminationsCfg(TerminationsCfg):
     )
 
 @configclass
+class A1EventCfg:
+    """Configuration for events."""
+
+    reset_all = EventTerm(func=mdp.reset_scene_to_default, mode="reset")
+
+    reset_object_position = EventTerm(
+        func=lift_mdp.reset_root_state_binary,
+        mode="reset",
+        params={
+            "pose_range": {"x": (0.3, 0.4), "y": (-0.3, 0.3)},
+            "velocity_range": {},
+            "unoise": 0.05,
+            "asset_cfg": SceneEntityCfg("object", body_names="Object"),
+        },
+    )
+
+    # reset_object_position = EventTerm(
+    #     func=mdp.reset_root_state_uniform,
+    #     mode="reset",
+    #     params={
+    #         "pose_range": {"x": (-0.0, 0.35), "y": (-0.3, 0.3), "z": (0.0, 0.0)},
+    #         "velocity_range": {},
+    #         "asset_cfg": SceneEntityCfg("object", body_names="Object"),
+    #     },
+    # )
+
+    # startup
+    # physics_material = EventTerm(
+    #     func=mdp.randomize_rigid_body_material,
+    #     mode="startup",
+    #     params={
+    #         "asset_cfg": SceneEntityCfg("robot", body_names=".*"),
+    #         "static_friction_range": (1.5, 1.5),
+    #         "dynamic_friction_range": (1.2, 1.2),
+    #         "restitution_range": (0.0, 0.0),
+    #         "num_buckets": 1,
+    #     },
+    # )
+
+@configclass
 class A1CubeLiftEnvCfg(LiftEnvCfg):
-    # terminations: A1CubeTerminationsCfg = A1CubeTerminationsCfg()
+    observations: A1ObservationsCfg = A1ObservationsCfg()
+    rewards: A1RewardsCfg = A1RewardsCfg()
+    commands: A1CommandsCfg = A1CommandsCfg()
+    events: A1EventCfg = A1EventCfg()
+    terminations: A1CubeTerminationsCfg = A1CubeTerminationsCfg()
+    curriculum: None = None
 
     def __post_init__(self):
         # post init of parent
@@ -102,6 +237,7 @@ class A1CubeLiftEnvCfg(LiftEnvCfg):
                 visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color=(1.0, 1.0, 0.0)),
             ),
             init_state=RigidObjectCfg.InitialStateCfg(pos=[0.0, 0.0, 0.025], rot=[1, 0, 0 ,0]),
+            debug_vis=False,
         )
 
         self.scene.screen = RigidObjectCfg(
@@ -124,14 +260,15 @@ class A1CubeLiftEnvCfg(LiftEnvCfg):
                 visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color=(0.5, 0.0, 0.0)),
             ),
             init_state=RigidObjectCfg.InitialStateCfg(pos=[0.475, 0, 0.25], rot=[1, 0, 0 ,0]),
+            debug_vis=False,
         )
 
         # sensors
-        self.scene.camera = CameraCfg(
-            prim_path="{ENV_REGEX_NS}/Robot/base_link/camera_link",
+        self.scene.tv_camera = CameraCfg(
+            prim_path="{ENV_REGEX_NS}/Robot/base_link/tv_camera_link",
             update_period=0.1,
-            height=480,
-            width=640,
+            height=224,
+            width=224,
             data_types=["rgb", "distance_to_image_plane"],
             spawn=sim_utils.PinholeCameraCfg(
                 focal_length=24.0, focus_distance=400.0, horizontal_aperture=20.955, clipping_range=(0.1, 4.0)
@@ -139,14 +276,28 @@ class A1CubeLiftEnvCfg(LiftEnvCfg):
             # offset=CameraCfg.OffsetCfg(pos=(0.07, 0.0, 0.04), rot=(0.5, -0.5, 0.5, -0.5), convention="ros"),
             offset=CameraCfg.OffsetCfg(pos=(0.3, 0.0, 1.3), rot=(0, 1, 0, 0), convention="ros"),
         )
-    
+
+        self.scene.ee_camera = CameraCfg(
+            prim_path="{ENV_REGEX_NS}/Robot/camera_link/ee_camera_link",
+            update_period=0.1,
+            height=224,
+            width=224,
+            data_types=["rgb", "distance_to_image_plane"],
+            spawn=sim_utils.PinholeCameraCfg(
+                focal_length=24.0, focus_distance=400.0, horizontal_aperture=20.955, clipping_range=(0.1, 4.0)
+            ),
+            # offset=CameraCfg.OffsetCfg(pos=(0.07, 0.0, 0.04), rot=(0.5, -0.5, 0.5, -0.5), convention="ros"),
+            offset=CameraCfg.OffsetCfg(pos=(0.0, 0.0, 0.0), rot=(0.70711, 0.0 ,-0.70711 ,0.0), convention="opengl"),
+        )
+
+
         # Listens to the required transforms
         marker_cfg = FRAME_MARKER_CFG.copy()
         marker_cfg.markers["frame"].scale = (0.1, 0.1, 0.1)
         marker_cfg.prim_path = "/Visuals/FrameTransformer"
         self.scene.ee_frame = FrameTransformerCfg(
             prim_path="{ENV_REGEX_NS}/Robot/base_link",
-            debug_vis=True,
+            debug_vis=False,
             visualizer_cfg=marker_cfg,
             target_frames=[
                 FrameTransformerCfg.FrameCfg(

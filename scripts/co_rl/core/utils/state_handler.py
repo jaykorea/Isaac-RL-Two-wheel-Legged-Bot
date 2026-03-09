@@ -35,7 +35,10 @@ class StateHandler:
         """
         self.stack_buffer = [stack_obs.clone() for _ in range(self.total_frames)]
         stacked = self.get_stacked()
-        return torch.cat([stacked, nonstack_obs], dim=-1)
+        if self.nonstack_dim == 0:
+            return stacked
+        else:
+            return torch.cat([stacked, nonstack_obs], dim=-1)
 
     def update(self, stack_obs: torch.Tensor, nonstack_obs: torch.Tensor) -> torch.Tensor:
         """
@@ -52,7 +55,10 @@ class StateHandler:
             return self.reset(stack_obs, nonstack_obs)
         self.stack_buffer = [stack_obs.clone()] + self.stack_buffer[:-1]
         stacked = self.get_stacked()
-        return torch.cat([stacked, nonstack_obs], dim=-1)
+        if self.nonstack_dim == 0:
+            return stacked
+        else:
+            return torch.cat([stacked, nonstack_obs], dim=-1)
 
     def get_stacked(self) -> torch.Tensor:
         """

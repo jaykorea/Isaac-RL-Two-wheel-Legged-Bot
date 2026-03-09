@@ -68,7 +68,6 @@ class MySceneCfg(InteractiveSceneCfg):
     height_scanner = RayCasterCfg(
         prim_path="{ENV_REGEX_NS}/Robot/base_link",
         offset=RayCasterCfg.OffsetCfg(pos=(0.0, 0.0, 20.0)),
-        attach_yaw_only=True,
         pattern_cfg=patterns.GridPatternCfg(resolution=0.07, size=[0.8, 0.8]),
         debug_vis=True,
         mesh_prim_paths=["/World/ground"],
@@ -76,7 +75,6 @@ class MySceneCfg(InteractiveSceneCfg):
     base_height_scanner = RayCasterCfg(
         prim_path="{ENV_REGEX_NS}/Robot/base_link",
         offset=RayCasterCfg.OffsetCfg(pos=(0.0, 0.0, 20.0)),
-        attach_yaw_only=True,
         pattern_cfg=patterns.GridPatternCfg(resolution=0.05, size=[0.025, 0.025]),
         debug_vis=True,
         mesh_prim_paths=["/World/ground"],
@@ -84,7 +82,6 @@ class MySceneCfg(InteractiveSceneCfg):
     left_wheel_height_scanner = RayCasterCfg(
         prim_path="{ENV_REGEX_NS}/Robot/left_wheel_static_link",
         offset=RayCasterCfg.OffsetCfg(pos=(0.0, 0.0, 20.0)),
-        attach_yaw_only=True,
         pattern_cfg=patterns.GridPatternCfg(resolution=0.05, size=[0.025, 0.025]), # (resolution=0.05, size=[0.025, 0.025])
         debug_vis=True,
         mesh_prim_paths=["/World/ground"],
@@ -166,7 +163,7 @@ class ActionsCfg:
         asset_name="robot",
         joint_names=["left_hip_joint", "right_hip_joint", 
                      ],
-        scale=0.5,
+        scale=1.0,
         use_default_offset=False,
         preserve_order=True,
     )
@@ -175,7 +172,7 @@ class ActionsCfg:
         joint_names=["left_shoulder_joint", "right_shoulder_joint", 
                      "left_leg_joint", "right_leg_joint"
                      ],
-        scale=0.5,
+        scale=1.0,
         use_default_offset=False,
         preserve_order=True,
     )
@@ -241,7 +238,7 @@ class ObservationsCfg:
 
     @configclass
     class NoneStackCriticCfg(ObsGroup):
-        velocity_commands = ObsTerm(func=mdp.generated_scaled_commands, params={"command_name": "base_velocity", "scale": (2.0, 0.0, 0.25)})
+        velocity_commands = ObsTerm(func=mdp.generated_scaled_commands, params={"command_name": "base_velocity", "scale": (1.0, 0.0, 0.25)})
         roll_pitch_commands = ObsTerm(func=mdp.generated_commands, params={"command_name": "roll_pitch"})
         event_commands = ObsTerm(func=mdp.generated_commands, params={"command_name": "event"})
 
@@ -269,7 +266,7 @@ class ObservationsCfg:
 
         base_lin_vel_z = ObsTerm(func=mdp.base_lin_vel_z_link, scale=0.25)
         base_lin_vel_y = ObsTerm(func=mdp.base_lin_vel_y_link)
-        base_lin_vel_x = ObsTerm(func=mdp.base_lin_vel_x_link, scale=2.0)
+        base_lin_vel_x = ObsTerm(func=mdp.base_lin_vel_x_link, scale=1.0)
 
         base_pos_z = ObsTerm(func=mdp.base_pos_z_rel_link, params={"sensor_cfg": SceneEntityCfg("base_height_scanner")})
         current_reward = ObsTerm(func=mdp.current_reward)
@@ -346,7 +343,7 @@ class ObservationsCfg:
     @configclass
     class NoneStackPolicyCfg(ObsGroup):
         """Observations for None-Stack policy group."""
-        velocity_commands = ObsTerm(func=mdp.generated_scaled_commands, params={"command_name": "base_velocity", "scale": (2.0, 0.0, 0.25)})
+        velocity_commands = ObsTerm(func=mdp.generated_scaled_commands, params={"command_name": "base_velocity", "scale": (1.0, 0.0, 0.25)})
         roll_pitch_commands = ObsTerm(func=mdp.generated_commands, params={"command_name": "roll_pitch"})
         event_commands = ObsTerm(func=mdp.generated_commands, params={"command_name": "event"})
         height_scan = ObsTerm(
@@ -355,7 +352,7 @@ class ObservationsCfg:
             clip=(-1.0, 1.0),
             noise=Unoise(n_min=-0.1, n_max=0.1),
         )
-        base_lin_vel = ObsTerm(func=mdp.base_lin_vel_x_link, scale=2.0)
+        base_lin_vel = ObsTerm(func=mdp.base_lin_vel_x_link, scale=1.0)
         base_pos_z = ObsTerm(func=mdp.base_pos_z_rel_link, params={"sensor_cfg": SceneEntityCfg("base_height_scanner")})
         current_reward = ObsTerm(func=mdp.current_reward)
         is_contact = ObsTerm(
@@ -400,49 +397,48 @@ class EventCfg:
         },
     )
 
-    randomize_joint_actuator_gains = EventTerm(
-        func=mdp.randomize_actuator_gains,
-        mode="startup",
-        params={
-            "asset_cfg": SceneEntityCfg("robot", joint_names=[".*hip_joint", ".*shoulder_joint"]),
-            "stiffness_distribution_params": (0.8, 1.2),
-            "damping_distribution_params": (0.8, 1.2),
-            "operation": "scale",
-            "distribution": "log_uniform",
-        },
-    )
+    # randomize_joint_actuator_gains = EventTerm(
+    #     func=mdp.randomize_actuator_gains,
+    #     mode="startup",
+    #     params={
+    #         "asset_cfg": SceneEntityCfg("robot", joint_names=[".*hip_joint", ".*shoulder_joint"]),
+    #         "stiffness_distribution_params": (0.8, 1.2),
+    #         "damping_distribution_params": (0.8, 1.2),
+    #         "operation": "scale",
+    #         "distribution": "log_uniform",
+    #     },
+    # )
 
-    randomize_leg_joint_actuator_gains = EventTerm(
-        func=mdp.randomize_actuator_gains,
-        mode="startup",
-        params={
-            "asset_cfg": SceneEntityCfg("robot", joint_names=".*leg_joint"),
-            "stiffness_distribution_params": (0.8, 1.2),
-            "damping_distribution_params": (0.8, 1.2),
-            "operation": "scale",
-            "distribution": "log_uniform",
-        },
-    )
+    # randomize_leg_joint_actuator_gains = EventTerm(
+    #     func=mdp.randomize_actuator_gains,
+    #     mode="startup",
+    #     params={
+    #         "asset_cfg": SceneEntityCfg("robot", joint_names=".*leg_joint"),
+    #         "stiffness_distribution_params": (0.8, 1.2),
+    #         "damping_distribution_params": (0.8, 1.2),
+    #         "operation": "scale",
+    #         "distribution": "log_uniform",
+    #     },
+    # )
 
-    randomize_wheel_actuator_gains = EventTerm(
-        func=mdp.randomize_actuator_gains,
-        mode="startup",
-        params={
-            "asset_cfg": SceneEntityCfg("robot", joint_names=".*wheel_joint"),
-            "stiffness_distribution_params": (0.8, 1.2),
-            "damping_distribution_params": (0.8, 1.2),
-            "operation": "scale",
-            "distribution": "log_uniform",
-        },
-
-    )
+    # randomize_wheel_actuator_gains = EventTerm(
+    #     func=mdp.randomize_actuator_gains,
+    #     mode="startup",
+    #     params={
+    #         "asset_cfg": SceneEntityCfg("robot", joint_names=".*wheel_joint"),
+    #         "stiffness_distribution_params": (0.8, 1.2),
+    #         "damping_distribution_params": (0.8, 1.2),
+    #         "operation": "scale",
+    #         "distribution": "log_uniform",
+    #     },
+    # )
 
     randomize_com_positions = EventTerm(
         func=mdp.randomize_com_positions,
         mode="startup",
         params={
             "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
-            "com_distribution_params": (-0.01, -0.01),
+            "com_distribution_params": (-0.05, -0.02),
             "operation": "add",
         },
     )

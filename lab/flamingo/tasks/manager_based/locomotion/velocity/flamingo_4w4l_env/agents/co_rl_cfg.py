@@ -13,14 +13,12 @@ from scripts.co_rl.core.wrapper import (
 )
 
 ######################################## [ PPO CONFIG] ########################################
-
-
 @configclass
-class Flamingo4w4lPPORunnerCfg(CoRlPolicyRunnerCfg):
+class FlamingoPPORunnerCfg(CoRlPolicyRunnerCfg):
     num_steps_per_env = 24
     max_iterations = 1500
     save_interval = 100
-    experiment_name = "Flamingo4w4l-v0"
+    experiment_name = "4w4l-PPO"
     experiment_description = "test"
     empirical_normalization = False
     policy = CoRlPpoActorCriticCfg(
@@ -44,24 +42,13 @@ class Flamingo4w4lPPORunnerCfg(CoRlPolicyRunnerCfg):
         max_grad_norm=1.0,
     )
 
-
 @configclass
-class Flamingo4w4lFlatPPORunnerCfg_Stand_Drive(Flamingo4w4lPPORunnerCfg):
+class Flamingo4w4lRoughPPORunnerCfg_Stand_Drive(FlamingoPPORunnerCfg):
     def __post_init__(self):
         super().__post_init__()
 
-        self.max_iterations = 10000
-        self.experiment_name = "Flamingo4w4l_Flat_Stand_Drive"
+        self.max_iterations = 5000
+        self.experiment_name = "4W4L_PPO"
         self.policy.actor_hidden_dims = [512, 256, 128]
         self.policy.critic_hidden_dims = [512, 256, 128]
 
-
-@configclass
-class Flamingo4w4lRoughPPORunnerCfg_Stand_Drive(Flamingo4w4lPPORunnerCfg):
-    def __post_init__(self):
-        super().__post_init__()
-
-        self.max_iterations = 10000
-        self.experiment_name = "Flamingo4w4l_Rough_Stand_Drive"
-        self.policy.actor_hidden_dims = [512, 256, 128]
-        self.policy.critic_hidden_dims = [512, 256, 128]

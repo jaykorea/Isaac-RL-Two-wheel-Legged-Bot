@@ -14,7 +14,7 @@ from lab.flamingo.tasks.manager_based.locomotion.velocity.flamingo_env.velocity_
     CurriculumCfg,
 )
 
-from lab.flamingo.assets.flamingo.flamingo_rev03_2_0 import FLAMINGO_CFG  # isort: skip
+from lab.flamingo.assets.flamingo.flamingo_rev01_5_2 import FLAMINGO_CFG  # isort: skip
 
 
 @configclass
@@ -36,18 +36,18 @@ class FlamingoRewardsCfg():
     # track_lin_vel_xy_exp = RewTerm(
     #     func=mdp.track_lin_vel_xy_link_exp, weight=2.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
     # )
-    # track_ang_vel_z_exp = RewTerm(
-    #     func=mdp.track_ang_vel_z_link_exp, weight=1.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
-    # )
+    track_ang_vel_z_exp = RewTerm(
+        func=mdp.track_ang_vel_z_link_exp, weight=1.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
+    )
 
     track_lin_vel_xy_exp = RewTerm(
         func=mdp.track_lin_vel_xy_yaw_frame_exp,
         weight=2.0,
         params={"command_name": "base_velocity", "std": 0.25},
     )
-    track_ang_vel_z_exp = RewTerm(
-        func=mdp.track_ang_vel_z_world_exp, weight=1.0, params={"command_name": "base_velocity", "std": 0.25}  #0.5
-    )
+    # track_ang_vel_z_exp = RewTerm(
+    #     func=mdp.track_ang_vel_z_world_exp, weight=1.0, params={"command_name": "base_velocity", "std": 0.25}  #0.5
+    # )
 
     # track_lin_vel_xy_exp_fine_grained = RewTerm(
     #     func=mdp.track_lin_vel_xy_link_exp, weight=1.0, params={"command_name": "base_velocity", "std": math.sqrt(0.0625)}
@@ -122,7 +122,7 @@ class FlamingoRewardsCfg():
         func=mdp.base_height_adaptive_l2,
         weight=-25.0,
         params={
-            "target_height": 0.65,
+            "target_height": 0.48,
             "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
             # "sensor_cfg": SceneEntityCfg("base_height_scanner"),
         },
@@ -257,7 +257,7 @@ class FlamingoFlatEnvCfg_PLAY(FlamingoFlatEnvCfg):
 
         # add base mass should be called here
         self.events.add_base_mass.params["asset_cfg"].body_names = ["base_link"]
-        self.events.add_base_mass.params["mass_distribution_params"] = (-0.75, 1.0)
+        self.events.add_base_mass.params["mass_distribution_params"] = (-0.75, 2.0)
 
         # physics material should be called here
         self.events.physics_material.params["asset_cfg"].body_names = [".*_link"]

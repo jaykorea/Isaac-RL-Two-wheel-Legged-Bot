@@ -19,7 +19,7 @@ from lab.flamingo.assets.flamingo import FLAMINGO_ASSETS_DATA_DIR
 
 A1_CFG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
-        usd_path=f"{FLAMINGO_ASSETS_DATA_DIR}/Robots/Flamingo_Arm/A1_rev_3_3_0/asset/A1_rev_3_3_0.usd",
+        usd_path=f"{FLAMINGO_ASSETS_DATA_DIR}/Robots/Flamingo_Arm/A1_rev_3_3_0/assets/A1_rev_3_3_0.usd",
         activate_contact_sensors=True,
         rigid_props=sim_utils.RigidBodyPropertiesCfg(
             disable_gravity=False,
@@ -77,10 +77,10 @@ A1_CFG = ArticulationCfg(
             min_delay=0,  # physics time steps (min: 5.0 * 0 = 0.0ms)
             max_delay=0,  # physics time steps (max: 5.0 * 4 = 20.0ms)
             stiffness={
-                "dof2_joint": 50.0,
+                "dof2_joint": 70.0,
             },
             damping={
-                "dof2_joint": 5.0,
+                "dof2_joint": 5.5,
             },
             friction={
                 "dof2_joint": 0.0,
@@ -96,10 +96,10 @@ A1_CFG = ArticulationCfg(
             min_delay=0,  # physics time steps (min: 5.0 * 0 = 0.0ms)
             max_delay=0,  # physics time steps (max: 5.0 * 4 = 20.0ms)
             stiffness={
-                "dof3_joint": 35.0,
+                "dof3_joint": 55.0,
             },
             damping={
-                "dof3_joint": 3.5,
+                "dof3_joint": 4.5,
             },
             friction={
                 "dof3_joint": 0.0,
@@ -141,7 +141,7 @@ A1_CFG = ArticulationCfg(
                 "dof6_joint": 20.0,
             },
             damping={
-                "dof6_joint": 1.0,
+                "dof6_joint": 2.0,
             },
             friction={
                 "dof6_joint": 0.0,

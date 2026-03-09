@@ -48,7 +48,7 @@ FLAMINGO_CFG = ArticulationCfg(
     ),
     
     init_state=ArticulationCfg.InitialStateCfg(
-        pos=(0.0, 0.0, 0.615),  # default: 0.4535
+        pos=(0.0, 0.0, 0.615),  # default: 0.6129
         joint_pos={
             "left_hip_joint": 0.0,
             "left_shoulder_joint": 0.0,

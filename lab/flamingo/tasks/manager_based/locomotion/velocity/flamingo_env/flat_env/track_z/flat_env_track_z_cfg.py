@@ -14,7 +14,7 @@ from lab.flamingo.tasks.manager_based.locomotion.velocity.flamingo_env.velocity_
     CurriculumCfg,
 )
 
-from lab.flamingo.assets.flamingo.flamingo_rev01_5_2 import FLAMINGO_CFG  # isort: skip
+from lab.flamingo.assets.flamingo.flamingo_rev03_2_0 import FLAMINGO_CFG  # isort: skip
 
 
 @configclass
@@ -92,18 +92,20 @@ class FlamingoRewardsCfg():
     flat_orientation_l2 = RewTerm(func=mdp.flat_euler_angle_l2, weight=-10.0)
 
     track_base_height = RewTerm(
-        func=mdp.track_pos_z_exp,
+        func=mdp.track_pos_z_rel_exp,
         weight=2.5,
         params={
             "temperature": 8.0,
+            "default_height": 0.6129,
             "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
         },
     )
     track_base_height_fine_grained = RewTerm(
-        func=mdp.track_pos_z_exp,
+        func=mdp.track_pos_z_rel_exp,
         weight=1.25,
         params={
             "temperature": 32.0,
+            "default_height": 0.6129,
             "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
         },
     )
@@ -125,7 +127,7 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
         # scene
         self.scene.robot = FLAMINGO_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
 
-        #! ************** scene & observations setup - 0 *********** !#
+       #! ************** scene & observations setup - 0 *********** !#
         self.scene.height_scanner = None
         self.scene.base_height_scanner = None
         self.scene.left_wheel_height_scanner = None
@@ -133,21 +135,22 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
         self.scene.left_mask_sensor = None
         self.scene.right_mask_sensor = None
 
+        self.observations.none_stack_critic.height_scan = None
         self.observations.none_stack_critic.base_height_scan = None
         self.observations.none_stack_critic.left_wheel_height_scan = None
         self.observations.none_stack_critic.right_wheel_height_scan = None
+        self.observations.none_stack_critic.lift_mask = None
         #! ********************************************************* !#
-        
-        # observations
-        #! ****************** Observations setup - 0 *************** !#
+
+        #! ****************** Observations setup ****************** !#
         self.observations.none_stack_policy.base_pos_z.params["sensor_cfg"] = None
         self.observations.none_stack_critic.base_pos_z.params["sensor_cfg"] = None
 
         self.observations.none_stack_policy.height_scan = None
-        self.observations.none_stack_policy.base_lin_vel = None
-        self.observations.none_stack_policy.base_pos_z = None
-        self.observations.none_stack_policy.current_reward = None
-        self.observations.none_stack_policy.is_contact = None
+        # self.observations.none_stack_policy.base_lin_vel = None
+        # self.observations.none_stack_policy.base_pos_z = None
+        # self.observations.none_stack_policy.current_reward = None
+        # self.observations.none_stack_policy.is_contact = None
         self.observations.none_stack_policy.lift_mask = None
 
         self.observations.none_stack_policy.roll_pitch_commands = None
@@ -189,7 +192,7 @@ class FlamingoFlatEnvCfg(LocomotionVelocityFlatEnvCfg):
         self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
         self.commands.base_velocity.ranges.ang_vel_z = (-2.5, 2.5)
         # self.commands.base_velocity.ranges.heading = (-math.pi, math.pi)
-        self.commands.base_velocity.ranges.pos_z = (0.19972, 0.36288)
+        self.commands.base_velocity.ranges.pos_z = (-0.3, 0.1)
 
         # terminations
         self.terminations.base_contact.params["sensor_cfg"].body_names = [
@@ -252,7 +255,7 @@ class FlamingoFlatEnvCfg_PLAY(FlamingoFlatEnvCfg):
         self.commands.base_velocity.ranges.lin_vel_y = (0.0, 0.0)
         self.commands.base_velocity.ranges.ang_vel_z = (-2.5, 2.5)
         self.commands.base_velocity.ranges.heading = (-0.0, 0.0)
-        self.commands.base_velocity.ranges.pos_z = (0.19972, 0.36288)
+        self.commands.base_velocity.ranges.pos_z = (-0.5, 0.1)
 
         # terminations
         self.terminations.base_contact.params["sensor_cfg"].body_names = [
