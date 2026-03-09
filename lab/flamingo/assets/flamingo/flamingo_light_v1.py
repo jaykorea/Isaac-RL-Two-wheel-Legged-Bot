@@ -15,9 +15,9 @@ from isaaclab.assets.articulation import ArticulationCfg
 from lab.flamingo.assets.flamingo import FLAMINGO_ASSETS_DATA_DIR
 
 
-FLAMINGO_CFG = ArticulationCfg(
+FLAMINGO_LIGHT_CFG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
-        usd_path=f"{FLAMINGO_ASSETS_DATA_DIR}/Robots/Flamingo/flamingo_light_v01_2_1/flamingo_light_v01_2_1_merge_joints.usd",
+        usd_path=f"{FLAMINGO_ASSETS_DATA_DIR}/Robots/Flamingo/flamingo_light_v01_2_2/flamingo_light_v01_2_1_merge_joints.usd",
         activate_contact_sensors=True,
         rigid_props=sim_utils.RigidBodyPropertiesCfg(
             disable_gravity=False,
@@ -34,11 +34,11 @@ FLAMINGO_CFG = ArticulationCfg(
     ),
     
     init_state=ArticulationCfg.InitialStateCfg(
-        pos=(0.0, 0.0, 0.135),
+        pos=(0.0, 0.0, 0.2), # default: 0.135
         joint_pos={
-            "left_shoulder_joint": 0.0,
+            "left_shoulder_joint": -0.05,
             "left_wheel_joint": 0.0,
-            "right_shoulder_joint": 0.0,
+            "right_shoulder_joint": -0.05,
             "right_wheel_joint": 0.0,
         },
         joint_vel={".*": 0.0},
@@ -52,10 +52,10 @@ FLAMINGO_CFG = ArticulationCfg(
             min_delay=0,  # physics time steps (min: 5.0 * 0 = 0.0ms)
             max_delay=4,  # physics time steps (max: 5.0 * 4 = 20.0ms)
             stiffness={
-                ".*_shoulder_joint": 65.0,
+                ".*_shoulder_joint": 35.0,
             },
             damping={
-                ".*_shoulder_joint": 1.0,
+                ".*_shoulder_joint": 0.45,
             },
             friction={
                 ".*_shoulder_joint": 0.0,
@@ -73,7 +73,7 @@ FLAMINGO_CFG = ArticulationCfg(
             stiffness={
                 ".*_wheel_joint": 0.0,
             },
-            damping={".*_wheel_joint": 0.5},
+            damping={".*_wheel_joint": 0.3},
             friction={
                 ".*_wheel_joint": 0.0,
             },

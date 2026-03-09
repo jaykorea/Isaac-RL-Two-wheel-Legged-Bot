@@ -14,7 +14,7 @@ from isaaclab.assets import Articulation, RigidObject
 from isaaclab.managers import SceneEntityCfg, ManagerTermBase, RewardTermCfg
 from isaaclab.sensors import ContactSensor, RayCaster
 from lab.flamingo.tasks.manager_based.locomotion.velocity.sensors import LiftMask
-from isaaclab.utils.math import euler_xyz_from_quat, quat_rotate_inverse
+from isaaclab.utils.math import euler_xyz_from_quat, quat_rotate_inverse, yaw_quat
 
 if TYPE_CHECKING:
     from isaaclab.envs import ManagerBasedRLEnv
@@ -48,6 +48,29 @@ def track_ang_vel_z_link_exp(
         env.command_manager.get_command(command_name)[:, 2] - asset.data.root_link_ang_vel_b[:, 2]
     )
     return torch.exp(-ang_vel_error / std**2)
+
+def track_lin_vel_xy_yaw_frame_exp(
+    env, std: float, command_name: str, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")
+) -> torch.Tensor:
+    """Reward tracking of linear velocity commands (xy axes) in the gravity aligned robot frame using exponential kernel."""
+    # extract the used quantities (to enable type-hinting)
+    asset = env.scene[asset_cfg.name]
+    vel_yaw = quat_rotate_inverse(yaw_quat(asset.data.root_quat_w), asset.data.root_lin_vel_w[:, :3])
+    lin_vel_error = torch.sum(
+        torch.square(env.command_manager.get_command(command_name)[:, :2] - vel_yaw[:, :2]), dim=1
+    )
+    return torch.exp(-lin_vel_error / std**2)
+
+
+def track_ang_vel_z_world_exp(
+    env, command_name: str, std: float, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")
+) -> torch.Tensor:
+    """Reward tracking of angular velocity commands (yaw) in world frame using exponential kernel."""
+    # extract the used quantities (to enable type-hinting)
+    asset = env.scene[asset_cfg.name]
+    ang_vel_error = torch.square(env.command_manager.get_command(command_name)[:, 2] - asset.data.root_ang_vel_w[:, 2])
+    return torch.exp(-ang_vel_error / std**2)
+
 
 def lin_vel_z_link_l2(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
     """Penalize z-axis base linear velocity using L2 squared kernel."""
@@ -91,6 +114,42 @@ def track_pos_z_exp(
 
     return torch.exp(-pos_z_error * temperature)
 
+def track_pos_z_rel_exp(
+    env: ManagerBasedRLEnv,
+    temperature: float,
+    default_height: float,  # <--- [추가] 로봇의 기준 높이 (예: 0.5m)
+    asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+    sensor_cfg: SceneEntityCfg | None = None,
+) -> torch.Tensor:
+    """Reward tracking of z position commands as an offset from a standard height."""
+    
+    # 1. 로봇 에셋 가져오기
+    asset: RigidObject = env.scene[asset_cfg.name]
+    current_pos_z = asset.data.root_link_pos_w[:, 2]
+
+    # 2. 커맨드 가져오기 (이제 이 값은 Delta/Offset으로 취급: -0.3 ~ 0.3)
+    command_pos_z_delta = env.command_manager.get_command("base_velocity")[:, 3]
+
+    # 3. 목표 높이 계산 (기준 높이 + 델타)
+    # 예: 기준 0.5m + 명령 -0.1m = 지면으로부터 0.4m 목표
+    target_height_from_ground = default_height + command_pos_z_delta
+
+    # 4. 지형 고려 (RayCaster가 있다면 지면 높이를 더해줌)
+    if sensor_cfg is not None:
+        sensor: RayCaster = env.scene[sensor_cfg.name]
+        # 지면의 평균 높이
+        ground_height = torch.mean(sensor.data.ray_hits_w[..., 2], dim=1)
+        
+        # 최종 목표 Z = (지면 높이) + (기준 높이 + 델타)
+        final_target_z = ground_height + target_height_from_ground
+    else:
+        # 평지(z=0)라고 가정
+        final_target_z = target_height_from_ground
+
+    # 5. 에러 계산 및 리워드 반환
+    pos_z_error = torch.square(final_target_z - current_pos_z)
+
+    return torch.exp(-pos_z_error * temperature)
 '''
 def track_pos_z_exp_v2(
     env: ManagerBasedRLEnv,
@@ -908,6 +967,61 @@ def action_smoothness_hard(env: ManagerBasedRLEnv) -> torch.Tensor:
 
     return sm1 + sm2 + sm3
 
+
+class ActionSmoothness(ManagerTermBase):
+    """
+    A reward term for penalizing large instantaneous changes in the network action output.
+    This penalty encourages smoother actions over time.
+    """
+
+    def __init__(self, cfg: RewardTermCfg, env: ManagerBasedRLEnv):
+        """Initialize the term.
+
+        Args:
+        cfg: The configuration of the reward term.
+        env: The RL environment instance.
+        """
+        super().__init__(cfg, env)
+        self.dt = env.step_dt
+        self.prev_prev_action = None
+        self.prev_action = None
+        # self.__name__ = "action_smoothness_penalty"
+
+    def __call__(self, env: ManagerBasedRLEnv) -> torch.Tensor:
+        """Compute the action smoothness penalty.
+
+        Args:
+        env: The RL environment instance.
+
+        Returns:
+        The penalty value based on the action smoothness.
+        """
+        # Get the current action from the environment's action manager
+        current_action = env.action_manager.action.clone()
+
+        # If this is the first call, initialize the previous actions
+        if self.prev_action is None:
+            self.prev_action = current_action
+            return torch.zeros(current_action.shape[0], device=current_action.device)
+
+        if self.prev_prev_action is None:
+            self.prev_prev_action = self.prev_action
+            self.prev_action = current_action
+            return torch.zeros(current_action.shape[0], device=current_action.device)
+
+        # Compute the smoothness penalty
+        penalty = torch.sum(torch.square(current_action - 2 * self.prev_action + self.prev_prev_action), dim=1)
+
+        # Update the previous actions for the next call
+        self.prev_prev_action = self.prev_action
+        self.prev_action = current_action
+
+        # Apply a condition to ignore penalty during the first few episodes
+        startup_env_mask = env.episode_length_buf < 3
+        penalty[startup_env_mask] = 0
+
+        # Return the penalty scaled by the configured weight
+        return penalty
 
 def force_action_zero(
     env: ManagerBasedRLEnv,

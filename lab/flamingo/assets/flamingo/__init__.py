@@ -31,7 +31,11 @@ __version__ = FLAMINGO_ASSETS_METADATA["package"]["version"]
 # Configuration for different assets.
 ##
 
-from .flamingo_rev01_5_2 import *
+from .wolf_rev01_0_0 import *
+from .koch_rev01_0_0 import *
+from .a1_rev03_3_0 import *
+from .flamingo_rev03_2_0 import *
+from .flamingo_4w4l_rev02_0_4 import *
 from .humanoid_rev2_0_0 import *
 from .humanoid_rev2_1_0 import *
 # from .flamingo_rev01_4_3 import * # Depricated

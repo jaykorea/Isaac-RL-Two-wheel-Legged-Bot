@@ -15,7 +15,7 @@ from isaaclab.assets.articulation import ArticulationCfg
 from lab.flamingo.assets.flamingo import FLAMINGO_ASSETS_DATA_DIR
 
 
-FLAMINGO_CFG = ArticulationCfg(
+FLAMINGO_LIGHT_CFG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
         usd_path=f"{FLAMINGO_ASSETS_DATA_DIR}/Robots/Flamingo/flamingo_edu_v1/flamingo_edu_v1.usd",
         activate_contact_sensors=True,

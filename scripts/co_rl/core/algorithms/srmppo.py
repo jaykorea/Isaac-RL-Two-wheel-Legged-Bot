@@ -249,7 +249,7 @@ class SRMPPO:
             # Split obs into input x and target y for reconstruction
             if self.actor_critic.is_recurrent: #! No stack here
                 x = s_o_t[:, :, : self.srm_input_dim]  # [batch_size, seq_len=1, input_size]
-                y = s_f_t[:, :, -5:]  # Target for reconstruction
+                y = s_f_t[:, :, -self.srm_output_dim:]  # Target for reconstruction
                 srm_hidden_state, _ = self.srm(x)
             else:
                 if self.srm_net in ["lstm", "gru"]:
@@ -262,7 +262,7 @@ class SRMPPO:
                     x = s_o_t[:, : self.in_dim*3 + self.cmd_dim].unsqueeze(1)   # [batch_size, seq_len=1, input_size]
                     srm_hidden_state = self.srm(x)  # [batch_size, seq_len=1, hidden_size]
 
-                y = s_f_t[:, -5:].unsqueeze(1)  # Target for reconstruction
+                y = s_f_t[:, -self.srm_output_dim:].unsqueeze(1)  # Target for reconstruction
 
             # Hidden states to fully connected layer
             s_hat_f7_t = self.srm_fc(
@@ -394,5 +394,5 @@ class SRMPPO:
                 encoded_features_actor = self.srm_fc(srm_out)
             encoded_features_actor[:, 3:5] = torch.round(torch.sigmoid(encoded_features_actor[:, 3:5]))
 
-        obs_[:, -5:] = encoded_features_actor
+        obs_[:, -self.srm_output_dim:] = encoded_features_actor
         return obs_

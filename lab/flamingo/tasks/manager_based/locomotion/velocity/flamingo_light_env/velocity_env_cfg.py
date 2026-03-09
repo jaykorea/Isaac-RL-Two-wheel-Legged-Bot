@@ -172,7 +172,7 @@ class ActionsCfg:
     wheel_vel = mdp.JointVelocityActionCfg(
         asset_name="robot",
         joint_names=["left_wheel_joint", "right_wheel_joint"],
-        scale=20.0,
+        scale=40.0,
         use_default_offset=False,
         preserve_order=True
     )
@@ -189,10 +189,16 @@ class ObservationsCfg:
         # observation terms (order preserved)  
         joint_pos = ObsTerm(
             func=mdp.joint_pos,
+            params={
+                "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_shoulder_joint"])
+            },
         )
         joint_vel = ObsTerm(
             func=mdp.joint_vel,
             scale=0.15,
+            params={
+                "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_shoulder_joint", ".*_wheel_joint"])
+            },
         )
         base_ang_vel = ObsTerm(func=mdp.base_ang_vel_link, scale=0.25)  # default: -0.15
         # base_euler = ObsTerm(func=mdp.base_euler_angle_link)
@@ -230,9 +236,11 @@ class ObservationsCfg:
             params={"sensor_cfg": SceneEntityCfg("right_wheel_height_scanner"), 'offset': 0.0},
             clip=(-1.0, 1.0),
         )
-        base_lin_vel_z = ObsTerm(func=mdp.base_lin_vel_z_link, scale=0.25)
-        base_lin_vel_y = ObsTerm(func=mdp.base_lin_vel_y_link)
+
+        
         base_lin_vel_x = ObsTerm(func=mdp.base_lin_vel_x_link, scale=2.0)
+        base_lin_vel_y = ObsTerm(func=mdp.base_lin_vel_y_link)
+        base_lin_vel_z = ObsTerm(func=mdp.base_lin_vel_z_link, scale=0.25)
         base_pos_z = ObsTerm(func=mdp.base_pos_z_rel_link, params={"sensor_cfg": SceneEntityCfg("base_height_scanner")})
         current_reward = ObsTerm(func=mdp.current_reward)
 
@@ -241,6 +249,12 @@ class ObservationsCfg:
             params={
                 "sensor_cfg": SceneEntityCfg("contact_forces", body_names=[".*_wheel_link"]),
                 "threshold": 1.0,
+            },
+        )
+        is_contact_time = ObsTerm(
+            func=mdp.is_contact_time,
+            params={
+                "sensor_cfg": SceneEntityCfg("contact_forces", body_names=[".*_caster_link"]),
             },
         )
         lift_mask = ObsTerm(
@@ -260,12 +274,14 @@ class ObservationsCfg:
         """Observations for Stack policy group."""
         joint_pos = ObsTerm(
             func=mdp.joint_pos,
+            noise=Unoise(n_min=-0.05, n_max=0.05),
             params={
                 "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_shoulder_joint"])
             },
         )
         joint_vel = ObsTerm(
             func=mdp.joint_vel,
+            noise=Unoise(n_min=-1.5, n_max=1.5),
             params={
                 "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_shoulder_joint", ".*_wheel_joint"])
             },
@@ -330,11 +346,23 @@ class EventCfg:
         func=mdp.randomize_rigid_body_material,
         mode="startup",
         params={
-            "asset_cfg": SceneEntityCfg("robot", body_names=".*"),
+            "asset_cfg": SceneEntityCfg("robot", body_names=["(?!.*_caster_link)"]),
             "static_friction_range": (0.8, 1.0),
             "dynamic_friction_range": (0.6, 0.8),
             "restitution_range": (0.0, 0.0),
             "num_buckets": 64,
+        },
+    )
+
+    physics_material_caster = EventTerm(
+        func=mdp.randomize_rigid_body_material,
+        mode="startup",
+        params={
+            "asset_cfg": SceneEntityCfg("robot", body_names=["FL_caster_link", "FR_caster_link", "RL_caster_link", "RR_caster_link"]),
+            "static_friction_range": (0.0, 0.0),
+            "dynamic_friction_range": (0.0, 0.0),
+            "restitution_range": (0.0, 0.0),
+            "num_buckets": 1,
         },
     )
 
@@ -343,20 +371,8 @@ class EventCfg:
         mode="startup",
         params={
             "asset_cfg": SceneEntityCfg("robot", joint_names=[".*shoulder_joint"]),
-            "stiffness_distribution_params": (0.7, 1.3),
-            "damping_distribution_params": (0.7, 1.3),
-            "operation": "scale",
-            "distribution": "log_uniform",
-        },
-    )
-
-    randomize_leg_joint_actuator_gains = EventTerm(
-        func=mdp.randomize_actuator_gains,
-        mode="startup",
-        params={
-            "asset_cfg": SceneEntityCfg("robot", joint_names=".*leg_joint"),
-            "stiffness_distribution_params": (0.8, 1.3),
-            "damping_distribution_params": (0.8, 1.3),
+            "stiffness_distribution_params": (0.9, 1.2),
+            "damping_distribution_params": (0.9, 1.2),
             "operation": "scale",
             "distribution": "log_uniform",
         },
@@ -367,8 +383,8 @@ class EventCfg:
         mode="startup",
         params={
             "asset_cfg": SceneEntityCfg("robot", joint_names=".*wheel_joint"),
-            "stiffness_distribution_params": (0.7, 1.3),
-            "damping_distribution_params": (0.7, 1.3),
+            "stiffness_distribution_params": (0.9, 1.2),
+            "damping_distribution_params": (0.9, 1.2),
             "operation": "scale",
             "distribution": "log_uniform",
         },
@@ -379,7 +395,7 @@ class EventCfg:
         mode="startup",
         params={
             "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
-            "com_distribution_params": (-0.05, -0.02),
+            "com_distribution_params": (-0.02, 0.05),
             "operation": "add",
         },
     )
@@ -448,6 +464,14 @@ class TerminationsCfg:
         func=mdp.illegal_contact,
         params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names="base"), "threshold": 1.0},
     )
+    time_illegal_contact = DoneTerm(
+        func=mdp.time_illegal_contact,
+        params={
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=["FL_caster_link", "FR_caster_link", "RL_caster_link", "RR_caster_link"]),
+            "time_threshold": 0.01
+            },
+    )
+
     terrain_out_of_bounds = DoneTerm(
         func=mdp.terrain_out_of_bounds,
         params={"asset_cfg": SceneEntityCfg("robot"), "distance_buffer": 3.0},

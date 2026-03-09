@@ -136,17 +136,37 @@ class FlamingoSRMPPORunnerCfg(CoRlPolicyRunnerCfg):
         desired_kl=0.01,
         max_grad_norm=1.0,
         srm_net="gru",
-        srm_input_dim=34,
-        cmd_dim = 6,
+        srm_input_dim=32,
+        cmd_dim = 4,
         srm_hidden_dim=256,
         srm_output_dim=5,
         srm_num_layers=1,
         srm_r_loss_coef=1.0,
         srm_rc_loss_coef=1.0e-1,
-        use_acaps=True,
+        use_acaps=False,
         acaps_lambda_t_coef=1.0e-1,
         acaps_lambda_s_coef=1.0e-2,
     )
+
+@configclass
+class FlamingoFlatSRMPPORunnerCfg_Stand_Drive(FlamingoSRMPPORunnerCfg):
+    def __post_init__(self):
+        super().__post_init__()
+
+        self.max_iterations = 5000
+        self.experiment_name = "Flamingo_Flat_Stand_Drive"
+        self.policy.actor_hidden_dims = [512, 256, 128]
+        self.policy.critic_hidden_dims = [512, 256, 128]
+        
+@configclass
+class FlamingoFlatSRMPPORunnerCfg_Track_Z(FlamingoSRMPPORunnerCfg):
+    def __post_init__(self):
+        super().__post_init__()
+
+        self.max_iterations = 5000
+        self.experiment_name = "Flamingo_Flat_Track_Z"
+        self.policy.actor_hidden_dims = [512, 256, 128]
+        self.policy.critic_hidden_dims = [512, 256, 128]
 
 @configclass
 class FlamingoFlatSRMPPORunnerCfg_Track_YK(FlamingoSRMPPORunnerCfg):
@@ -157,6 +177,8 @@ class FlamingoFlatSRMPPORunnerCfg_Track_YK(FlamingoSRMPPORunnerCfg):
         self.experiment_name = "Flamingo_Flat_Yuna_Kim"
         self.policy.actor_hidden_dims = [512, 256, 128]
         self.policy.critic_hidden_dims = [512, 256, 128]
+        self.algorithm.srm_input_dim = 34
+        self.algorithm.cmd_dim = 6
 
 ###############################################################################################
 ######################################## [ SAC CONFIG] ########################################

@@ -75,8 +75,10 @@ class CoRlVecEnvWrapper(VecEnv):
 
         if hasattr(self.unwrapped, "observation_manager"):
             # -- Policy observations
-            stack_policy_dim = self.unwrapped.observation_manager.group_obs_dim["stack_policy"][0]
-            nonstack_policy_dim = self.unwrapped.observation_manager.group_obs_dim["none_stack_policy"][0]
+            stack_policy_len = len(self.unwrapped.observation_manager.group_obs_dim["stack_policy"])
+            stack_policy_dim = self.unwrapped.observation_manager.group_obs_dim["stack_policy"][0] if stack_policy_len != 0 else 0
+            nonstack_policy_len = len(self.unwrapped.observation_manager.group_obs_dim["none_stack_policy"])
+            nonstack_policy_dim = self.unwrapped.observation_manager.group_obs_dim["none_stack_policy"][0] if nonstack_policy_len != 0 else 0
             self.policy_state_handler = StateHandler(self.num_policy_stacks + 1, stack_policy_dim, nonstack_policy_dim)
             # state handler 내부에서 최종 policy 차원(policy_dim)을 계산합니다.]
             self.unwrapped.observation_manager.group_obs_dim["policy"] = (self.policy_state_handler.num_obs,)
@@ -86,8 +88,10 @@ class CoRlVecEnvWrapper(VecEnv):
 
         # -- Privileged observations (Critic)
         if hasattr(self.unwrapped, "observation_manager"):
-            stack_critic_dim = self.unwrapped.observation_manager.group_obs_dim["stack_critic"][0]
-            nonstack_critic_dim = self.unwrapped.observation_manager.group_obs_dim["none_stack_critic"][0]
+            stack_critic_len = len(self.unwrapped.observation_manager.group_obs_dim["stack_critic"])
+            stack_critic_dim = self.unwrapped.observation_manager.group_obs_dim["stack_critic"][0] if stack_critic_len != 0 else 0
+            nonstack_critic_len = len(self.unwrapped.observation_manager.group_obs_dim["none_stack_critic"])
+            nonstack_critic_dim = self.unwrapped.observation_manager.group_obs_dim["none_stack_critic"][0] if nonstack_critic_len != 0 else 0
             self.critic_state_handler = StateHandler(self.num_critic_stacks + 1, stack_critic_dim, nonstack_critic_dim)
             self.unwrapped.observation_manager.group_obs_dim["critic"] = (self.critic_state_handler.num_obs,)
             self.num_privileged_obs = self.critic_state_handler.num_obs

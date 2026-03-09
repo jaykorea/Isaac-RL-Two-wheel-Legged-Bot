@@ -15,7 +15,7 @@ from lab.flamingo.tasks.constraint_based.locomotion.velocity.velocity_env_cfg im
     CurriculumCfg,
 )
 
-from lab.flamingo.assets.flamingo.flamingo_edu_v1 import FLAMINGO_CFG  # isort: skip
+from lab.flamingo.assets.flamingo.flamingo_edu_v1 import FLAMINGO_LIGHT_CFG  # isort: skip
 
 
 @configclass
